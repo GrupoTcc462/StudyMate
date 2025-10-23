@@ -19,7 +19,7 @@
     <button class="nav-btn active" onclick="showSection('home')">🏠 Home</button>
     <button class="nav-btn" onclick="showSection('materias')">📚 Matérias</button>
     <button class="nav-btn" onclick="showSection('chat')">💬 Chat</button>
-    <button class="nav-btn" onclick="showSection('notes')">📝 Notes</button>
+    <a href="{% url 'notes:list' %}" class="nav-btn" style="text-decoration: none;">📝 Notes</a>
     <button class="nav-btn" onclick="showSection('horarios')">🕐 Horários</button>
 
     {% if user.is_authenticated %}
