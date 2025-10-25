@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ note.title }} - StudyMate</title>
+    {% load static %}
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: rgb(178, 34, 34);
+            --primary-dark: rgb(222, 30, 53);
+            --background: rgb(43, 45, 66);
+        }
+
+        body {
+            background: var(--background);
+            min-height: 100vh;
+            padding: 20px 0;
+        }
+
+        .content-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .badge-professor {
+            background: var(--primary);
+        }
+
+        .badge-recommended {
+            background: #17a2b8;
+        }
+
+        .comment-box {
+            background: #f8f9fa;
+            border-left: 3px solid var(--primary);
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+        }
+
+        .comment-author {
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .metrics-large {
+            font-size: 1.2rem;
+            color: #666;
+        }
+
+        .like-btn, .recommend-btn {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .like-btn:hover, .recommend-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .like-btn.liked {
+            color: #dc3545;
+        }
+
+        .recommend-btn.recommended {
+            color: #ffc107;
+        }
+
+        .recommendation-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .recommendation-item:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- NAVBAR PADRÃO -->
+        {% include 'partials/navbar.html' %}
+
+        <!-- Cabeçalho -->
+        <div class="content-section">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+                <div>
+                    <h1 class="mb-2">{{ note.title }}</h1>
+                    <div class="mb-2">
+                        <strong class="text-primary">Por: {{ note.author.username }}</strong>
+                        
+                        {% if is_author_teacher %}
+                            <span class="badge badge-professor ms-2">Professor ✔️</span>
+                        {% endif %}
+                        
+                        {% if note.is_recommended %}
+                            <span class="badge badge-recommended ms-2">⭐ Recomendado</span>
+                        {% endif %}
+                    </div>
+                    
+                    {% if note.subject %}
+                        <span class="badge bg-secondary">{{ note.subject.name }}</span>
+                    {% endif %}
+                    <span class="badge bg-info">{{ note.get_file_type_display }}</span>
+                    
+                    <div class="mt-2 text-muted">
+                        <small>Publicado em {{ note.created_at|date:"d/m/Y às H:i" }}</small>
+                    </div>
+                </div>
+                
+                <a href="{% url 'notes:list' %}" class="btn btn-outline-secondary">← Voltar</a>
+            </div>
+
+            <!-- Descrição -->
+            {% if note.description %}
+                <div class="mb-4">
+                    <h5>Descrição:</h5>
+                    <p class="lead">{{ note.description|linebreaks }}</p>
+                </div>
+            {% endif %}
+
+            <!-- Recomendações -->
+            {% if recommendations_count > 0 %}
+                <div class="alert alert-info">
+                    <strong>⭐ Recomendado por {{ recommendations_count }} professor(es):</strong>
+                    <div class="mt-2">
+                        {% for rec in recommendations_preview %}
+                            <span class="badge bg-primary me-1">{{ rec.professor.username }}</span>
+                        {% endfor %}
+                        {% if recommendations_count > 2 %}
+                            <button class="btn btn-sm btn-link" data-bs-toggle="modal" data-bs-target="#recommendationsModal">
+                                Ver todos ({{ recommendations_count }})
+                            </button>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Métricas e Ações -->
+            <div class="d-flex justify-content-between align-items-center border-top border-bottom py-3 my-3">
+                <div class="metrics-large">
+                    <span class="me-3" title="Visualizações">👁️ {{ note.views }}</span>
+                    <span class="me-3" title="Curtidas">
+                        <span class="like-btn {% if user_liked %}liked{% endif %}" 
+                              id="likeBtn" 
+                              onclick="toggleLike()"
+                              {% if not user.is_authenticated %}style="pointer-events: none; opacity: 0.6;"{% endif %}>
+                            ❤️ <span id="likesCount">{{ note.likes }}</span>
+                        </span>
+                    </span>
+                    <span title="Downloads">⬇️ {{ note.downloads }}</span>
+                    
+                    {% if can_recommend %}
+                        <span class="ms-3">
+                            <span class="recommend-btn {% if user_recommended %}recommended{% endif %}" 
+                                  id="recommendBtn"
+                                  onclick="toggleRecommend()"
+                                  title="{% if user_recommended %}Remover recomendação{% else %}Recomendar este note{% endif %}">
+                                ⭐ <span id="recommendText">{% if user_recommended %}Recomendado{% else %}Recomendar{% endif %}</span>
+                            </span>
+                        </span>
+                    {% endif %}
+                </div>
+
+                <div>
+                    {% if note.file %}
+                        <a href="{% url 'notes:download' note.pk %}" class="btn btn-success">
+                            📥 Download
+                        </a>
+                    {% endif %}
+                    
+                    {% if note.link %}
+                        <a href="{{ note.link }}" target="_blank" class="btn btn-primary">
+                            🔗 Abrir Link
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Conteúdo para tipo TXT -->
+            {% if note.file_type == 'TXT' and note.description %}
+                <div class="alert alert-light">
+                    <h5>📄 Conteúdo:</h5>
+                    <pre style="white-space: pre-wrap; font-family: inherit;">{{ note.description }}</pre>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Seção de Comentários -->
+        <div class="content-section">
+            <h3 class="mb-4">💬 Comentários ({{ comments.count }})</h3>
+
+            {% if user.is_authenticated %}
+                <form method="POST" class="mb-4">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">Deixe seu comentário:</label>
+                        <textarea name="text" class="form-control auto-resize" rows="3" 
+                                  maxlength="400" required 
+                                  placeholder="Compartilhe sua opinião..."></textarea>
+                        <small class="text-muted">Máximo 400 caracteres</small>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Comentar</button>
+                </form>
+            {% else %}
+                <div class="alert alert-info">
+                    <a href="{% url 'accounts:login' %}">Faça login</a> para comentar.
+                </div>
+            {% endif %}
+
+            <!-- Lista de Comentários -->
+            {% if comments %}
+                <div class="mt-4">
+                    {% for comment in comments %}
+                        <div class="comment-box">
+                            <div class="d-flex justify-content-between">
+                                <span class="comment-author">
+                                    {{ comment.author.username }}
+                                    {% if comment.author.user_type == 'professor' or comment.author.is_staff %}
+                                        <span class="badge badge-professor">Professor</span>
+                                    {% endif %}
+                                </span>
+                                <small class="text-muted">{{ comment.created_at|date:"d/m/Y H:i" }}</small>
+                            </div>
+                            <p class="mb-0 mt-2">{{ comment.text }}</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-muted fst-italic">Nenhum comentário ainda. Seja o primeiro!</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Modal de Recomendações -->
+    <div class="modal fade" id="recommendationsModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">⭐ Professores que Recomendam</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    {% for rec in recommendations %}
+                        <div class="recommendation-item">
+                            <strong>{{ rec.professor.username }}</strong>
+                            {% if rec.subject %}
+                                <span class="badge bg-secondary">{{ rec.subject.name }}</span>
+                            {% endif %}
+                            <br>
+                            <small class="text-muted">{{ rec.created_at|date:"d/m/Y H:i" }}</small>
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Auto-resize para textareas
+        document.addEventListener('input', function (e) {
+            if (e.target.matches('.auto-resize')) {
+                e.target.style.height = 'auto';
+                e.target.style.height = (e.target.scrollHeight) + 'px';
+                if (e.target.maxLength && e.target.value.length > e.target.maxLength) {
+                    e.target.value = e.target.value.substring(0, e.target.maxLength);
+                }
+            }
+        });
+
+        function getCsrfToken() {
+            return document.querySelector('[name=csrfmiddlewaretoken]').value;
+        }
+
+        async function toggleLike() {
+            {% if not user.is_authenticated %}
+                alert('Faça login para curtir!');
+                return;
+            {% endif %}
+
+            const likeBtn = document.getElementById('likeBtn');
+            const likesCount = document.getElementById('likesCount');
+            
+            try {
+                const response = await fetch('{% url "notes:like" note.pk %}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCsrfToken(),
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    likesCount.textContent = data.likes;
+                    
+                    if (data.liked) {
+                        likeBtn.classList.add('liked');
+                    } else {
+                        likeBtn.classList.remove('liked');
+                    }
+                }
+            } catch (error) {
+                console.error('Erro ao curtir:', error);
+                alert('Erro ao processar curtida. Tente novamente.');
+            }
+        }
+
+        {% if can_recommend %}
+        async function toggleRecommend() {
+            const recommendBtn = document.getElementById('recommendBtn');
+            const recommendText = document.getElementById('recommendText');
+            
+            try {
+                const response = await fetch('{% url "notes:recommend" note.pk %}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCsrfToken(),
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    if (data.action === 'added') {
+                        recommendBtn.classList.add('recommended');
+                        recommendText.textContent = 'Recomendado';
+                        alert('Note recomendado com sucesso!');
+                    } else {
+                        recommendBtn.classList.remove('recommended');
+                        recommendText.textContent = 'Recomendar';
+                        alert('Recomendação removida.');
+                    }
+                    
+                    // Recarregar página para atualizar contadores e badges
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    alert(data.error || 'Erro ao processar recomendação');
+                }
+            } catch (error) {
+                console.error('Erro ao recomendar:', error);
+                alert('Erro ao processar recomendação. Tente novamente.');
+            }
+        }
+        {% endif %}
+    </script>
+</body>
+</html>

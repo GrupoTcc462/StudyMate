@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Cadastro - StudyMate</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #2B2D42;
+            color: #EDF2F4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .form-container {
+            background-color: #8D99AE;
+            padding: 30px;
+            border-radius: 10px;
+            width: 350px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.3);
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #2B2D42;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+            color: #2B2D42;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            border: none;
+            border-radius: 5px;
+            margin-top: 5px;
+        }
+        button {
+            background-color: #178222;
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 15px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #14691b;
+        }
+        .messages {
+            background: #EDF2F4;
+            color: #2B2D42;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        a {
+            color: #2B2D42;
+            text-decoration: none;
+            display: block;
+            text-align: center;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h2>Cadastro de Usuário</h2>
+
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <p>{{ message }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <form method="POST">
+            {% csrf_token %}
+            <label for="username">Nome de Usuário:</label>
+            <input type="text" name="username" id="username" required>
+
+            <label for="password1">Senha:</label>
+            <input type="password" name="password1" id="password1" required>
+
+            <label for="password2">Confirmar Senha:</label>
+            <input type="password" name="password2" id="password2" required>
+
+            <label for="user_type">Tipo de Usuário:</label>
+            <select name="user_type" id="user_type" required>
+                <option value="">Selecione...</option>
+                <option value="student">Estudante</option>
+                <option value="teacher">Professor</option>
+                <option value="admin">Administrador</option>
+            </select>
+
+            <button type="submit">Registrar</button>
+        </form>
+
+        <a href="{% url 'accounts:login' %}">Já tem uma conta? Faça login</a>
+    </div>
+</body>
+</html>

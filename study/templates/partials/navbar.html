@@ -1,0 +1,103 @@
+{% load static %}
+
+<style>
+    .studymate-navbar {
+        background: rgba(237, 242, 244, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 20px 30px;
+        margin-bottom: 30px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .navbar-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    .navbar-logo {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .navbar-logo h2 {
+        color: rgb(178, 34, 34);
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: 700;
+    }
+
+    .navbar-links {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .nav-link-btn {
+        background: rgb(178, 34, 34);
+        color: white;
+        text-decoration: none;
+        padding: 10px 20px;
+        border-radius: 50px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(178, 34, 34, 0.3);
+        display: inline-block;
+    }
+
+    .nav-link-btn:hover {
+        background: rgb(222, 30, 53);
+        transform: translateY(-2px);
+        color: white;
+    }
+
+    .nav-link-btn.active {
+        background: rgb(222, 30, 53);
+    }
+
+    .user-info {
+        color: rgb(43, 45, 66);
+        font-weight: 600;
+    }
+
+    @media (max-width: 768px) {
+        .navbar-content {
+            flex-direction: column;
+            text-align: center;
+        }
+        
+        .navbar-links {
+            justify-content: center;
+        }
+    }
+</style>
+
+<nav class="studymate-navbar">
+    <div class="navbar-content">
+        <div class="navbar-logo">
+            <img src="{% static 'study/img/logoStudyMate.png' %}" height="72" width="146" alt="StudyMate">
+            <h2>StudyMate</h2>
+        </div>
+        
+        <div class="navbar-links">
+            <a href="{% url 'study:home' %}" class="nav-link-btn {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
+                🏠 Home
+            </a>
+            <a href="{% url 'notes:list' %}" class="nav-link-btn {% if 'notes' in request.path %}active{% endif %}">
+                📝 Notes
+            </a>
+            
+            {% if user.is_authenticated %}
+                <span class="user-info">👋 {{ user.username }}</span>
+                <a href="{% url 'accounts:logout' %}" class="nav-link-btn">🚪 Sair</a>
+            {% else %}
+                <a href="{% url 'accounts:login' %}" class="nav-link-btn">🔐 Login</a>
+            {% endif %}
+        </div>
+    </div>
+</nav>
