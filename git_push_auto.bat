@@ -1,6 +1,6 @@
 @echo off
 title 🚀 GIT PUSH AUTOMATICO - STUDYMATE
-color 0A
+
 
 REM ================================================
 REM  SCRIPT AUTOMÁTICO DE COMMIT E PUSH PARA GITHUB
