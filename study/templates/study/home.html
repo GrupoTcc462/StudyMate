@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Minha Página</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'study/style.css' %}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.4.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-..." crossorigin="anonymous">
+
+</head>
+<body>
+   
+     <div class="container">
+        <div class="header">
+            <img src="{% static 'study/img/logoStudyMate.png' %}" height="144px" width="293">
+            <h4>Portal do Estudante - Sua plataforma de estudos</h4>
+            <br> 
+            
+            <div class="nav">
+    <button class="nav-btn active" onclick="showSection('home')">🏠 Home</button>
+    <button class="nav-btn" onclick="showSection('materias')">📚 Matérias</button>
+    <button class="nav-btn" onclick="showSection('chat')">💬 Chat</button>
+    <a href="{% url 'notes:list' %}" class="nav-btn" style="text-decoration: none;">📝 Notes</a>
+    <button class="nav-btn" onclick="showSection('horarios')">🕐 Horários</button>
+
+    {% if user.is_authenticated %}
+        <span style="margin-left: 15px;">👋 Bem-vindo, <strong>{{ user.username }}</strong>!</span>
+        <a href="{% url 'accounts:logout' %}" style="margin-left: 15px;">🚪 Logout</a>
+    {% else %}
+        <a href="{% url 'accounts:login' %}">🔐 Login</a>
+        <a href="{% url 'accounts:register' %}" style="margin-left: 10px;">🧾 Registrar</a>
+    {% endif %}
+</div>
+
+        </div>
+
+        <div class="content">
+            <!-- HOME SECTION -->
+            <div id="home" class="section active">
+                <h2>Bem-vindo ao Portal do Estudante! 🎓</h2>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number">15</div>
+                        <div>Matérias Disponíveis</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">247</div>
+                        <div>Estudantes Online</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">89</div>
+                        <div>Notes Compartilhadas</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">24/7</div>
+                        <div>Suporte Disponível</div>
+                    </div>
+                </div>
+
+                <div class="grid">
+                    <div class="card">
+                        <h3>🎯 Objetivo da Plataforma</h3>
+                        <p>Facilitar o processo de ensino-aprendizagem dos estudantes da ETEC João Maria Stevanatto através de uma plataforma integrada e colaborativa.</p>
+                    </div>
+                    
+                    <div class="card">
+                        <h3>⚡ Funcionalidades</h3>
+                        <p>• Acesso às matérias organizadas<br>
+                        • Chat colaborativo entre alunos<br>
+                        • Sistema de notes compartilhadas<br>
+                        • Horários das aulas atualizados<br>
+                        • Interface responsiva moderna</p>
+                    </div>
+                    
+                    <div class="card">
+                        <h3>🤝 Colaboração</h3>
+                        <p>Conecte-se com colegas, compartilhe conhecimento e construa uma comunidade de aprendizado forte e unida.</p>
+                    </div>
+                    
+                    <div class="card">
+                        <h3>🆕 Novidades</h3>
+                        <p>• Nova interface com cores suaves<br>
+                        • Sistema de busca nas notes<br>
+                        • Chat em tempo real<br>
+                        • Design responsivo otimizado<br>
+                        • Animações fluidas</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MATÉRIAS SECTION -->
+            <div id="materias" class="section">
+                <h2>📚 Matérias Disponíveis</h2>
+                <div class="grid">
+                    <div class="card">
+                        <h3>🔢 Matemática</h3>
+                        <button class="subject-btn" onclick="openSubject('Álgebra')">Álgebra</button>
+                        <button class="subject-btn" onclick="openSubject('Geometria')">Geometria</button>
+                        <button class="subject-btn" onclick="openSubject('Trigonometria')">Trigonometria</button>
+                    </div>
+                    
+                    <div class="card">
+                        <h3>🔬 Física</h3>
+                        <button class="subject-btn" onclick="openSubject('Mecânica')">Mecânica</button>
+                        <button class="subject-btn" onclick="openSubject('Eletricidade')">Eletricidade</button>
+                        <button class="subject-btn" onclick="openSubject('Óptica')">Óptica</button>
+                    </div>
+                    
+                    <div class="card">
+                        <h3>🧪 Química</h3>
+                        <button class="subject-btn" onclick="openSubject('Química Orgânica')">Química Orgânica</button>
+                        <button class="subject-btn" onclick="openSubject('Química Inorgânica')">Química Inorgânica</button>
+                        <button class="subject-btn" onclick="openSubject('Físico-Química')">Físico-Química</button>
+                    </div>
+                    
+                    <div class="card">
+                        <h3>💻 Informática</h3>
+                        <button class="subject-btn" onclick="openSubject('Programação')">Programação</button>
+                        <button class="subject-btn" onclick="openSubject('Banco de Dados')">Banco de Dados</button>
+                        <button class="subject-btn" onclick="openSubject('Redes')">Redes</button>
+                    </div>
+                    
+                    <div class="card">
+                        <h3>📖 Português</h3>
+                        <button class="subject-btn" onclick="openSubject('Literatura')">Literatura</button>
+                        <button class="subject-btn" onclick="openSubject('Gramática')">Gramática</button>
+                        <button class="subject-btn" onclick="openSubject('Redação')">Redação</button>
+                    </div>
+                    
+                    <div class="card">
+                        <h3>🌍 Geografia</h3>
+                        <button class="subject-btn" onclick="openSubject('Geografia Física')">Geografia Física</button>
+                        <button class="subject-btn" onclick="openSubject('Geografia Humana')">Geografia Humana</button>
+                        <button class="subject-btn" onclick="openSubject('Cartografia')">Cartografia</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CHAT SECTION -->
+            <div id="chat" class="section">
+                <h2>💬 Chat das Salas</h2>
+                
+                <div class="class-selector">
+                    <label for="chatClass">Selecione sua turma:</label>
+                    <select id="chatClass" onchange="changeChat()">
+                        <option value="1info">1º C - Integral</option>
+                        <option value="2info">2º C - Integral</option>
+                        <option value="3info">3º C - Integral</option>
+                        <option value="1adm">1º A - Manhã</option>
+                        <option value="2adm">2º A - Manhã</option>
+                        <option value="3adm">3º A - Manhã</option>
+                    </select>
+                </div>
+
+                <div class="chat-container">
+                    <div class="chat-messages" id="chatMessages">
+                        <div class="message">João: Alguém tem o resumo de matemática da prova?</div>
+                        <div class="message">Maria: Eu tenho! Vou postar nos notes 📝</div>
+                        <div class="message own">Você: Obrigado, pessoal! 👍</div>
+                        <div class="message">Pedro: A prova de física foi adiada para sexta</div>
+                        <div class="message">Ana: Ótima notícia! Mais tempo para estudar 📚</div>
+                    </div>
+                    
+                    <div class="chat-input-container">
+                        <input type="text" class="chat-input" id="messageInput" placeholder="Digite sua mensagem..." onkeypress="handleKeyPress(event)">
+                        <button class="send-btn" onclick="sendMessage()">Enviar</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- NOTES SECTION -->
+            <div id="notes" class="section">
+                <h2>📝 Notes Compartilhadas</h2>
+                
+                <div class="search-container">
+                    <div class="search-box">
+                        <input type="text" class="search-input" placeholder="Pesquisar notes..." id="searchInput" onkeyup="searchNotes()">
+                        <button class="search-btn" onclick="searchNotes()">🔍</button>
+                    </div>
+                </div>
+                
+                <button class="add-note-btn" onclick="addNote()">+ Nova Note</button>
+                
+                <div class="notes-container">
+                    <div class="note-item" data-search="trigonometria matematica seno cosseno">
+                        <div class="note-title">📐 Resumo - Trigonometria (Maria, 2º Info)</div>
+                        <p>Seno, cosseno e tangente são as principais funções trigonométricas. Sen²x + Cos²x = 1 (identidade fundamental)</p>
+                        <small>⏰ Compartilhado há 2 horas</small>
+                    </div>
+                    
+                    <div class="note-item" data-search="revolucao industrial historia mapa mental">
+                        <div class="note-title">🧠 Mapa Mental - Revolução Industrial (João, 3º Adm)</div>
+                        <p>Mapa mental completo sobre a 1ª Revolução Industrial: causas, consequências, inovações tecnológicas e impactos sociais</p>
+                        <small>⏰ Compartilhado ontem</small>
+                    </div>
+                    
+                    <div class="note-item" data-search="quimica organica formulas alcanos">
+                        <div class="note-title">⚗️ Fórmulas - Química Orgânica (Ana, 2º Info)</div>
+                        <p>Principais fórmulas e reações da química orgânica: alcanos, alcenos, álcoois, aldeídos e cetonas</p>
+                        <small>⏰ Compartilhado há 3 dias</small>
+                    </div>
+                    
+                    <div class="note-item" data-search="algoritmos programacao estruturas dados python">
+                        <div class="note-title">💾 Algoritmos - Estruturas de Dados (Pedro, 3º Info)</div>
+                        <p>Resumo sobre listas, pilhas, filas e árvores binárias com exemplos práticos em Python</p>
+                        <small>⏰ Compartilhado há 1 semana</small>
+                    </div>
+                    
+                    <div class="note-item" data-search="literatura brasileira romantismo realismo">
+                        <div class="note-title">📚 Resumo - Literatura Brasileira (Carla, 1º Adm)</div>
+                        <p>Principais movimentos literários: Romantismo, Realismo, Modernismo e autores representativos</p>
+                        <small>⏰ Compartilhado há 5 dias</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- HORÁRIOS SECTION -->
+            <div id="horarios" class="section">
+                <h2>🕐 Horários das Aulas</h2>
+                
+                <div class="class-selector">
+                    <label for="scheduleClass">Selecione a turma:</label>
+                    <select id="scheduleClass" onchange="changeSchedule()">
+                        <option value="1info">1º C - Integral</option>
+                        <option value="2info">2º C - Integral</option>
+                        <option value="3info">3º C - Integral</option>
+                        <option value="1adm">1º A - Manhã</option>
+                        <option value="2adm">2º A - Manhã</option>
+                        <option value="3adm">3º A - Manhã</option>
+                    </select>
+                </div>
+
+                <table class="schedule-table">
+                    <thead>
+                        <tr>
+                            <th>Horário</th>
+                            <th>Segunda</th>
+                            <th>Terça</th>
+                            <th>Quarta</th>
+                            <th>Quinta</th>
+                            <th>Sexta</th>
+                        </tr>
+                    </thead>
+                    <tbody id="scheduleBody">
+                        <tr>
+                            <td>07:30 - 08:20</td>
+                            <td>Matemática</td>
+                            <td>Português</td>
+                            <td>Programação</td>
+                            <td>Física</td>
+                            <td>BD</td>
+                        </tr>
+                        <tr>
+                            <td>08:20 - 09:10</td>
+                            <td>Matemática</td>
+                            <td>Português</td>
+                            <td>Programação</td>
+                            <td>Física</td>
+                            <td>BD</td>
+                        </tr>
+                        <tr>
+                            <td>09:30 - 10:20</td>
+                            <td>História</td>
+                            <td>Inglês</td>
+                            <td>Redes</td>
+                            <td>Química</td>
+                            <td>Programação</td>
+                        </tr>
+                        <tr>
+                            <td>10:20 - 11:10</td>
+                            <td>História</td>
+                            <td>Inglês</td>
+                            <td>Redes</td>
+                            <td>Química</td>
+                            <td>Programação</td>
+                        </tr>
+                        <tr>
+                            <td>11:10 - 12:00</td>
+                            <td>Geografia</td>
+                            <td>Ed. Física</td>
+                            <td>Sistemas Op.</td>
+                            <td>Biologia</td>
+                            <td>TCC</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <footer>
+            <p><strong>Endereço:</strong> Av. Paulo Lacerda Quartim Barbosa, 630 - Santa Bárbara, Itapira - SP, 13977-175</p>
+            <p><strong>Telefone:</strong> (19) 3843-1171</p>
+            <br>
+            <p>&copy; 2024 ETEC João Maria Stevanatto. Todos os direitos reservados.</p>
+        </footer>
+    </div>
+
+    <script>
+        // Navegação entre seções
+        function showSection(sectionId) {
+            // Oculta todas as seções
+            const sections = document.querySelectorAll('.section');
+            sections.forEach(section => section.classList.remove('active'));
+            
+            // Remove classe ativa de todos os botões
+            const navBtns = document.querySelectorAll('.nav-btn');
+            navBtns.forEach(btn => btn.classList.remove('active'));
+            
+            // Mostra a seção selecionada
+            document.getElementById(sectionId).classList.add('active');
+            
+            // Adiciona classe ativa ao botão clicado
+            event.target.classList.add('active');
+        }
+
+        // Abrir matérias
+        function openSubject(subject) {
+            alert(`Abrindo conteúdo de ${subject}. Em breve, materiais completos estarão disponíveis!`);
+        }
+
+        // Enviar mensagem no chat
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            
+            if (message) {
+                const chatMessages = document.getElementById('chatMessages');
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'message own';
+                messageDiv.textContent = `Você: ${message}`;
+                chatMessages.appendChild(messageDiv);
+                
+                input.value = '';
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+                
+                // Resposta automática
+                setTimeout(() => {
+                    const responseDiv = document.createElement('div');
+                    responseDiv.className = 'message';
+                    responseDiv.textContent = 'Colega: Interessante! 👍';
+                    chatMessages.appendChild(responseDiv);
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                }, 1000);
+            }
+        }
+
+        // Enter para enviar mensagem
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        // Trocar chat da turma
+        function changeChat() {
+            const selectedClass = document.getElementById('chatClass').value;
+            const chatMessages = document.getElementById('chatMessages');
+            
+            // Mensagens por turma
+            const messages = {
+                '1info': [
+                    'Ana: Alguém entendeu a matéria de algoritmos?',
+                    'Carlos: Estou com dúvida também! 🤔',
+                    'Maria: Vou explicar na próxima aula!'
+                ],
+                '2info': [
+                    'João: A prova de BD vai ser difícil...',
+                    'Pedro: Vamos estudar juntos? 📚',
+                    'Você: Boa ideia!'
+                ],
+                '3info': [
+                    'Sofia: Alguém já terminou o TCC?',
+                    'Bruno: Ainda estou no capítulo 2 😅',
+                    'Lisa: Vamos marcar um grupo de estudos!'
+                ],
+                '1adm': [
+                    'Carla: A apresentação é amanhã!',
+                    'Diego: Já terminei os slides! 📊',
+                    'Fernanda: Alguém pode revisar?'
+                ],
+                '2adm': [
+                    'Amanda: O projeto está ficando ótimo!',
+                    'Gustavo: Nossa equipe é top! 🚀',
+                    'Patrícia: Falta só a pesquisa'
+                ],
+                '3adm': [
+                    'Isabela: Estágio está sendo incrível!',
+                    'Thiago: Onde conseguiu?',
+                    'Isabela: Na prefeitura!'
+                ]
+            };
+            
+            const classMessages = messages[selectedClass] || [
+                'Bem-vindo ao chat da turma!',
+                'Vamos colaborar e estudar juntos! 🚀'
+            ];
+            
+            chatMessages.innerHTML = '';
+            classMessages.forEach(msg => {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'message';
+                messageDiv.textContent = msg;
+                chatMessages.appendChild(messageDiv);
+            });
+        }
+
+        // Buscar notes
+        function searchNotes() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const notes = document.querySelectorAll('.note-item');
+            
+            notes.forEach(note => {
+                const title = note.querySelector('.note-title').textContent.toLowerCase();
+                const content = note.querySelector('p').textContent.toLowerCase();
+                const searchData = note.getAttribute('data-search').toLowerCase();
+                
+                if (title.includes(searchTerm) || content.includes(searchTerm) || searchData.includes(searchTerm)) {
+                    note.style.display = 'block';
+                } else {
+                    note.style.display = searchTerm ? 'none' : 'block';
+                }
+            });
+        }
+
+        // Adicionar note
+        function addNote() {
+            const title = prompt('Título da sua note:');
+            const content = prompt('Conteúdo da note:');
+            
+            if (title && content) {
+                const notesContainer = document.querySelector('.notes-container');
+                const noteDiv = document.createElement('div');
+                noteDiv.className = 'note-item';
+                noteDiv.setAttribute('data-search', title.toLowerCase() + ' ' + content.toLowerCase());
+                noteDiv.innerHTML = `
+                    <div class="note-title">📝 ${title} (Você)</div>
+                    <p>${content}</p>
+                    <small>⏰ Compartilhado agora</small>
+                `;
+                notesContainer.insertBefore(noteDiv, notesContainer.firstChild);
+                alert('Note adicionada com sucesso! 🎉');
+            }
+        }
+
+        // Trocar horário
+        function changeSchedule() {
+            const selectedClass = document.getElementById('scheduleClass').value;
+            const scheduleBody = document.getElementById('scheduleBody');
+            
+            const schedules = {
+                '1info': [
+                    ['07:30 - 08:20', 'Matemática', 'Português', 'Algoritmos', 'Física', 'Inglês'],
+                    ['08:20 - 09:10', 'Matemática', 'Português', 'Algoritmos', 'Física', 'Inglês'],
+                    ['09:30 - 10:20', 'História', 'Química', 'Hardware', 'Geografia', 'Ed. Física'],
+                    ['10:20 - 11:10', 'História', 'Química', 'Hardware', 'Geografia', 'Ed. Física'],
+                    ['11:10 - 12:00', 'Biologia', 'Sociologia', 'Informática', 'Filosofia', 'Arte']
+                ],
+                '2info': [
+                    ['07:30 - 08:20', 'Programação', 'Matemática', 'BD', 'Redes', 'Português'],
+                    ['08:20 - 09:10', 'Programação', 'Matemática', 'BD', 'Redes', 'Português'],
+                    ['09:30 - 10:20', 'Sistemas Op.', 'Física', 'Web Design', 'História', 'Inglês'],
+                    ['10:20 - 11:10', 'Sistemas Op.', 'Física', 'Web Design', 'História', 'Inglês'],
+                    ['11:10 - 12:00', 'Geografia', 'Química', 'Projeto', 'Ed. Física', 'Filosofia']
+                ],
+                '3info': [
+                    ['07:30 - 08:20', 'TCC', 'Programação', 'BD Avançado', 'Gestão', 'Português'],
+                    ['08:20 - 09:10', 'TCC', 'Programação', 'BD Avançado', 'Gestão', 'Português'],
+                    ['09:30 - 10:20', 'Redes Av.', 'Matemática', 'Seg. Info', 'Empreend.', 'Inglês'],
+                    ['10:20 - 11:10', 'Redes Av.', 'Matemática', 'Seg. Info', 'Empreend.', 'Inglês'],
+                    ['11:10 - 12:00', 'Estágio', 'Física', 'Projeto', 'Ética', 'Ed. Física']
+                ],
+                '1adm': [
+                    ['07:30 - 08:20', 'Administração', 'Português', 'Matemática', 'História', 'Inglês'],
+                    ['08:20 - 09:10', 'Administração', 'Português', 'Matemática', 'História', 'Inglês'],
+                    ['09:30 - 10:20', 'Economia', 'Geografia', 'Física', 'Química', 'Ed. Física'],
+                    ['10:20 - 11:10', 'Economia', 'Geografia', 'Física', 'Química', 'Ed. Física'],
+                    ['11:10 - 12:00', 'Sociologia', 'Filosofia', 'Biologia', 'Arte', 'Informática']
+                ],
+                '2adm': [
+                    ['07:30 - 08:20', 'Marketing', 'Matemática', 'RH', 'Contabilidade', 'Português'],
+                    ['08:20 - 09:10', 'Marketing', 'Matemática', 'RH', 'Contabilidade', 'Português'],
+                    ['09:30 - 10:20', 'Direito', 'História', 'Geografia', 'Física', 'Inglês'],
+                    ['10:20 - 11:10', 'Direito', 'História', 'Geografia', 'Física', 'Inglês'],
+                    ['11:10 - 12:00', 'Projeto', 'Química', 'Filosofia', 'Ed. Física', 'Informática']
+                ],
+                '3adm': [
+                    ['07:30 - 08:20', 'TCC', 'Empreend.', 'Gestão', 'Estatística', 'Português'],
+                    ['08:20 - 09:10', 'TCC', 'Empreend.', 'Gestão', 'Estatística', 'Português'],
+                    ['09:30 - 10:20', 'Estágio', 'Finanças', 'Direito Emp.', 'Economia', 'Inglês'],
+                    ['10:20 - 11:10', 'Estágio', 'Finanças', 'Direito Emp.', 'Economia', 'Inglês'],
+                    ['11:10 - 12:00', 'Ética', 'Liderança', 'Projeto', 'Ed. Física', 'Filosofia']
+                ]
+            };
+            
+            const currentSchedule = schedules[selectedClass] || schedules['1info'];
+            
+            scheduleBody.innerHTML = '';
+            currentSchedule.forEach(row => {
+                const tr = document.createElement('tr');
+                row.forEach(cell => {
+                    const td = document.createElement('td');
+                    td.textContent = cell;
+                    tr.appendChild(td);
+                });
+                scheduleBody.appendChild(tr);
+            });
+        }
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            // Adicionar efeitos de carregamento
+            const cards = document.querySelectorAll('.card');
+            cards.forEach((card, index) => {
+                card.style.animationDelay = `${index * 0.1}s`;
+            });
+        });
+    </script>
+
+    <script src="{% static 'study/js/script.js' %}"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.4.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-..." crossorigin="anonymous"></script> 
+</body>
+</html>
