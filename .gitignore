@@ -1,0 +1,14 @@
+# Arquivos Python compilados
+__pycache__/
+*.pyc
+
+# Banco de dados local do Django
+db.sqlite3
+
+# Ambientes virtuais
+venv/
+env/
+
+# Arquivos temporários
+*.log
+*.tmp
