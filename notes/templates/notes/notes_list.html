@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notes - StudyMate</title>
+    {% load static %}
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: rgb(178, 34, 34);
+            --primary-dark: rgb(222, 30, 53);
+            --background: rgb(43, 45, 66);
+            --card-bg: #ffffff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--background);
+            min-height: 100vh;
+            color: #2c2c2c;
+            line-height: 1.6;
+        }
+
+        .header {
+            background: rgb(237, 242, 244);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            margin: 20px auto;
+            max-width: 1200px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .header h4 {
+            color: #2c2c2c;
+            font-size: 1.1rem;
+            margin-top: 10px;
+            font-weight: 400;
+        }
+
+        .nav {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 25px;
+        }
+
+        .nav-btn, .nav a {
+            background: var(--primary);
+            border: none;
+            padding: 15px 25px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            color: white;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(178, 34, 34, 0.3);
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .nav-btn:hover, .nav a:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(178, 34, 34, 0.4);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .create-note-section {
+            text-align: center;
+            margin: 30px 0 25px;
+        }
+
+        .btn-create-note {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            border: none;
+            padding: 15px 35px;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(40, 167, 69, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .btn-create-note:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 25px rgba(40, 167, 69, 0.5);
+        }
+
+        .filters-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        .filter-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .filter-box {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 12px 18px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .filter-box:focus-within {
+            border-color: var(--primary);
+            box-shadow: 0 4px 12px rgba(178, 34, 34, 0.15);
+        }
+
+        .filter-box label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 6px;
+        }
+
+        .filter-box select {
+            width: 100%;
+            border: none;
+            background: transparent;
+            font-size: 1rem;
+            color: #2c2c2c;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .filter-actions {
+            display: none;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .btn-filter {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 10px rgba(178, 34, 34, 0.3);
+        }
+
+        .btn-filter:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-clear {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-clear:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+            color: white;
+        }
+
+        .notes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .note-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .note-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+        }
+
+        .note-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .note-author {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .badge-professor {
+            background: var(--primary);
+            color: white;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-recommended {
+            background: #17a2b8;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .note-date {
+            font-size: 0.85rem;
+            color: #6c757d;
+        }
+
+        .note-title {
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: #2c2c2c;
+            margin-bottom: 10px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        .note-description {
+            color: #6c757d;
+            font-size: 0.95rem;
+            margin-bottom: 12px;
+            flex-grow: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .note-badges {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .badge-subject {
+            background: #e9ecef;
+            color: #495057;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .badge-type {
+            background: #d1ecf1;
+            color: #0c5460;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .note-metrics {
+            display: flex;
+            gap: 15px;
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-bottom: 15px;
+        }
+
+        .btn-open-note {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 10px;
+            font-weight: 600;
+            text-align: center;
+            text-decoration: none;
+            display: block;
+            transition: all 0.3s ease;
+        }
+
+        .btn-open-note:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(178, 34, 34, 0.3);
+            color: white;
+        }
+
+        .char-counter {
+            font-size: 0.875rem;
+            color: #6c757d;
+            margin-top: 5px;
+            text-align: right;
+        }
+
+        .char-counter.limit-reached {
+            color: #dc3545;
+            font-weight: 600;
+        }
+
+        .validation-warning {
+            color: #dc3545;
+            font-size: 0.875rem;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .field-warning {
+            border-color: #8ecae6 !important;
+            animation: pulse 0.5s;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        .toast-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border-left: 4px solid #28a745;
+            border-radius: 8px;
+            padding: 15px 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            z-index: 9999;
+            animation: slideIn 0.3s ease;
+            max-width: 350px;
+        }
+
+        .toast-notification.error {
+            border-left-color: #dc3545;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* MODAL DE LOGIN */
+        .modal-content {
+            border-radius: 15px !important;
+            overflow: hidden;
+            border: none;
+        }
+
+        .modal-header {
+            background-color: #dc3545 !important;
+            color: white !important;
+            border: none !important;
+        }
+
+        .modal-body {
+            background-color: #fff !important;
+            text-align: center;
+            padding: 30px;
+        }
+
+        .modal-body a,
+        .modal-body button {
+            min-width: 150px;
+            padding: 12px 30px;
+            font-size: 1rem;
+            border-radius: 25px;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .nav {
+                gap: 8px;
+            }
+
+            .nav-btn, .nav a {
+                padding: 12px 18px;
+                font-size: 0.9rem;
+            }
+
+            .filter-row {
+                grid-template-columns: 1fr;
+            }
+
+            .notes-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-actions {
+                flex-direction: column;
+            }
+
+            .btn-filter, .btn-clear {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <img src="{% static 'study/img/logoStudyMate.png' %}" height="144px" width="293" alt="StudyMate Logo">
+        <h4>Portal do Estudante - Sua plataforma de estudos</h4>
+        
+        <div class="nav">
+            <a href="{% url 'study:home' %}">🏠 Home</a>
+            <a href="{% url 'study:home' %}#materias">📚 Matérias</a>
+            <a href="{% url 'study:home' %}#chat">💬 Chat</a>
+            <a href="{% url 'notes:list' %}" style="background: var(--primary-dark);">📝 Notes</a>
+            <a href="{% url 'study:home' %}#horarios">🕐 Horários</a>
+
+            {% if user.is_authenticated %}
+                <span style="color: white; background: #6c757d; padding: 15px 25px; border-radius: 50px; font-weight: 600;">
+                    👋 {{ user.username }}
+                </span>
+                <a href="{% url 'accounts:logout' %}">🚪 Logout</a>
+            {% else %}
+                <a href="{% url 'accounts:login' %}">🔐 Login</a>
+                <a href="{% url 'accounts:register' %}">🧾 Registrar</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="container">
+        {% if user.is_authenticated %}
+        <div class="create-note-section">
+            <button class="btn-create-note" data-bs-toggle="modal" data-bs-target="#createNoteModal">
+                Criar Novo Note
+            </button>
+        </div>
+        {% endif %}
+
+        <div class="filters-section">
+            <form method="get" id="filterForm">
+                <div class="filter-row">
+                    <div class="filter-box">
+                        <label>📚 Matéria</label>
+                        <select name="subject" id="subjectFilter" class="filter-field">
+                            <option value="">Todas as matérias</option>
+                            {% for subject in subjects %}
+                                <option value="{{ subject }}" {% if subject == current_subject %}selected{% endif %}>
+                                    {{ subject }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="filter-box">
+                        <label>📄 Tipo de Conteúdo</label>
+                        <select name="file_type" id="typeFilter" class="filter-field">
+                            <option value="">Todos os tipos</option>
+                            {% for code, name in file_types %}
+                                <option value="{{ code }}" {% if code == current_file_type %}selected{% endif %}>
+                                    {{ name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="filter-box">
+                        <label>🔢 Ordenar por</label>
+                        <select name="order" id="orderFilter" class="filter-field">
+                            <option value="recent" {% if current_order == 'recent' %}selected{% endif %}>Mais Recentes</option>
+                            <option value="likes" {% if current_order == 'likes' %}selected{% endif %}>Mais Curtidos</option>
+                            <option value="views" {% if current_order == 'views' %}selected{% endif %}>Mais Visualizados</option>
+                            <option value="downloads" {% if current_order == 'downloads' %}selected{% endif %}>Mais Baixados</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-box">
+                        <label>⭐ Recomendados</label>
+                        <select name="recommended" id="recommendedFilter" class="filter-field">
+                            <option value="">Todos</option>
+                            <option value="true" {% if request.GET.recommended == 'true' %}selected{% endif %}>Apenas Recomendados</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="filter-actions" id="filterActions">
+                    <button type="submit" class="btn-filter" id="btnFiltrar">🔍 Filtrar</button>
+                    <a href="{% url 'notes:list' %}" class="btn-clear" id="btnLimpar">❌ Limpar Filtros</a>
+                </div>
+            </form>
+        </div>
+
+        <div class="notes-grid">
+            {% for note in page_obj %}
+                <div class="note-card">
+                    <div class="note-header">
+                        <div>
+                            <span class="note-author">{{ note.author.username }}</span>
+                            {% if note.author.user_type == 'professor' or note.author.is_staff %}
+                                <span class="badge-professor">Professor</span>
+                            {% endif %}
+                            {% if note.is_recommended %}
+                                <span class="badge-recommended">Recomendado</span>
+                            {% endif %}
+                        </div>
+                        <span class="note-date">{{ note.created_at|date:"d/m/Y" }}</span>
+                    </div>
+
+                    <h3 class="note-title">{{ note.title }}</h3>
+
+                    <p class="note-description">
+                        {% if note.description %}
+                            {{ note.description }}
+                        {% else %}
+                            <em>Sem descrição</em>
+                        {% endif %}
+                    </p>
+
+                    <div class="note-badges">
+                        {% if note.subject %}
+                            <span class="badge-subject">{{ note.subject }}</span>
+                        {% endif %}
+                        <span class="badge-type">{{ note.get_file_type_display }}</span>
+                    </div>
+
+                    <div class="note-metrics">
+                        <span title="Visualizações">👁️ {{ note.views }}</span>
+                        <span title="Curtidas">❤️ {{ note.likes }}</span>
+                        <span title="Downloads">⬇️ {{ note.downloads }}</span>
+                    </div>
+
+                    <a href="{% url 'notes:detail' note.pk %}" class="btn-open-note">
+                        Abrir Note
+                    </a>
+                </div>
+            {% empty %}
+                <div style="grid-column: 1/-1; text-align: center; padding: 60px 20px; background: white; border-radius: 15px;">
+                    <div style="font-size: 4rem; margin-bottom: 20px;">😕</div>
+                    <h3 style="color: #6c757d; margin-bottom: 10px;">Nenhum note encontrado</h3>
+                    <p style="color: #adb5bd;">Tente ajustar os filtros ou limpar a busca</p>
+                </div>
+            {% endfor %}
+        </div>
+
+        {% if page_obj.has_other_pages %}
+            <div style="margin-top: 40px; display: flex; justify-content: center; gap: 10px;">
+                {% if page_obj.has_previous %}
+                    <a href="?page={{ page_obj.previous_page_number }}&subject={{ current_subject }}&file_type={{ current_file_type }}&order={{ current_order }}" style="background: white; color: var(--primary); padding: 10px 18px; border-radius: 8px; text-decoration: none; font-weight: 600;">« Anterior</a>
+                {% endif %}
+
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                        <span style="background: var(--primary); color: white; padding: 10px 18px; border-radius: 8px; font-weight: 600;">{{ num }}</span>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <a href="?page={{ num }}&subject={{ current_subject }}&file_type={{ current_file_type }}&order={{ current_order }}" style="background: white; color: var(--primary); padding: 10px 18px; border-radius: 8px; text-decoration: none; font-weight: 600;">{{ num }}</a>
+                    {% endif %}
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}&subject={{ current_subject }}&file_type={{ current_file_type }}&order={{ current_order }}" style="background: white; color: var(--primary); padding: 10px 18px; border-radius: 8px; text-decoration: none; font-weight: 600;">Próximo »</a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+
+    {% if user.is_authenticated %}
+    <div class="modal fade" id="createNoteModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Criar Novo Note</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="createNoteForm" method="POST" action="{% url 'notes:create' %}" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3" style="text-align: left;">
+                            <label class="form-label" style="text-align: left; display: block;">Título *</label>
+                            <input type="text" name="title" class="form-control" required maxlength="50" 
+                                   placeholder="Ex: Resumo de Revolução Francesa" id="titleInput"
+                                   style="text-align: left;">
+                            <div class="char-counter" id="titleCount" style="text-align: right;">0/50</div>
+                            <div class="validation-warning" id="titleWarning" style="text-align: left;">Apenas letras e espaços são permitidos no título.</div>
+                        </div>
+
+                        <div class="mb-3" style="text-align: left;">
+                            <label class="form-label" style="text-align: left; display: block;">Descrição</label>
+                            <textarea name="description" class="form-control" rows="4" maxlength="400" 
+                                      placeholder="Digite um breve resumo do conteúdo..." id="descInput"
+                                      style="text-align: left;"></textarea>
+                            <div class="char-counter" id="descCount" style="text-align: right;">0/400</div>
+                            <div class="validation-warning" id="descWarning" style="text-align: left;">Limite máximo de 400 caracteres atingido.</div>
+                        </div>
+
+                        <div class="mb-3" style="text-align: left;">
+                            <label class="form-label" style="text-align: left; display: block;">Matéria *</label>
+                            <select name="subject" class="form-select" id="subjectSelect" required style="text-align: left;">
+                                <option value="">Selecione uma matéria</option>
+                                {% for subject in subjects %}
+                                    <option value="{{ subject }}">{{ subject }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="mb-3" style="text-align: left;">
+                            <label class="form-label" style="text-align: left; display: block;">Tipo de Conteúdo *</label>
+                            <select name="file_type" id="fileTypeSelect" class="form-select" required style="text-align: left;">
+                                <option value="">Selecione...</option>
+                                <option value="PDF">📄 PDF</option>
+                                <option value="DOC">📝 Documento Word</option>
+                                <option value="PPT">📊 Slides</option>
+                                <option value="LINK">🔗 Link Externo</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3" id="fileInput" style="display: none;">
+                            <label class="form-label">Arquivo</label>
+                            <input type="file" name="file" class="form-control" 
+                                   accept=".pdf,.doc,.docx,.ppt,.pptx">
+                            <small class="text-muted">Máximo 10MB</small>
+                        </div>
+
+                        <div class="mb-3" id="linkInput" style="display: none;">
+                            <label class="form-label">Link</label>
+                            <input type="url" name="link" class="form-control" placeholder="https://exemplo.com">
+                            <div class="validation-warning" id="linkWarning">Link inválido.</div>
+                        </div>
+
+                        <div id="formErrors" class="alert alert-danger" style="display: none;"></div>
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-primary" id="submitBtn" style="background: var(--primary); border: none;">Criar Note</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="modal fade" id="loginRequiredModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Login Necessário</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p style="font-size: 1.1rem; margin-bottom: 25px;">
+                        Para criar ou interagir com Notes, é necessário estar logado.
+                    </p>
+                    <div style="display: flex; gap: 15px; justify-content: center;">
+                        <a href="{% url 'accounts:login' %}" style="background: #dc3545; color: white; border: none; padding: 12px 30px; border-radius: 25px; font-weight: 600; text-decoration: none;">
+                            Fazer Login
+                        </a>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" 
+                                style="background: #6c757d; color: white; border: none; padding: 12px 30px; border-radius: 25px; font-weight: 600;">
+                            Cancelar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // VALIDAÇÃO DE CARACTERES
+        const titleRegex = /^[A-Za-zÀ-ÿÇç\s]*$/;
+        const descRegex = /^[A-Za-zÀ-ÿÇç\s.,!?;:\-()'"]*$/;
+
+        const titleInput = document.getElementById('titleInput');
+        const titleCount = document.getElementById('titleCount');
+        const titleWarning = document.getElementById('titleWarning');
+
+        if (titleInput) {
+            // BLOQUEAR digitação de caracteres inválidos
+            titleInput.addEventListener('keypress', function(e) {
+                const char = e.key;
+                const regex = /^[A-Za-zÀ-ÿÇç\s]$/;
+                
+                if (!regex.test(char)) {
+                    e.preventDefault(); // BLOQUEIA antes de inserir
+                    titleWarning.style.display = 'block';
+                    this.style.borderColor = '#dc3545';
+                    
+                    setTimeout(() => {
+                        titleWarning.style.display = 'none';
+                        this.style.borderColor = '#e9ecef';
+                    }, 2000);
+                }
+            });
+            
+            // BLOQUEAR colagem de texto inválido
+            titleInput.addEventListener('paste', function(e) {
+                e.preventDefault();
+                const pastedText = (e.clipboardData || window.clipboardData).getData('text');
+                const regex = /^[A-Za-zÀ-ÿÇç\s]+$/;
+                
+                if (regex.test(pastedText)) {
+                    this.value += pastedText.substring(0, 50 - this.value.length);
+                } else {
+                    titleWarning.style.display = 'block';
+                    this.style.borderColor = '#dc3545';
+                    
+                    setTimeout(() => {
+                        titleWarning.style.display = 'none';
+                        this.style.borderColor = '#e9ecef';
+                    }, 2000);
+                }
+            });
+            
+            // Contador de caracteres
+            titleInput.addEventListener('input', function() {
+                const len = this.value.length;
+                titleCount.textContent = `${len}/50`;
+                
+                if (len >= 50) {
+                    titleCount.classList.add('limit-reached');
+                } else {
+                    titleCount.classList.remove('limit-reached');
+                }
+            });
+        }
+
+        const descInput = document.getElementById('descInput');
+        const descCount = document.getElementById('descCount');
+        const descWarning = document.getElementById('descWarning');
+
+        if (descInput) {
+            descInput.addEventListener('input', function() {
+                const len = this.value.length;
+                descCount.textContent = `${len}/400`;
+                
+                if (!descRegex.test(this.value)) {
+                    this.style.borderColor = '#dc3545';
+                } else {
+                    this.style.borderColor = '#e9ecef';
+                }
+                
+                if (len >= 400) {
+                    descCount.classList.add('limit-reached');
+                    descWarning.style.display = 'block';
+                    if (len > 400) {
+                        this.value = this.value.substring(0, 400);
+                    }
+                } else {
+                    descCount.classList.remove('limit-reached');
+                    descWarning.style.display = 'none';
+                }
+            });
+        }
+
+        const fileTypeSelect = document.getElementById('fileTypeSelect');
+        const fileInput = document.getElementById('fileInput');
+        const linkInput = document.getElementById('linkInput');
+
+        if (fileTypeSelect) {
+            fileTypeSelect.addEventListener('change', function() {
+                const selectedType = this.value;
+                
+                fileInput.style.display = 'none';
+                linkInput.style.display = 'none';
+                
+                if (selectedType === 'PDF' || selectedType === 'DOC' || selectedType === 'PPT') {
+                    fileInput.style.display = 'block';
+                    
+                    const fileInputEl = fileInput.querySelector('input[type="file"]');
+                    if (selectedType === 'PDF') {
+                        fileInputEl.setAttribute('accept', '.pdf');
+                    } else if (selectedType === 'DOC') {
+                        fileInputEl.setAttribute('accept', '.doc,.docx');
+                    } else if (selectedType === 'PPT') {
+                        fileInputEl.setAttribute('accept', '.ppt,.pptx');
+                    }
+                } else if (selectedType === 'LINK') {
+                    linkInput.style.display = 'block';
+                }
+            });
+        }
+
+        const linkInputField = linkInput ? linkInput.querySelector('input[type="url"]') : null;
+        const linkWarning = document.getElementById('linkWarning');
+        const urlRegex = /^(https?:\/\/)[\w\-]+(\.[\w\-]+)+[/#?]?.*$/;
+
+        if (linkInputField) {
+            linkInputField.addEventListener('blur', function() {
+                if (this.value && !urlRegex.test(this.value)) {
+                    linkWarning.style.display = 'block';
+                    this.style.borderColor = '#dc3545';
+                } else {
+                    linkWarning.style.display = 'none';
+                    this.style.borderColor = '#e9ecef';
+                }
+            });
+        }
+
+        // EXIBIÇÃO DOS BOTÕES DE FILTRO
+        const filters = document.querySelectorAll('.filter-field');
+        const filterActions = document.getElementById('filterActions');
+
+        filters.forEach(filter => {
+            filter.addEventListener('change', () => {
+                const anyActive = Array.from(filters).some(f => f.value);
+                filterActions.style.display = anyActive ? 'flex' : 'none';
+            });
+        });
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const anyActive = Array.from(filters).some(f => f.value);
+            if (anyActive) {
+                filterActions.style.display = 'flex';
+            }
+        });
+
+        // VALIDAÇÃO DO FORMULÁRIO
+        const createNoteForm = document.getElementById('createNoteForm');
+        const formErrors = document.getElementById('formErrors');
+
+        if (createNoteForm) {
+            createNoteForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                formErrors.style.display = 'none';
+                formErrors.textContent = '';
+                
+                const title = titleInput.value.trim();
+                if (!title) {
+                    showError('O título é obrigatório.');
+                    highlightField(titleInput);
+                    return;
+                }
+                
+                if (title.length > 50) {
+                    showError('O título não pode ter mais de 50 caracteres.');
+                    highlightField(titleInput);
+                    return;
+                }
+                
+                if (!titleRegex.test(title)) {
+                    showError('O título só pode conter letras e espaços.');
+                    highlightField(titleInput);
+                    return;
+                }
+                
+                const fileType = fileTypeSelect.value;
+                if (!fileType) {
+                    showError('Selecione o tipo de conteúdo.');
+                    highlightField(fileTypeSelect);
+                    return;
+                }
+                
+                // VALIDAR MATÉRIA (OBRIGATÓRIO)
+                const subjectSelect = document.getElementById('subjectSelect');
+                if (!subjectSelect.value.trim()) {
+                    showError('Você esqueceu de preencher todos os campos obrigatórios.');
+                    highlightField(subjectSelect);
+                    return;
+                }
+                
+                if (fileType === 'LINK') {
+                    const link = linkInputField.value.trim();
+                    if (!link) {
+                        showError('O link é obrigatório para tipo Link Externo.');
+                        highlightField(linkInputField);
+                        return;
+                    }
+                    if (!urlRegex.test(link)) {
+                        showError('Link inválido. Use um URL completo (ex: https://exemplo.com).');
+                        highlightField(linkInputField);
+                        return;
+                    }
+                } else {
+                    const fileInputEl = fileInput.querySelector('input[type="file"]');
+                    if (!fileInputEl.files || fileInputEl.files.length === 0) {
+                        showError('Selecione um arquivo para upload.');
+                        highlightField(fileInputEl);
+                        return;
+                    }
+                }
+                
+                const formData = new FormData(this);
+                const submitBtn = document.getElementById('submitBtn');
+                
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Criando...';
+                
+                try {
+                    const response = await fetch(this.action, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                        }
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        showToast('Note criado com sucesso.', 'success');
+                        setTimeout(() => {
+                            window.location.href = data.note.url;
+                        }, 1500);
+                    } else {
+                        showError(data.error || 'Erro ao criar note.');
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'Criar Note';
+                    }
+                } catch (error) {
+                    showError('Erro ao processar requisição. Tente novamente.');
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Criar Note';
+                }
+            });
+        }
+
+        function showError(message) {
+            formErrors.textContent = message;
+            formErrors.style.display = 'block';
+            formErrors.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        function highlightField(field) {
+            field.classList.add('field-warning');
+            field.focus();
+            
+            setTimeout(() => {
+                field.classList.remove('field-warning');
+            }, 2000);
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast-notification ${type === 'error' ? 'error' : ''}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
+        {% if messages %}
+            {% for message in messages %}
+                showToast('{{ message }}', '{{ message.tags }}');
+            {% endfor %}
+        {% endif %}
+    </script>
+</body>
+</html>

@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+    {% load static %}
+</head>
+
+  <style> 
+     * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: rgb(43, 45, 66);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: rgb(178, 34, 34);
+            color: white;
+            padding: 20px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+            letter-spacing: 2px;
+        }
+
+        .header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+
+        .school-info {
+            background: #ffffff;
+            border-left: 5px solid #003366;
+            padding: 15px;
+            margin: 20px auto;
+            max-width: 800px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .school-info h2 {
+            color: #003366;
+            font-size: 1.3rem;
+            margin-bottom: 5px;
+        }
+
+        .school-info p {
+            color: #555;
+            font-size: 1rem;
+            margin-bottom: 3px;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        .login-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+            padding: 40px;
+            width: 100%;
+            max-width: 450px;
+            border-top: 5px solid #003366;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .login-header h3 {
+            color: #003366;
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .login-header p {
+            color: #666;
+            font-size: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #003366;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 1rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: #f9f9f9;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #003366;
+            background: white;
+            box-shadow: 0 0 10px rgba(0,51,102,0.1);
+        }
+
+        .btn-login {
+            width: 100%;
+            background: linear-gradient(135deg, #003366 0%, #004080 100%);
+            color: white;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .btn-login:hover {
+            background: linear-gradient(135deg, #002244 0%, #003366 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,51,102,0.3);
+        }
+
+        .team-info {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px auto;
+            max-width: 800px;
+            color: white;
+            text-align: center;
+        }
+
+        .team-info h3 {
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+
+        .team-members {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .member {
+            background: rgba(255,255,255,0.1);
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        .footer {
+            background: rgb(178, 34, 34);
+            color: white;
+            text-align: center;
+            padding: 20px;
+            margin-top: auto;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .login-container {
+                padding: 30px 20px;
+            }
+            
+            .team-members {
+                grid-template-columns: 1fr;
+            }
+        }
+  </style>
+
+<body>
+
+    <header class="header">
+        <div class="header-content">
+            <img src="{% static 'accounts/img/logoMate.png' %}" height="87,75px" width="164,5px">
+            <p class="subtitle">SEMPRE COM VOCÊ</p>
+        </div>
+    </header>
+
+    <div class="school-info">
+        <h2>CENTRO PAULA SOUZA</h2>
+        <p><strong>ETEC JOÃO MARIA STEVANATTO</strong></p>
+    </div>
+
+  <main class="main-content">
+    <div class="login-container">
+      <form method="post">
+          {% csrf_token %}
+
+          <div class="login-header">
+                <h3>Login</h3>
+                <p>Acesse a plataforma com suas credenciais</p>
+            </div>
+
+          <div class="form-group">
+            <label for="username">Usuário:</label>
+            <input type="text" id="username" name="username" required>
+          </div>
+
+          <div class="form-group">
+            <label for="password">Senha:</label>
+            <input type="password" id="password" name="password" required>
+          </div>
+
+            <button type="submit" class="btn-login">Entrar</button>
+        </form> 
+    </div>
+  </main>
+
+  <div class="team-info">
+        <h3>Equipe de Desenvolvimento</h3>
+        <div class="team-members">
+            <div class="member">Acácio Artuso Nucci</div>
+            <div class="member">Caio Henrique Saulo da Silva</div>
+            <div class="member">Giovana Moreira Ferreira</div>
+            <div class="member">João Victor Rodrigues Coelho</div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2025 Centro Paula Souza - ETEC João Maria Stevanatto - Itapira/SP</p>
+  
+    </footer>
+
+    {% if messages %}
+      <ul>
+        {% for message in messages %}
+          <li>{{ message }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+</body>
+</html>

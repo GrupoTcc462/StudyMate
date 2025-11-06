@@ -1,0 +1,56 @@
+<div class="col-lg-3 col-md-6 col-sm-12">
+    <div class="card h-100 shadow-sm note-card">
+        <div class="card-body d-flex flex-column">
+            <!-- Cabeçalho com autor e badges -->
+            <div class="d-flex justify-content-between align-items-start mb-2">
+                <div>
+                    <strong class="text-primary">{{ note.author.username }}</strong>
+                    
+                    {% if note.author.user_type == 'professor' or note.author.is_staff %}
+                        <span class="badge badge-professor ms-1">Professor ✔️</span>
+                    {% endif %}
+                    
+                    {% if note.is_recommended %}
+                        <span class="badge badge-recommended ms-1">Recomendado</span>
+                    {% endif %}
+                </div>
+                <small class="text-muted">{{ note.created_at|date:"d/m/Y" }}</small>
+            </div>
+
+            <!-- Título e descrição -->
+            <h5 class="card-title text-truncate" title="{{ note.title }}">{{ note.title }}</h5>
+            
+            {% if note.description %}
+                <p class="card-text text-muted small flex-grow-1">
+                    {{ note.description|truncatewords:18 }}
+                </p>
+            {% else %}
+                <p class="card-text text-muted small flex-grow-1 fst-italic">
+                    Sem descrição
+                </p>
+            {% endif %}
+
+            <!-- Matéria e Tipo -->
+            <div class="mb-2">
+                {% if note.subject %}
+                    <span class="badge bg-secondary">{{ note.subject }}</span>
+                {% endif %}
+                <span class="badge bg-info">{{ note.get_file_type_display }}</span>
+            </div>
+
+            <!-- Métricas -->
+            <div class="metrics mb-3">
+                <small class="me-2" title="Visualizações">👁️ {{ note.views }}</small>
+                <small class="me-2" title="Curtidas">❤️ <span class="likes-count">{{ note.likes }}</span></small>
+                <small title="Downloads">⬇️ {{ note.downloads }}</small>
+            </div>
+
+            <!-- Botão de ação -->
+            <div class="mt-auto">
+                <a href="{% url 'notes:detail' note.pk %}" class="btn btn-sm btn-outline-primary w-100">
+                    Abrir 📖
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
