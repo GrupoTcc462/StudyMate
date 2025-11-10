@@ -2,7 +2,6 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from .models import User
-from django.contrib.auth.forms import UserCreationForm
 
 # 🔹 Registro de usuário
 def register_view(request):
@@ -26,7 +25,8 @@ def register_view(request):
 
     return render(request, 'accounts/register.html')
 
-# 🔹 Login de usuário (ATUALIZADO)
+
+# 🔹 Login de usuário (ATUALIZADO COM MENSAGEM DE BOAS-VINDAS)
 def login_view(request):
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -36,13 +36,15 @@ def login_view(request):
 
         if user is not None:
             login(request, user)
-            messages.success(request, f'Bem-vindo(a) de volta ao StudyMate, {user.username}!')  # MENSAGEM ADICIONADA
+            # ⚡ MENSAGEM DE BOAS-VINDAS APÓS LOGIN
+            messages.success(request, f'Bem-vindo(a) de volta ao StudyMate, {user.username}!')
             return redirect('study:home')
         else:
             messages.error(request, 'Usuário ou senha incorretos.')
             return redirect('accounts:login')
 
     return render(request, 'accounts/login.html')
+
 
 # 🔹 Logout de usuário
 def logout_view(request):

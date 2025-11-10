@@ -1,37 +1,80 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Minha Página</title>
+    <title>StudyMate - Home</title>
     {% load static %}
     <link rel="stylesheet" href="{% static 'study/style.css' %}">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.4.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-..." crossorigin="anonymous">
-
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.4.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
    
-     <div class="container">
+     <!-- ========================================
+         MENSAGENS DE TOAST (BOAS-VINDAS)
+    ======================================== -->
+    {% if messages %}
+        <div id="toast-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const toastContainer = document.getElementById('toast-container');
+                
+                {% for message in messages %}
+                    const toast = document.createElement('div');
+                    toast.style.cssText = `
+                        background: white;
+                        border-left: 4px solid #28a745;
+                        border-radius: 8px;
+                        padding: 15px 20px;
+                        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+                        animation: slideIn 0.3s ease;
+                        max-width: 400px;
+                        margin-bottom: 10px;
+                        font-size: 1rem;
+                        color: #2c2c2c;
+                    `;
+                    toast.textContent = '{{ message }}';
+                    toastContainer.appendChild(toast);
+                    
+                    setTimeout(() => {
+                        toast.style.animation = 'slideOut 0.3s ease';
+                        setTimeout(() => toast.remove(), 300);
+                    }, 4000);
+                {% endfor %}
+            });
+        </script>
+        <style>
+            @keyframes slideIn {
+                from { transform: translateX(400px); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(400px); opacity: 0; }
+            }
+        </style>
+    {% endif %}
+
+    <div class="container">
         <div class="header">
             <img src="{% static 'study/img/logoStudyMate.png' %}" height="144px" width="293">
             <h4>Portal do Estudante - Sua plataforma de estudos</h4>
             <br> 
             
+            <!-- ========================================
+                 NAVBAR UNIFICADA (TODAS AS ABAS)
+            ======================================== -->
             <div class="nav">
-    <button class="nav-btn active" onclick="showSection('home')">🏠 Home</button>
-    <button class="nav-btn" onclick="showSection('materias')">📚 Matérias</button>
-    <button class="nav-btn" onclick="showSection('chat')">💬 Chat</button>
-    <a href="{% url 'notes:list' %}" class="nav-btn" style="text-decoration: none;">📝 Notes</a>
-    <button class="nav-btn" onclick="showSection('horarios')">🕐 Horários</button>
+                <button class="nav-btn active" onclick="showSection('home')">🏠 Home</button>
+                <button class="nav-btn" onclick="showSection('materias')">📚 Matérias</button>
+                <button class="nav-btn" onclick="showSection('chat')">💬 Chat</button>
+                <a href="{% url 'notes:list' %}" class="nav-btn" style="text-decoration: none;">📝 Notes</a>
+                <button class="nav-btn" onclick="showSection('horarios')">🕐 Horários</button>
 
-    {% if user.is_authenticated %}
-        <a href="{% url 'perfil:perfil' %}" class="nav-btn" style="text-decoration: none;">👤 Perfil</a>
-        <span style="margin-left: 15px;">👋 Bem-vindo, <strong>{{ user.username }}</strong>!</span>
-        <a href="{% url 'accounts:logout' %}" style="margin-left: 15px;">🚪 Logout</a>
-    {% else %}
-        <a href="{% url 'accounts:login' %}">🔐 Login</a>
-        <a href="{% url 'accounts:register' %}" style="margin-left: 10px;">🧾 Registrar</a>
-    {% endif %}
-</div>
-
+                {% if user.is_authenticated %}
+                    <a href="{% url 'perfil:perfil' %}" class="nav-btn" style="text-decoration: none;">👤 Perfil</a>
+                {% else %}
+                    <a href="{% url 'accounts:login' %}" class="nav-btn" style="text-decoration: none;">🔐 Login</a>
+                {% endif %}
+            </div>
         </div>
 
         <div class="content">
@@ -299,27 +342,20 @@
     <script>
         // Navegação entre seções
         function showSection(sectionId) {
-            // Oculta todas as seções
             const sections = document.querySelectorAll('.section');
             sections.forEach(section => section.classList.remove('active'));
             
-            // Remove classe ativa de todos os botões
             const navBtns = document.querySelectorAll('.nav-btn');
             navBtns.forEach(btn => btn.classList.remove('active'));
             
-            // Mostra a seção selecionada
             document.getElementById(sectionId).classList.add('active');
-            
-            // Adiciona classe ativa ao botão clicado
             event.target.classList.add('active');
         }
 
-        // Abrir matérias
         function openSubject(subject) {
             alert(`Abrindo conteúdo de ${subject}. Em breve, materiais completos estarão disponíveis!`);
         }
 
-        // Enviar mensagem no chat
         function sendMessage() {
             const input = document.getElementById('messageInput');
             const message = input.value.trim();
@@ -334,7 +370,6 @@
                 input.value = '';
                 chatMessages.scrollTop = chatMessages.scrollHeight;
                 
-                // Resposta automática
                 setTimeout(() => {
                     const responseDiv = document.createElement('div');
                     responseDiv.className = 'message';
@@ -345,19 +380,16 @@
             }
         }
 
-        // Enter para enviar mensagem
         function handleKeyPress(event) {
             if (event.key === 'Enter') {
                 sendMessage();
             }
         }
 
-        // Trocar chat da turma
         function changeChat() {
             const selectedClass = document.getElementById('chatClass').value;
             const chatMessages = document.getElementById('chatMessages');
             
-            // Mensagens por turma
             const messages = {
                 '1info': [
                     'Ana: Alguém entendeu a matéria de algoritmos?',
@@ -405,7 +437,6 @@
             });
         }
 
-        // Buscar notes
         function searchNotes() {
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
             const notes = document.querySelectorAll('.note-item');
@@ -423,7 +454,6 @@
             });
         }
 
-        // Adicionar note
         function addNote() {
             const title = prompt('Título da sua note:');
             const content = prompt('Conteúdo da note:');
@@ -443,7 +473,6 @@
             }
         }
 
-        // Trocar horário
         function changeSchedule() {
             const selectedClass = document.getElementById('scheduleClass').value;
             const scheduleBody = document.getElementById('scheduleBody');
@@ -507,9 +536,7 @@
             });
         }
 
-        // Inicialização
         document.addEventListener('DOMContentLoaded', function() {
-            // Adicionar efeitos de carregamento
             const cards = document.querySelectorAll('.card');
             cards.forEach((card, index) => {
                 card.style.animationDelay = `${index * 0.1}s`;
@@ -518,7 +545,6 @@
     </script>
 
     <script src="{% static 'study/js/script.js' %}"></script>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.4.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-..." crossorigin="anonymous"></script> 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.4.3/dist/js/bootstrap.bundle.min.js"></script> 
 </body>
 </html>

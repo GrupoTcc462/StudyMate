@@ -45,6 +45,9 @@
             font-weight: 400;
         }
 
+        /* ========================================
+           NAVBAR UNIFICADA (TODAS AS ABAS)
+        ======================================== */
         .nav {
             display: flex;
             justify-content: center;
@@ -73,6 +76,11 @@
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(178, 34, 34, 0.4);
             color: white;
+        }
+
+        /* Destacar aba ativa (Perfil) */
+        .nav a.active {
+            background: var(--primary-dark);
         }
 
         .container {
@@ -267,12 +275,15 @@
             transition: all 0.3s ease;
             font-size: 1.1rem;
             box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+            text-decoration: none;
+            display: inline-block;
         }
 
         .btn-logout:hover {
             background: #c82333;
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
+            color: white;
         }
 
         .toast-notification {
@@ -339,21 +350,39 @@
             .actions-section {
                 flex-direction: column;
             }
+
+            .nav {
+                gap: 8px;
+            }
+
+            .nav-btn, .nav a {
+                padding: 12px 18px;
+                font-size: 0.9rem;
+            }
         }
     </style>
 </head>
 <body>
+    <!-- ========================================
+         HEADER COM NAVBAR UNIFICADA
+    ======================================== -->
     <div class="header">
         <img src="{% static 'study/img/logoStudyMate.png' %}" height="144px" width="293" alt="StudyMate Logo">
         <h4>Portal do Estudante - Sua plataforma de estudos</h4>
         
+        <!-- NAVBAR UNIFICADA (VISÍVEL EM TODAS AS ABAS) -->
         <div class="nav">
             <a href="{% url 'study:home' %}">🏠 Home</a>
             <a href="{% url 'study:home' %}#materias">📚 Matérias</a>
             <a href="{% url 'study:home' %}#chat">💬 Chat</a>
             <a href="{% url 'notes:list' %}">📝 Notes</a>
             <a href="{% url 'study:home' %}#horarios">🕐 Horários</a>
-            <a href="{% url 'perfil:perfil' %}" style="background: var(--primary-dark);">👤 Perfil</a>
+
+            {% if user.is_authenticated %}
+                <a href="{% url 'perfil:perfil' %}" class="active">👤 Perfil</a>
+            {% else %}
+                <a href="{% url 'accounts:login' %}">🔐 Login</a>
+            {% endif %}
         </div>
     </div>
 
@@ -423,7 +452,7 @@
                 </div>
             </div>
 
-            <!-- Ações -->
+            <!-- Ações (BOTÃO LOGOUT APENAS AQUI) -->
             <div class="actions-section">
                 <a href="{% url 'accounts:logout' %}" class="btn-logout">
                     🚪 Sair da Conta
@@ -440,9 +469,8 @@
         const cancelBtn = document.getElementById('cancel-edit');
         const csrftoken = '{{ csrf_token }}';
 
-        // Botão Editar
+        // Botão Editar - AVISO ANTES DE EDITAR
         editBtn.addEventListener('click', () => {
-            // Mensagem de aviso
             const confirmChange = confirm("Você só pode alterar seu nome a cada 7 dias. Deseja continuar?");
             if (!confirmChange) return;
 
@@ -465,16 +493,17 @@
             editBtn.style.display = 'inline-block';
         });
 
-        // Botão Salvar
+        // Botão Salvar - MENSAGEM "Nome alterado de X para Y"
         saveBtn.addEventListener('click', async () => {
             const newName = nameField.value.trim();
+            const oldName = nameField.getAttribute('value');
             
             if (newName === '') {
                 showToast('O nome não pode ficar em branco.', 'error');
                 return;
             }
 
-            if (newName === nameField.getAttribute('value')) {
+            if (newName === oldName) {
                 showToast('Nenhuma alteração foi feita.', 'error');
                 return;
             }
@@ -492,7 +521,8 @@
                 const data = await response.json();
 
                 if (data.success) {
-                    showToast(data.message, 'success');
+                    // MENSAGEM PERSONALIZADA "De X para Y"
+                    showToast(`Nome alterado com sucesso! De ${data.old_name} para ${data.new_name}.`, 'success');
                     
                     nameField.setAttribute('value', newName);
                     nameField.disabled = true;
@@ -507,7 +537,7 @@
                     showToast(data.message, 'error');
                     
                     // Restaurar nome antigo
-                    nameField.value = nameField.getAttribute('value');
+                    nameField.value = oldName;
                     nameField.disabled = true;
                     
                     saveBtn.style.display = 'none';
