@@ -26,7 +26,7 @@ def register_view(request):
 
     return render(request, 'accounts/register.html')
 
-# 🔹 Login de usuário
+# 🔹 Login de usuário (ATUALIZADO)
 def login_view(request):
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -36,8 +36,8 @@ def login_view(request):
 
         if user is not None:
             login(request, user)
-            messages.success(request, f'Bem-vindo, {user.username}!')
-            return redirect('study:home')  # ajuste se o nome do app for outro
+            messages.success(request, f'Bem-vindo(a) de volta ao StudyMate, {user.username}!')  # MENSAGEM ADICIONADA
+            return redirect('study:home')
         else:
             messages.error(request, 'Usuário ou senha incorretos.')
             return redirect('accounts:login')

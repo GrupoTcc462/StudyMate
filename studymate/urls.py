@@ -12,6 +12,7 @@ urlpatterns = [
     path('accounts/', include('accounts.urls', namespace='accounts')),
     path('study/', include('study.urls', namespace='study')),
     path('notes/', include('notes.urls', namespace='notes')),
+    path('perfil/', include('perfil.urls', namespace='perfil')),
 ]
 
 if settings.DEBUG:

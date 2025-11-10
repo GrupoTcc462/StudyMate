@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'study',
     'accounts',
     'notes',
+    'perfil',
 ]
 
 MIDDLEWARE = [
