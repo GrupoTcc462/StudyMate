@@ -1,86 +1,62 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
-from django.views.decorators.http import require_POST
-from django.utils import timezone
-import json
+from django.contrib.auth import authenticate, login, logout
+from django.contrib import messages
+from .models import User
+from perfil.models import PerfilUsuario
+from django.shortcuts import render
 
-from notes.models import Note, NoteLike, Comment
-from .models import PerfilUsuario
-
-
-@login_required
 def perfil_view(request):
-    """View principal da aba Perfil"""
-    user = request.user
-    
-    # Criar perfil se não existir
-    perfil, created = PerfilUsuario.objects.get_or_create(user=user)
-    
-    # Estatísticas do usuário
-    notes_count = Note.objects.filter(author=user).count()
-    likes_count = NoteLike.objects.filter(user=user).count()
-    downloads_count = sum(Note.objects.filter(author=user).values_list('downloads', flat=True))
-    comments_count = Comment.objects.filter(author=user).count()
-    
-    context = {
-        'user': user,
-        'perfil': perfil,
-        'notes_count': notes_count,
-        'likes_count': likes_count,
-        'downloads_count': downloads_count,
-        'comments_count': comments_count,
-    }
-    
-    return render(request, 'perfil/perfil.html', context)
+    return render(request, 'perfil/perfil.html')
+
+def register_view(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password1 = request.POST.get('password1')
+        password2 = request.POST.get('password2')
+        user_type = request.POST.get('user_type')
+
+        if password1 != password2:
+            messages.error(request, 'As senhas não coincidem.')
+            return redirect('accounts:register')
+
+        if User.objects.filter(username=username).exists():
+            messages.error(request, 'Esse nome de usuário já existe.')
+            return redirect('accounts:register')
+
+        user = User.objects.create_user(username=username, password=password1, user_type=user_type)
+        messages.success(request, 'Cadastro realizado com sucesso!')
+        return redirect('accounts:login')
+
+    return render(request, 'accounts/register.html')
 
 
-@login_required
-@require_POST
-def editar_nome(request):
-    """Editar nome do usuário com restrição de 7 dias"""
-    try:
-        data = json.loads(request.body)
-        new_name = data.get('name', '').strip()
-        
-        if not new_name:
-            return JsonResponse({
-                'success': False,
-                'error': 'O nome não pode ficar em branco.'
-            }, status=400)
-        
-        user = request.user
-        perfil, created = PerfilUsuario.objects.get_or_create(user=user)
-        
-        # Verificar se pode alterar
-        if not perfil.pode_alterar_nome():
-            dias_restantes = perfil.dias_ate_proxima_mudanca()
-            return JsonResponse({
-                'success': False,
-                'wait_days': dias_restantes,
-                'message': f'Você só poderá alterar o nome novamente em {dias_restantes} dias.'
-            })
-        
-        # Guardar nome antigo
-        old_name = user.username
-        
-        # Atualizar nome
-        user.username = new_name
-        user.save()
-        
-        # Atualizar data da última mudança
-        perfil.last_name_change = timezone.now()
-        perfil.save()
-        
-        return JsonResponse({
-            'success': True,
-            'old_name': old_name,
-            'new_name': new_name,
-            'message': f'Nome alterado com sucesso! De {old_name} para {new_name}.'
-        })
-        
-    except Exception as e:
-        return JsonResponse({
-            'success': False,
-            'error': str(e)
-        }, status=500)
+def login_view(request):
+    """Login com atualização automática do streak"""
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+
+        user = authenticate(request, username=username, password=password)
+
+        if user is not None:
+            login(request, user)
+            
+            # ========================================
+            # ATUALIZAR STREAK NO LOGIN
+            # ========================================
+            perfil, created = PerfilUsuario.objects.get_or_create(user=user)
+            perfil.update_streak()
+            
+            messages.success(request, f'Bem-vindo(a) de volta ao StudyMate, {user.username}!')
+            return redirect('study:home')
+        else:
+            messages.error(request, 'Usuário ou senha incorretos.')
+            return redirect('accounts:login')
+
+    return render(request, 'accounts/login.html')
+
+
+def logout_view(request):
+    logout(request)
+    messages.info(request, 'Você saiu da sua conta.')
+    return redirect('accounts:login')

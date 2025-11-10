@@ -448,6 +448,9 @@
         <img src="{% static 'study/img/logoStudyMate.png' %}" height="144px" width="293" alt="StudyMate Logo">
         <h4>Portal do Estudante - Sua plataforma de estudos</h4>
         
+        <!-- TRECHO DO NAVBAR ATUALIZADO -->
+        <!-- Substitua o bloco <div class="nav"> no seu notes_list.html por este: -->
+
         <div class="nav">
             <a href="{% url 'study:home' %}">🏠 Home</a>
             <a href="{% url 'study:home' %}#materias">📚 Matérias</a>
@@ -456,13 +459,9 @@
             <a href="{% url 'study:home' %}#horarios">🕐 Horários</a>
 
             {% if user.is_authenticated %}
-                <span style="color: white; background: #6c757d; padding: 15px 25px; border-radius: 50px; font-weight: 600;">
-                    👋 {{ user.username }}
-                </span>
-                <a href="{% url 'accounts:logout' %}">🚪 Logout</a>
+                <a href="{% url 'perfil:perfil' %}">👤 Perfil</a>
             {% else %}
                 <a href="{% url 'accounts:login' %}">🔐 Login</a>
-                <a href="{% url 'accounts:register' %}">🧾 Registrar</a>
             {% endif %}
         </div>
     </div>

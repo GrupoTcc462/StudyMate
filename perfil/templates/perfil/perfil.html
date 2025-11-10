@@ -78,7 +78,6 @@
             color: white;
         }
 
-        /* Destacar aba ativa (Perfil) */
         .nav a.active {
             background: var(--primary-dark);
         }
@@ -89,7 +88,10 @@
             padding: 20px;
         }
 
-        .profile-card {
+        /* ========================================
+           LAYOUT MODAL EM DUAS COLUNAS
+        ======================================== */
+        .profile-modal {
             background: white;
             border-radius: 20px;
             padding: 40px;
@@ -97,13 +99,20 @@
             margin-bottom: 30px;
         }
 
-        .profile-header {
-            display: flex;
-            align-items: center;
-            gap: 30px;
+        .profile-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
             margin-bottom: 30px;
-            padding-bottom: 30px;
-            border-bottom: 2px solid #e9ecef;
+        }
+
+        /* COLUNA ESQUERDA: Foto + Nome + Ações */
+        .profile-left {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border-right: 2px solid #e9ecef;
+            padding-right: 40px;
         }
 
         .profile-avatar {
@@ -118,21 +127,17 @@
             font-size: 3rem;
             font-weight: 700;
             box-shadow: 0 8px 20px rgba(178, 34, 34, 0.3);
-        }
-
-        .profile-info {
-            flex: 1;
+            margin-bottom: 20px;
         }
 
         .profile-name-section {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 15px;
+            text-align: center;
+            width: 100%;
+            margin-bottom: 20px;
         }
 
         .profile-name-input {
-            font-size: 2rem;
+            font-size: 1.5rem;
             font-weight: 700;
             color: #2c2c2c;
             border: 2px solid transparent;
@@ -140,6 +145,9 @@
             border-radius: 10px;
             background: transparent;
             transition: all 0.3s ease;
+            text-align: center;
+            width: 100%;
+            margin-bottom: 10px;
         }
 
         .profile-name-input:disabled {
@@ -158,6 +166,23 @@
             border-color: var(--primary);
         }
 
+        .profile-email {
+            color: #6c757d;
+            font-size: 0.95rem;
+            margin-bottom: 10px;
+        }
+
+        .profile-type-badge {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            padding: 6px 18px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
         .btn-edit, .btn-save, .btn-cancel {
             padding: 10px 20px;
             border: none;
@@ -166,6 +191,7 @@
             cursor: pointer;
             transition: all 0.3s ease;
             font-size: 0.9rem;
+            margin: 5px;
         }
 
         .btn-edit {
@@ -199,84 +225,20 @@
             background: #5a6268;
         }
 
-        .profile-email {
-            color: #6c757d;
-            font-size: 1.1rem;
-            margin-bottom: 10px;
-        }
-
-        .profile-type-badge {
-            display: inline-block;
-            background: var(--primary);
-            color: white;
-            padding: 6px 18px;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            font-weight: 600;
-        }
-
-        .stats-section {
-            margin-bottom: 30px;
-        }
-
-        .stats-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #2c2c2c;
-            margin-bottom: 20px;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-        }
-
-        .stat-card {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-            color: white;
-            padding: 25px;
-            border-radius: 15px;
-            text-align: center;
-            box-shadow: 0 6px 20px rgba(178, 34, 34, 0.3);
-            transition: transform 0.3s ease;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
-        }
-
-        .stat-number {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 8px;
-        }
-
-        .stat-label {
-            font-size: 1rem;
-            opacity: 0.95;
-        }
-
-        .actions-section {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-            margin-top: 30px;
-        }
-
         .btn-logout {
             background: #dc3545;
             color: white;
-            padding: 15px 35px;
+            padding: 12px 30px;
             border: none;
             border-radius: 50px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            font-size: 1.1rem;
+            font-size: 1rem;
             box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
             text-decoration: none;
             display: inline-block;
+            margin-top: 10px;
         }
 
         .btn-logout:hover {
@@ -284,6 +246,86 @@
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
             color: white;
+        }
+
+        /* COLUNA DIREITA: Frequência + Estatísticas */
+        .profile-right {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        /* FREQUÊNCIA (STREAK) */
+        .streak-container {
+            background: linear-gradient(135deg, #ff9800 0%, #ff5722 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(255, 152, 0, 0.3);
+        }
+
+        .streak-icon {
+            font-size: 3rem;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .streak-text {
+            font-size: 1.3rem;
+            font-weight: 700;
+            display: block;
+            margin-bottom: 15px;
+        }
+
+        .streak-bar {
+            width: 100%;
+            height: 12px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .streak-progress {
+            height: 12px;
+            background: white;
+            border-radius: 20px;
+            transition: width 0.3s ease;
+        }
+
+        /* AÇÕES E ESTATÍSTICAS */
+        .profile-actions {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+        .action-btn {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            padding: 15px 20px;
+            border-radius: 12px;
+            text-align: left;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #2c2c2c;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .action-btn:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            transform: translateX(5px);
+        }
+
+        .action-btn .emoji {
+            font-size: 1.5rem;
         }
 
         .toast-notification {
@@ -329,26 +371,20 @@
         }
 
         @media (max-width: 768px) {
-            .profile-header {
-                flex-direction: column;
-                text-align: center;
+            .profile-grid {
+                grid-template-columns: 1fr;
+                gap: 30px;
             }
 
-            .profile-name-section {
-                flex-direction: column;
-                gap: 10px;
+            .profile-left {
+                border-right: none;
+                border-bottom: 2px solid #e9ecef;
+                padding-right: 0;
+                padding-bottom: 30px;
             }
 
             .profile-name-input {
-                font-size: 1.5rem;
-            }
-
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .actions-section {
-                flex-direction: column;
+                font-size: 1.3rem;
             }
 
             .nav {
@@ -387,14 +423,17 @@
     </div>
 
     <div class="container">
-        <div class="profile-card">
-            <!-- Cabeçalho do Perfil -->
-            <div class="profile-header">
-                <div class="profile-avatar">
-                    {{ user.username|slice:":1"|upper }}
-                </div>
-                
-                <div class="profile-info">
+        <!-- ========================================
+             MODAL CENTRALIZADO EM DUAS COLUNAS
+        ======================================== -->
+        <div class="profile-modal">
+            <div class="profile-grid">
+                <!-- COLUNA ESQUERDA: Foto + Nome + Logout -->
+                <div class="profile-left">
+                    <div class="profile-avatar">
+                        {{ user.username|slice:":1"|upper }}
+                    </div>
+                    
                     <div class="profile-name-section">
                         <input type="text" 
                                id="profile-name" 
@@ -403,60 +442,73 @@
                                disabled
                                maxlength="150">
                         
-                        <button id="edit-name" class="btn-edit">✏️ Editar</button>
+                        {% if user.email %}
+                        <div class="profile-email">
+                            📧 {{ user.email }}
+                        </div>
+                        {% endif %}
+                        
+                        <span class="profile-type-badge">
+                            {% if user.user_type == 'professor' %}
+                                👨‍🏫 Professor
+                            {% elif user.user_type == 'admin' %}
+                                🛡️ Administrador
+                            {% else %}
+                                🎓 Estudante
+                            {% endif %}
+                        </span>
+                    </div>
+
+                    <div>
+                        <button id="edit-name" class="btn-edit">✏️ Editar Nome</button>
                         <button id="save-name" class="btn-save" style="display:none;">💾 Salvar</button>
                         <button id="cancel-edit" class="btn-cancel" style="display:none;">❌ Cancelar</button>
                     </div>
-                    
-                    {% if user.email %}
-                    <div class="profile-email">
-                        📧 {{ user.email }}
+
+                    <a href="{% url 'accounts:logout' %}" class="btn-logout">
+                        🚪 Sair da Conta
+                    </a>
+                </div>
+
+                <!-- COLUNA DIREITA: Frequência + Ações -->
+                <div class="profile-right">
+                    <!-- FREQUÊNCIA (STREAK) -->
+                    <div class="streak-container">
+                        <span class="streak-icon">🔥</span>
+                        <span class="streak-text">{{ streak_count }} dias seguidos</span>
+                        <div class="streak-bar">
+                            <div class="streak-progress" style="width: {{ streak_progress }}%;"></div>
+                        </div>
+                        <small style="display: block; margin-top: 10px; opacity: 0.9;">
+                            Continue fazendo login diariamente!
+                        </small>
                     </div>
-                    {% endif %}
-                    
-                    <span class="profile-type-badge">
-                        {% if user.user_type == 'professor' %}
-                            👨‍🏫 Professor
-                        {% elif user.user_type == 'admin' %}
-                            🛡️ Administrador
-                        {% else %}
-                            🎓 Estudante
+
+                    <!-- AÇÕES E ESTATÍSTICAS -->
+                    <div class="profile-actions">
+                        <button class="action-btn">
+                            <span class="emoji">📝</span>
+                            <span>Notes: {{ notes_count }}</span>
+                        </button>
+                        
+                        <button class="action-btn">
+                            <span class="emoji">❤️</span>
+                            <span>Likes: {{ likes_count }}</span>
+                        </button>
+                        
+                        <button class="action-btn">
+                            <span class="emoji">⬇️</span>
+                            <span>Downloads: {{ downloads_count }}</span>
+                        </button>
+
+                        {% if user.user_type == 'professor' or user.is_staff %}
+                        <button class="action-btn">
+                            <span class="emoji">⭐</span>
+                            <span>Notes Recomendados: {{ recommended_notes_count }}</span>
+                        </button>
                         {% endif %}
-                    </span>
-                </div>
-            </div>
-
-            <!-- Estatísticas -->
-            <div class="stats-section">
-                <h3 class="stats-title">📊 Suas Estatísticas</h3>
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-number">{{ notes_count }}</div>
-                        <div class="stat-label">📝 Notes Criadas</div>
-                    </div>
-                    
-                    <div class="stat-card">
-                        <div class="stat-number">{{ likes_count }}</div>
-                        <div class="stat-label">❤️ Curtidas Dadas</div>
-                    </div>
-                    
-                    <div class="stat-card">
-                        <div class="stat-number">{{ downloads_count }}</div>
-                        <div class="stat-label">⬇️ Downloads Totais</div>
-                    </div>
-                    
-                    <div class="stat-card">
-                        <div class="stat-number">{{ comments_count }}</div>
-                        <div class="stat-label">💬 Comentários</div>
                     </div>
                 </div>
-            </div>
-
-            <!-- Ações (BOTÃO LOGOUT APENAS AQUI) -->
-            <div class="actions-section">
-                <a href="{% url 'accounts:logout' %}" class="btn-logout">
-                    🚪 Sair da Conta
-                </a>
             </div>
         </div>
     </div>
@@ -469,7 +521,7 @@
         const cancelBtn = document.getElementById('cancel-edit');
         const csrftoken = '{{ csrf_token }}';
 
-        // Botão Editar - AVISO ANTES DE EDITAR
+        // Botão Editar
         editBtn.addEventListener('click', () => {
             const confirmChange = confirm("Você só pode alterar seu nome a cada 7 dias. Deseja continuar?");
             if (!confirmChange) return;
@@ -493,7 +545,7 @@
             editBtn.style.display = 'inline-block';
         });
 
-        // Botão Salvar - MENSAGEM "Nome alterado de X para Y"
+        // Botão Salvar
         saveBtn.addEventListener('click', async () => {
             const newName = nameField.value.trim();
             const oldName = nameField.getAttribute('value');
@@ -521,7 +573,6 @@
                 const data = await response.json();
 
                 if (data.success) {
-                    // MENSAGEM PERSONALIZADA "De X para Y"
                     showToast(`Nome alterado com sucesso! De ${data.old_name} para ${data.new_name}.`, 'success');
                     
                     nameField.setAttribute('value', newName);
@@ -531,12 +582,10 @@
                     cancelBtn.style.display = 'none';
                     editBtn.style.display = 'inline-block';
                     
-                    // Atualizar avatar
                     document.querySelector('.profile-avatar').textContent = newName.charAt(0).toUpperCase();
                 } else if (data.wait_days) {
                     showToast(data.message, 'error');
                     
-                    // Restaurar nome antigo
                     nameField.value = oldName;
                     nameField.disabled = true;
                     
@@ -550,7 +599,6 @@
             }
         });
 
-        // Função para exibir toast
         function showToast(message, type = 'success') {
             const toast = document.createElement('div');
             toast.className = `toast-notification ${type === 'error' ? 'error' : ''}`;
