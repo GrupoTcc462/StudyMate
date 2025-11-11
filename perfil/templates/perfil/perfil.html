@@ -23,165 +23,293 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: var(--background);
             min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             color: #2c2c2c;
         }
 
-        /* BOTÃO DE VOLTAR (CANTO SUPERIOR ESQUERDO) */
-        .voltar-btn {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            background: transparent;
-            border: none;
-            font-size: 1.2rem;
-            color: var(--primary);
-            cursor: pointer;
-            transition: 0.2s;
-            z-index: 1000;
-            font-weight: 600;
-        }
-
-        .voltar-btn:hover {
-            color: #ff7043;
-            transform: translateX(-3px);
-        }
-
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
+        /* CONTAINER PRINCIPAL - 70% DA TELA */
+        .perfil-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: var(--background);
             padding: 20px;
-            padding-top: 60px; /* Espaço para o botão voltar */
         }
 
-        /* MODAL CENTRALIZADO COM FUNDO BRANCO AMPLIADO */
-        .profile-modal {
-            background: white;
+        .perfil-content {
+            background: #ffffff;
+            width: 70%;
             border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
-            margin-bottom: 30px;
-            width: 660px; /* AMPLIADO: de 600px para 660px */
-            max-width: 95%;
-            margin-left: auto;
-            margin-right: auto;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            padding: 30px;
+            animation: fadeInUp 0.4s ease;
         }
 
-        /* LAYOUT EM DUAS COLUNAS */
-        .profile-grid {
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* GRID DE 2 COLUNAS */
+        .perfil-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1fr 1.5fr;
             gap: 40px;
-            margin-bottom: 30px;
         }
 
-        /* COLUNA ESQUERDA: Foto + Nome + Ações */
-        .profile-left {
+        /* COLUNA ESQUERDA - Foto e Edição */
+        .perfil-left {
             display: flex;
             flex-direction: column;
             align-items: center;
-            border-right: 2px solid #e9ecef;
-            padding-right: 40px;
         }
 
-        .profile-avatar {
-            width: 120px;
-            height: 120px;
+        .foto-perfil-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .foto-perfil {
+            width: 150px;
+            height: 150px;
             border-radius: 50%;
+            border: 3px solid #2196f3;
+            object-fit: cover;
+            margin-bottom: 10px;
+            transition: 0.3s;
             background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 3rem;
+            font-size: 4rem;
             font-weight: 700;
-            box-shadow: 0 8px 20px rgba(178, 34, 34, 0.3);
+        }
+
+        .foto-perfil:hover {
+            transform: scale(1.05);
+        }
+
+        .editar-foto-btn {
+            border: none;
+            background: #2196f3;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 0.9rem;
             margin-bottom: 20px;
         }
 
-        .profile-name-section {
-            text-align: center;
-            width: 100%;
+        .editar-foto-btn:hover {
+            background: #1565c0;
+        }
+
+        /* COLUNA DIREITA - Informações */
+        .perfil-right {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .perfil-info {
             margin-bottom: 20px;
         }
 
-        .profile-name-input {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #2c2c2c;
+        .nome-editavel {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .nome-editavel input {
             border: 2px solid transparent;
             padding: 8px 15px;
             border-radius: 10px;
             background: transparent;
             transition: all 0.3s ease;
-            text-align: center;
-            width: 100%;
-            margin-bottom: 10px;
+            font-size: 1.3rem;
+            font-weight: 600;
         }
 
-        .profile-name-input:disabled {
+        .nome-editavel input:disabled {
             background: transparent;
             cursor: default;
         }
 
-        .profile-name-input:focus {
+        .nome-editavel input:focus {
             outline: none;
             border-color: var(--primary);
             background: #f8f9fa;
         }
 
-        .profile-name-input:not(:disabled) {
+        .nome-editavel input:not(:disabled) {
             background: #f8f9fa;
             border-color: var(--primary);
         }
 
-        .profile-email {
-            color: #6c757d;
-            font-size: 0.95rem;
-            margin-bottom: 10px;
-        }
-
-        .profile-type-badge {
-            display: inline-block;
+        .edit-btn {
             background: var(--primary);
             color: white;
-            padding: 6px 18px;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            margin-bottom: 20px;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: 0.2s;
         }
 
-        .btn-edit, .btn-save, .btn-cancel {
-            padding: 10px 20px;
+        .edit-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .email {
+            color: #666;
+            font-size: 0.95rem;
+            margin-top: 5px;
+        }
+
+        /* FREQUÊNCIA - NOVO ESTILO */
+        .streak-container {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1.5px solid gold;
+            border-radius: 10px;
+            padding: 10px;
+            text-align: center;
+            backdrop-filter: blur(4px);
+            color: #000;
+            margin: 25px 0;
+        }
+
+        .streak-icon {
+            font-size: 2rem;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .streak-text {
+            font-size: 1.1rem;
+            font-weight: 700;
+            display: block;
+            margin-bottom: 10px;
+            color: #2c2c2c;
+        }
+
+        .streak-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .streak-progress {
+            height: 8px;
+            background: linear-gradient(90deg, #ffb703, #fb8500);
+            border-radius: 10px;
+            transition: width 0.8s ease-in-out;
+        }
+
+        /* AÇÕES/INTERAÇÕES */
+        .perfil-acoes {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: space-around;
+        }
+
+        .acao-btn {
+            flex: 1;
             border: none;
-            border-radius: 25px;
+            border-radius: 8px;
+            background: #f1f1f1;
+            padding: 10px;
+            transition: 0.2s;
+            cursor: pointer;
+            font-size: 0.95rem;
+            min-width: 120px;
+        }
+
+        .acao-btn:hover {
+            background: #e3f2fd;
+            transform: scale(1.05);
+            box-shadow: 0 2px 6px rgba(0, 123, 255, 0.2);
+        }
+
+        /* RODAPÉ - Voltar e Tutorial */
+        .perfil-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 40px;
+        }
+
+        .voltar-btn {
+            background: none;
+            border: none;
+            color: #d32f2f;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: 0.2s;
+        }
+
+        .voltar-btn:hover {
+            color: #ff7043;
+        }
+
+        .tutorial-btn {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(25, 118, 210, 0.15);
+            color: #1976d2;
+            font-weight: bold;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .tutorial-btn:hover {
+            background: #1976d2;
+            color: white;
+            box-shadow: 0 0 8px rgba(25, 118, 210, 0.5);
+        }
+
+        /* BOTÕES DE AÇÃO (Salvar/Cancelar) */
+        .btn-save, .btn-cancel {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 8px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            font-size: 0.9rem;
-            margin: 5px;
-        }
-
-        .btn-edit {
-            background: var(--primary);
-            color: white;
-            box-shadow: 0 4px 12px rgba(178, 34, 34, 0.3);
-        }
-
-        .btn-edit:hover {
-            background: var(--primary-dark);
-            transform: translateY(-2px);
+            font-size: 0.85rem;
+            margin-left: 5px;
         }
 
         .btn-save {
             background: #28a745;
             color: white;
-            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
         }
 
         .btn-save:hover {
             background: #218838;
-            transform: translateY(-2px);
         }
 
         .btn-cancel {
@@ -193,112 +321,7 @@
             background: #5a6268;
         }
 
-        .btn-logout {
-            background: #dc3545;
-            color: white;
-            padding: 12px 30px;
-            border: none;
-            border-radius: 50px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 1rem;
-            box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
-            text-decoration: none;
-            display: inline-block;
-            margin-top: 10px;
-        }
-
-        .btn-logout:hover {
-            background: #c82333;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
-            color: white;
-        }
-
-        /* COLUNA DIREITA: Frequência + Estatísticas */
-        .profile-right {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        /* FREQUÊNCIA COM FUNDO TRANSLÚCIDO E BORDAS DOURADAS */
-        .streak-container {
-            background: rgba(255, 255, 255, 0.15);
-            border: 1.5px solid gold;
-            border-radius: 10px;
-            padding: 20px;
-            text-align: center;
-            backdrop-filter: blur(4px);
-            color: #2c2c2c;
-            margin-bottom: 25px;
-            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
-        }
-
-        .streak-icon {
-            font-size: 3rem;
-            display: block;
-            margin-bottom: 10px;
-        }
-
-        .streak-text {
-            font-size: 1.3rem;
-            font-weight: 700;
-            display: block;
-            margin-bottom: 15px;
-            color: #2c2c2c;
-        }
-
-        .streak-bar {
-            width: 100%;
-            height: 12px;
-            background: rgba(0, 0, 0, 0.1);
-            border-radius: 20px;
-            overflow: hidden;
-        }
-
-        .streak-progress {
-            height: 12px;
-            background: linear-gradient(90deg, #ffb703, #fb8500);
-            border-radius: 20px;
-            transition: width 0.3s ease;
-        }
-
-        /* AÇÕES E ESTATÍSTICAS */
-        .profile-actions {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 10px;
-        }
-
-        .action-btn {
-            background: #f8f9fa;
-            border: 2px solid #e9ecef;
-            padding: 15px 20px;
-            border-radius: 12px;
-            text-align: left;
-            font-size: 1rem;
-            font-weight: 600;
-            color: #2c2c2c;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .action-btn:hover {
-            background: var(--primary);
-            color: white;
-            border-color: var(--primary);
-            transform: translateX(5px);
-        }
-
-        .action-btn .emoji {
-            font-size: 1.5rem;
-        }
-
+        /* TOAST DE NOTIFICAÇÃO */
         .toast-notification {
             position: fixed;
             top: 20px;
@@ -341,128 +364,102 @@
             }
         }
 
-        @media (max-width: 768px) {
-            .profile-grid {
+        /* RESPONSIVIDADE */
+        @media (max-width: 800px) {
+            .perfil-content {
+                width: 95%;
+            }
+
+            .perfil-grid {
                 grid-template-columns: 1fr;
-                gap: 30px;
+                text-align: center;
             }
 
-            .profile-left {
+            .perfil-left {
                 border-right: none;
-                border-bottom: 2px solid #e9ecef;
                 padding-right: 0;
-                padding-bottom: 30px;
             }
 
-            .profile-name-input {
-                font-size: 1.3rem;
+            .nome-editavel {
+                justify-content: center;
             }
 
-            .voltar-btn {
-                font-size: 1rem;
+            .perfil-acoes {
+                flex-direction: column;
+            }
+
+            .acao-btn {
+                width: 100%;
             }
         }
     </style>
 </head>
 <body>
-    <!-- BOTÃO DE VOLTAR (SEM NAVBAR) -->
-    <button class="voltar-btn" onclick="window.history.back()">← Voltar</button>
-
-    <div class="container">
-        <!-- MODAL CENTRALIZADO EM DUAS COLUNAS -->
-        <div class="profile-modal">
-            <div class="profile-grid">
-                <!-- COLUNA ESQUERDA: Foto + Nome + Logout -->
-                <div class="profile-left">
-                    <div class="profile-avatar">
-                        {{ user.username|slice:":1"|upper }}
-                    </div>
-                    
-                    <div class="profile-name-section">
-                        <input type="text" 
-                               id="profile-name" 
-                               class="profile-name-input" 
-                               value="{{ user.username }}" 
-                               disabled
-                               maxlength="150">
-                        
-                        {% if user.email %}
-                        <div class="profile-email">
-                            📧 {{ user.email }}
+    <div class="perfil-container">
+        <div class="perfil-content">
+            <div class="perfil-grid">
+                <!-- COLUNA ESQUERDA: Foto -->
+                <div class="perfil-left">
+                    <div class="foto-perfil-container">
+                        <div class="foto-perfil" id="fotoPerfil">
+                            {{ user.username|slice:":1"|upper }}
                         </div>
-                        {% endif %}
-                        
-                        <span class="profile-type-badge">
-                            {% if user.user_type == 'professor' %}
-                                👨‍🏫 Professor
-                            {% elif user.user_type == 'admin' %}
-                                🛡️ Administrador
-                            {% else %}
-                                🎓 Estudante
-                            {% endif %}
-                        </span>
+                        <button class="editar-foto-btn">📸 Editar Foto</button>
+                        <input type="file" id="fotoInput" accept=".jpg,.png" hidden>
                     </div>
-
-                    <div>
-                        <button id="edit-name" class="btn-edit">✏️ Editar Nome</button>
-                        <button id="save-name" class="btn-save" style="display:none;">💾 Salvar</button>
-                        <button id="cancel-edit" class="btn-cancel" style="display:none;">❌ Cancelar</button>
-                    </div>
-
-                    <a href="{% url 'accounts:logout' %}" class="btn-logout">
-                        🚪 Sair da Conta
-                    </a>
                 </div>
 
-                <!-- COLUNA DIREITA: Frequência + Ações -->
-                <div class="profile-right">
-                    <!-- FREQUÊNCIA (STREAK) COM NOVO ESTILO -->
+                <!-- COLUNA DIREITA: Informações -->
+                <div class="perfil-right">
+                    <div class="perfil-info">
+                        <div class="nome-editavel">
+                            <input type="text" 
+                                   id="nomeUsuario" 
+                                   value="{{ user.username }}" 
+                                   disabled
+                                   maxlength="150">
+                            <button id="editarNome" class="edit-btn">✏️ Editar</button>
+                            <button id="salvarNome" class="btn-save" style="display:none;">💾 Salvar</button>
+                            <button id="cancelarNome" class="btn-cancel" style="display:none;">❌ Cancelar</button>
+                        </div>
+                        <p class="email">📧 {{ user.email }}</p>
+                    </div>
+
+                    <!-- FREQUÊNCIA -->
                     <div class="streak-container">
                         <span class="streak-icon">🔥</span>
                         <span class="streak-text">{{ streak_count }} dias seguidos</span>
                         <div class="streak-bar">
                             <div class="streak-progress" style="width: {{ streak_progress }}%;"></div>
                         </div>
-                        <small style="display: block; margin-top: 10px; opacity: 0.8;">
-                            Continue fazendo login diariamente!
-                        </small>
                     </div>
 
-                    <!-- AÇÕES E ESTATÍSTICAS -->
-                    <div class="profile-actions">
-                        <button class="action-btn">
-                            <span class="emoji">📝</span>
-                            <span>Notes: {{ notes_count }}</span>
-                        </button>
-                        
-                        <button class="action-btn">
-                            <span class="emoji">❤️</span>
-                            <span>Likes: {{ likes_count }}</span>
-                        </button>
-                        
-                        <button class="action-btn">
-                            <span class="emoji">⬇️</span>
-                            <span>Downloads: {{ downloads_count }}</span>
-                        </button>
-
+                    <!-- INTERAÇÕES -->
+                    <div class="perfil-acoes">
+                        <button class="acao-btn">📝 Notes: {{ notes_count }}</button>
+                        <button class="acao-btn">❤️ Likes: {{ likes_count }}</button>
+                        <button class="acao-btn">⬇️ Downloads: {{ downloads_count }}</button>
                         {% if user.user_type == 'professor' or user.is_staff %}
-                        <button class="action-btn">
-                            <span class="emoji">⭐</span>
-                            <span>Notes Recomendados: {{ recommended_notes_count }}</span>
-                        </button>
+                        <button class="acao-btn">⭐ Recomendados: {{ recommended_notes_count }}</button>
                         {% endif %}
                     </div>
                 </div>
+            </div>
+
+            <!-- RODAPÉ: Voltar e Tutorial -->
+            <div class="perfil-footer">
+                <button class="voltar-btn" onclick="window.history.back()">← Voltar</button>
+                <button class="tutorial-btn" title="Tutorial (em breve)">?</button>
             </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        const nameField = document.getElementById('profile-name');
-        const editBtn = document.getElementById('edit-name');
-        const saveBtn = document.getElementById('save-name');
-        const cancelBtn = document.getElementById('cancel-edit');
+        const nomeField = document.getElementById('nomeUsuario');
+        const editBtn = document.getElementById('editarNome');
+        const saveBtn = document.getElementById('salvarNome');
+        const cancelBtn = document.getElementById('cancelarNome');
         const csrftoken = '{{ csrf_token }}';
 
         // Botão Editar
@@ -470,9 +467,9 @@
             const confirmChange = confirm("Você só pode alterar seu nome a cada 7 dias. Deseja continuar?");
             if (!confirmChange) return;
 
-            nameField.disabled = false;
-            nameField.focus();
-            nameField.select();
+            nomeField.disabled = false;
+            nomeField.focus();
+            nomeField.select();
             
             editBtn.style.display = 'none';
             saveBtn.style.display = 'inline-block';
@@ -481,8 +478,8 @@
 
         // Botão Cancelar
         cancelBtn.addEventListener('click', () => {
-            nameField.value = nameField.getAttribute('value');
-            nameField.disabled = true;
+            nomeField.value = nomeField.getAttribute('value');
+            nomeField.disabled = true;
             
             saveBtn.style.display = 'none';
             cancelBtn.style.display = 'none';
@@ -491,8 +488,8 @@
 
         // Botão Salvar
         saveBtn.addEventListener('click', async () => {
-            const newName = nameField.value.trim();
-            const oldName = nameField.getAttribute('value');
+            const newName = nomeField.value.trim();
+            const oldName = nomeField.getAttribute('value');
             
             if (newName === '') {
                 showToast('O nome não pode ficar em branco.', 'error');
@@ -519,19 +516,19 @@
                 if (data.success) {
                     showToast(`Nome alterado com sucesso! De ${data.old_name} para ${data.new_name}.`, 'success');
                     
-                    nameField.setAttribute('value', newName);
-                    nameField.disabled = true;
+                    nomeField.setAttribute('value', newName);
+                    nomeField.disabled = true;
                     
                     saveBtn.style.display = 'none';
                     cancelBtn.style.display = 'none';
                     editBtn.style.display = 'inline-block';
                     
-                    document.querySelector('.profile-avatar').textContent = newName.charAt(0).toUpperCase();
+                    document.getElementById('fotoPerfil').textContent = newName.charAt(0).toUpperCase();
                 } else if (data.wait_days) {
                     showToast(data.message, 'error');
                     
-                    nameField.value = oldName;
-                    nameField.disabled = true;
+                    nomeField.value = oldName;
+                    nomeField.disabled = true;
                     
                     saveBtn.style.display = 'none';
                     cancelBtn.style.display = 'none';
