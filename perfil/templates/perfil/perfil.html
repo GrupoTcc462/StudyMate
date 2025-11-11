@@ -11,7 +11,6 @@
             --primary: rgb(178, 34, 34);
             --primary-dark: rgb(222, 30, 53);
             --background: rgb(43, 45, 66);
-            --card-bg: #ffffff;
         }
 
         * {
@@ -27,78 +26,47 @@
             color: #2c2c2c;
         }
 
-        .header {
-            background: rgb(237, 242, 244);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 30px;
-            margin: 20px auto;
-            max-width: 1200px;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.1);
-            text-align: center;
-        }
-
-        .header h4 {
-            color: #2c2c2c;
-            font-size: 1.1rem;
-            margin-top: 10px;
-            font-weight: 400;
-        }
-
-        /* ========================================
-           NAVBAR UNIFICADA (TODAS AS ABAS)
-        ======================================== */
-        .nav {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            flex-wrap: wrap;
-            margin-top: 25px;
-        }
-
-        .nav-btn, .nav a {
-            background: var(--primary);
+        /* BOTÃO DE VOLTAR (CANTO SUPERIOR ESQUERDO) */
+        .voltar-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: transparent;
             border: none;
-            padding: 15px 25px;
-            border-radius: 50px;
+            font-size: 1.2rem;
+            color: var(--primary);
             cursor: pointer;
-            font-size: 1rem;
+            transition: 0.2s;
+            z-index: 1000;
             font-weight: 600;
-            color: white;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(178, 34, 34, 0.3);
-            text-decoration: none;
-            display: inline-block;
         }
 
-        .nav-btn:hover, .nav a:hover {
-            background: var(--primary-dark);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(178, 34, 34, 0.4);
-            color: white;
-        }
-
-        .nav a.active {
-            background: var(--primary-dark);
+        .voltar-btn:hover {
+            color: #ff7043;
+            transform: translateX(-3px);
         }
 
         .container {
             max-width: 1000px;
             margin: 0 auto;
             padding: 20px;
+            padding-top: 60px; /* Espaço para o botão voltar */
         }
 
-        /* ========================================
-           LAYOUT MODAL EM DUAS COLUNAS
-        ======================================== */
+        /* MODAL CENTRALIZADO COM FUNDO BRANCO AMPLIADO */
         .profile-modal {
             background: white;
             border-radius: 20px;
             padding: 40px;
             box-shadow: 0 8px 30px rgba(0,0,0,0.15);
             margin-bottom: 30px;
+            width: 660px; /* AMPLIADO: de 600px para 660px */
+            max-width: 95%;
+            margin-left: auto;
+            margin-right: auto;
         }
 
+        /* LAYOUT EM DUAS COLUNAS */
         .profile-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -255,15 +223,17 @@
             justify-content: center;
         }
 
-        /* FREQUÊNCIA (STREAK) */
+        /* FREQUÊNCIA COM FUNDO TRANSLÚCIDO E BORDAS DOURADAS */
         .streak-container {
-            background: linear-gradient(135deg, #ff9800 0%, #ff5722 100%);
-            color: white;
+            background: rgba(255, 255, 255, 0.15);
+            border: 1.5px solid gold;
+            border-radius: 10px;
             padding: 20px;
-            border-radius: 15px;
             text-align: center;
+            backdrop-filter: blur(4px);
+            color: #2c2c2c;
             margin-bottom: 25px;
-            box-shadow: 0 4px 15px rgba(255, 152, 0, 0.3);
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
         }
 
         .streak-icon {
@@ -277,19 +247,20 @@
             font-weight: 700;
             display: block;
             margin-bottom: 15px;
+            color: #2c2c2c;
         }
 
         .streak-bar {
             width: 100%;
             height: 12px;
-            background: rgba(255,255,255,0.3);
+            background: rgba(0, 0, 0, 0.1);
             border-radius: 20px;
             overflow: hidden;
         }
 
         .streak-progress {
             height: 12px;
-            background: white;
+            background: linear-gradient(90deg, #ffb703, #fb8500);
             border-radius: 20px;
             transition: width 0.3s ease;
         }
@@ -387,45 +358,18 @@
                 font-size: 1.3rem;
             }
 
-            .nav {
-                gap: 8px;
-            }
-
-            .nav-btn, .nav a {
-                padding: 12px 18px;
-                font-size: 0.9rem;
+            .voltar-btn {
+                font-size: 1rem;
             }
         }
     </style>
 </head>
 <body>
-    <!-- ========================================
-         HEADER COM NAVBAR UNIFICADA
-    ======================================== -->
-    <div class="header">
-        <img src="{% static 'study/img/logoStudyMate.png' %}" height="144px" width="293" alt="StudyMate Logo">
-        <h4>Portal do Estudante - Sua plataforma de estudos</h4>
-        
-        <!-- NAVBAR UNIFICADA (VISÍVEL EM TODAS AS ABAS) -->
-        <div class="nav">
-            <a href="{% url 'study:home' %}">🏠 Home</a>
-            <a href="{% url 'study:home' %}#materias">📚 Matérias</a>
-            <a href="{% url 'study:home' %}#chat">💬 Chat</a>
-            <a href="{% url 'notes:list' %}">📝 Notes</a>
-            <a href="{% url 'study:home' %}#horarios">🕐 Horários</a>
-
-            {% if user.is_authenticated %}
-                <a href="{% url 'perfil:perfil' %}" class="active">👤 Perfil</a>
-            {% else %}
-                <a href="{% url 'accounts:login' %}">🔐 Login</a>
-            {% endif %}
-        </div>
-    </div>
+    <!-- BOTÃO DE VOLTAR (SEM NAVBAR) -->
+    <button class="voltar-btn" onclick="window.history.back()">← Voltar</button>
 
     <div class="container">
-        <!-- ========================================
-             MODAL CENTRALIZADO EM DUAS COLUNAS
-        ======================================== -->
+        <!-- MODAL CENTRALIZADO EM DUAS COLUNAS -->
         <div class="profile-modal">
             <div class="profile-grid">
                 <!-- COLUNA ESQUERDA: Foto + Nome + Logout -->
@@ -472,14 +416,14 @@
 
                 <!-- COLUNA DIREITA: Frequência + Ações -->
                 <div class="profile-right">
-                    <!-- FREQUÊNCIA (STREAK) -->
+                    <!-- FREQUÊNCIA (STREAK) COM NOVO ESTILO -->
                     <div class="streak-container">
                         <span class="streak-icon">🔥</span>
                         <span class="streak-text">{{ streak_count }} dias seguidos</span>
                         <div class="streak-bar">
                             <div class="streak-progress" style="width: {{ streak_progress }}%;"></div>
                         </div>
-                        <small style="display: block; margin-top: 10px; opacity: 0.9;">
+                        <small style="display: block; margin-top: 10px; opacity: 0.8;">
                             Continue fazendo login diariamente!
                         </small>
                     </div>
