@@ -23,29 +23,24 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: var(--background);
             min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
             color: #2c2c2c;
-        }
-
-        /* CONTAINER PRINCIPAL - 70% DA TELA */
-        .perfil-container {
             display: flex;
-            justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            background: var(--background);
+            justify-content: center;
             padding: 20px;
         }
 
-        .perfil-content {
-            background: #ffffff;
-            width: 70%;
+        /* MODAL CENTRALIZADO COM 70% DA TELA */
+        .profile-modal {
+            background: white;
             border-radius: 20px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-            padding: 30px;
+            padding: 50px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+            width: 70%;
+            max-width: 1400px;
+            min-width: 320px;
             animation: fadeInUp 0.4s ease;
+            position: relative;
         }
 
         @keyframes fadeInUp {
@@ -59,34 +54,28 @@
             }
         }
 
-        /* GRID DE 2 COLUNAS */
-        .perfil-grid {
+        /* LAYOUT EM DUAS COLUNAS (FOTO | INFORMAÇÕES) */
+        .profile-header {
             display: grid;
             grid-template-columns: 1fr 1.5fr;
-            gap: 40px;
+            gap: 50px;
+            margin-bottom: 40px;
+            padding-bottom: 40px;
+            border-bottom: 2px solid #e9ecef;
         }
 
-        /* COLUNA ESQUERDA - Foto e Edição */
-        .perfil-left {
+        /* COLUNA ESQUERDA: FOTO + BOTÃO EDITAR FOTO */
+        .profile-photo-section {
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: flex-start;
         }
 
-        .foto-perfil-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .foto-perfil {
-            width: 150px;
-            height: 150px;
+        .profile-avatar {
+            width: 180px;
+            height: 180px;
             border-radius: 50%;
-            border: 3px solid #2196f3;
-            object-fit: cover;
-            margin-bottom: 10px;
-            transition: 0.3s;
             background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
             display: flex;
             align-items: center;
@@ -94,182 +83,264 @@
             color: white;
             font-size: 4rem;
             font-weight: 700;
-        }
-
-        .foto-perfil:hover {
-            transform: scale(1.05);
-        }
-
-        .editar-foto-btn {
-            border: none;
-            background: #2196f3;
-            color: white;
-            padding: 6px 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: 0.2s;
-            font-size: 0.9rem;
+            box-shadow: 0 8px 25px rgba(178, 34, 34, 0.4);
             margin-bottom: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
         }
 
-        .editar-foto-btn:hover {
-            background: #1565c0;
+        .profile-avatar:hover {
+            transform: scale(1.05);
+            box-shadow: 0 12px 35px rgba(178, 34, 34, 0.5);
         }
 
-        /* COLUNA DIREITA - Informações */
-        .perfil-right {
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        .btn-edit-photo {
+            background: #6c757d;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+        }
+
+        .btn-edit-photo:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(108, 117, 125, 0.4);
+        }
+
+        /* COLUNA DIREITA: NOME + E-MAIL */
+        .profile-info-section {
             display: flex;
             flex-direction: column;
             justify-content: center;
         }
 
-        .perfil-info {
-            margin-bottom: 20px;
-        }
-
-        .nome-editavel {
+        .profile-name-row {
             display: flex;
             align-items: center;
-            gap: 10px;
-            font-size: 1.3rem;
-            font-weight: 600;
-            margin-bottom: 10px;
+            gap: 15px;
+            margin-bottom: 15px;
         }
 
-        .nome-editavel input {
+        .profile-name-input {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2c2c2c;
             border: 2px solid transparent;
-            padding: 8px 15px;
-            border-radius: 10px;
+            padding: 10px 20px;
+            border-radius: 12px;
             background: transparent;
             transition: all 0.3s ease;
-            font-size: 1.3rem;
-            font-weight: 600;
+            flex: 1;
         }
 
-        .nome-editavel input:disabled {
+        .profile-name-input:disabled {
             background: transparent;
             cursor: default;
         }
 
-        .nome-editavel input:focus {
+        .profile-name-input:focus {
             outline: none;
             border-color: var(--primary);
             background: #f8f9fa;
         }
 
-        .nome-editavel input:not(:disabled) {
+        .profile-name-input:not(:disabled) {
             background: #f8f9fa;
             border-color: var(--primary);
         }
 
-        .edit-btn {
+        .btn-edit, .btn-save, .btn-cancel {
+            padding: 10px 22px;
+            border: none;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
+
+        .btn-edit {
             background: var(--primary);
             color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            transition: 0.2s;
+            box-shadow: 0 4px 12px rgba(178, 34, 34, 0.3);
         }
 
-        .edit-btn:hover {
+        .btn-edit:hover {
             background: var(--primary-dark);
+            transform: translateY(-2px);
         }
 
-        .email {
-            color: #666;
+        .btn-save {
+            background: #28a745;
+            color: white;
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+        }
+
+        .btn-save:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+
+        .btn-cancel {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-cancel:hover {
+            background: #5a6268;
+        }
+
+        .profile-email {
+            color: #6c757d;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .profile-type-badge {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 25px;
             font-size: 0.95rem;
-            margin-top: 5px;
+            font-weight: 600;
         }
 
-        /* FREQUÊNCIA - NOVO ESTILO */
+        /* FREQUÊNCIA (STREAK) */
         .streak-container {
             background: rgba(255, 255, 255, 0.15);
             border: 1.5px solid gold;
-            border-radius: 10px;
-            padding: 10px;
+            border-radius: 15px;
+            padding: 30px;
             text-align: center;
             backdrop-filter: blur(4px);
-            color: #000;
-            margin: 25px 0;
+            margin-bottom: 40px;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
         }
 
         .streak-icon {
-            font-size: 2rem;
+            font-size: 3.5rem;
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 15px;
         }
 
         .streak-text {
-            font-size: 1.1rem;
+            font-size: 1.5rem;
             font-weight: 700;
             display: block;
-            margin-bottom: 10px;
+            margin-bottom: 20px;
             color: #2c2c2c;
         }
 
         .streak-bar {
             width: 100%;
-            height: 8px;
+            height: 14px;
             background: rgba(0, 0, 0, 0.1);
-            border-radius: 10px;
+            border-radius: 20px;
             overflow: hidden;
         }
 
         .streak-progress {
-            height: 8px;
+            height: 14px;
             background: linear-gradient(90deg, #ffb703, #fb8500);
-            border-radius: 10px;
-            transition: width 0.8s ease-in-out;
+            border-radius: 20px;
+            transition: width 0.3s ease;
         }
 
-        /* AÇÕES/INTERAÇÕES */
-        .perfil-acoes {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            justify-content: space-around;
+        /* SEÇÃO DE INTERAÇÕES (NOTES, LIKES, DOWNLOADS, RECOMENDADOS) */
+        .interactions-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 50px;
         }
 
-        .acao-btn {
-            flex: 1;
-            border: none;
-            border-radius: 8px;
-            background: #f1f1f1;
-            padding: 10px;
-            transition: 0.2s;
+        .interaction-btn {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            padding: 25px 20px;
+            border-radius: 15px;
+            text-align: center;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #2c2c2c;
+            transition: all 0.3s ease;
             cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .interaction-btn:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(178, 34, 34, 0.3);
+        }
+
+        .interaction-btn .emoji {
+            font-size: 2.5rem;
+        }
+
+        .interaction-btn .count {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        .interaction-btn .label {
             font-size: 0.95rem;
-            min-width: 120px;
+            opacity: 0.8;
         }
 
-        .acao-btn:hover {
-            background: #e3f2fd;
-            transform: scale(1.05);
-            box-shadow: 0 2px 6px rgba(0, 123, 255, 0.2);
-        }
-
-        /* RODAPÉ - Voltar e Tutorial */
-        .perfil-footer {
+        /* RODAPÉ INTERNO (VOLTAR + TUTORIAL) */
+        .profile-footer {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 1px solid #e9ecef;
         }
 
-        .voltar-btn {
-            background: none;
+        .btn-back {
+            background: transparent;
             border: none;
-            color: #d32f2f;
-            font-weight: bold;
+            font-size: 1.1rem;
+            color: var(--primary);
             cursor: pointer;
-            font-size: 1rem;
             transition: 0.2s;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        .voltar-btn:hover {
+        .btn-back:hover {
             color: #ff7043;
+            transform: translateX(-5px);
         }
 
         .tutorial-btn {
@@ -283,45 +354,41 @@
             font-size: 1.2rem;
             cursor: pointer;
             transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .tutorial-btn:hover {
             background: #1976d2;
             color: white;
             box-shadow: 0 0 8px rgba(25, 118, 210, 0.5);
+            transform: scale(1.1);
         }
 
-        /* BOTÕES DE AÇÃO (Salvar/Cancelar) */
-        .btn-save, .btn-cancel {
-            padding: 6px 12px;
+        .btn-logout {
+            background: #dc3545;
+            color: white;
+            padding: 12px 30px;
             border: none;
-            border-radius: 8px;
+            border-radius: 50px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            font-size: 0.85rem;
-            margin-left: 5px;
+            font-size: 1rem;
+            box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+            text-decoration: none;
+            display: inline-block;
+            margin-left: auto;
         }
 
-        .btn-save {
-            background: #28a745;
+        .btn-logout:hover {
+            background: #c82333;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
             color: white;
         }
 
-        .btn-save:hover {
-            background: #218838;
-        }
-
-        .btn-cancel {
-            background: #6c757d;
-            color: white;
-        }
-
-        .btn-cancel:hover {
-            background: #5a6268;
-        }
-
-        /* TOAST DE NOTIFICAÇÃO */
         .toast-notification {
             position: fixed;
             top: 20px;
@@ -365,131 +432,201 @@
         }
 
         /* RESPONSIVIDADE */
-        @media (max-width: 800px) {
-            .perfil-content {
-                width: 95%;
+        @media (max-width: 992px) {
+            .profile-modal {
+                width: 85%;
+                padding: 35px;
             }
 
-            .perfil-grid {
+            .profile-header {
                 grid-template-columns: 1fr;
-                text-align: center;
+                gap: 30px;
             }
 
-            .perfil-left {
-                border-right: none;
-                padding-right: 0;
+            .profile-photo-section {
+                border-bottom: 2px solid #e9ecef;
+                padding-bottom: 30px;
             }
 
-            .nome-editavel {
-                justify-content: center;
+            .interactions-section {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 576px) {
+            .profile-modal {
+                width: 95%;
+                padding: 25px;
             }
 
-            .perfil-acoes {
+            .profile-name-input {
+                font-size: 1.5rem;
+            }
+
+            .profile-avatar {
+                width: 140px;
+                height: 140px;
+                font-size: 3rem;
+            }
+
+            .interactions-section {
+                grid-template-columns: 1fr;
+            }
+
+            .profile-name-row {
                 flex-direction: column;
+                align-items: stretch;
             }
 
-            .acao-btn {
+            .btn-edit, .btn-save, .btn-cancel {
                 width: 100%;
             }
         }
     </style>
 </head>
 <body>
-    <div class="perfil-container">
-        <div class="perfil-content">
-            <div class="perfil-grid">
-                <!-- COLUNA ESQUERDA: Foto -->
-                <div class="perfil-left">
-                    <div class="foto-perfil-container">
-                        <div class="foto-perfil" id="fotoPerfil">
-                            {{ user.username|slice:":1"|upper }}
-                        </div>
-                        <button class="editar-foto-btn">📸 Editar Foto</button>
-                        <input type="file" id="fotoInput" accept=".jpg,.png" hidden>
-                    </div>
+    <div class="profile-modal">
+        <!-- HEADER: FOTO + INFORMAÇÕES -->
+        <div class="profile-header">
+            <!-- COLUNA ESQUERDA: FOTO -->
+            <div class="profile-photo-section">
+                <div class="profile-avatar" id="profileAvatar">
+                    {{ user.username|slice:":1"|upper }}
                 </div>
+                <button class="btn-edit-photo" id="btnEditPhoto">
+                    📸 Editar Foto
+                </button>
+                <input type="file" id="photoInput" accept=".jpg,.jpeg,.png" style="display: none;">
+            </div>
 
-                <!-- COLUNA DIREITA: Informações -->
-                <div class="perfil-right">
-                    <div class="perfil-info">
-                        <div class="nome-editavel">
-                            <input type="text" 
-                                   id="nomeUsuario" 
-                                   value="{{ user.username }}" 
-                                   disabled
-                                   maxlength="150">
-                            <button id="editarNome" class="edit-btn">✏️ Editar</button>
-                            <button id="salvarNome" class="btn-save" style="display:none;">💾 Salvar</button>
-                            <button id="cancelarNome" class="btn-cancel" style="display:none;">❌ Cancelar</button>
-                        </div>
-                        <p class="email">📧 {{ user.email }}</p>
-                    </div>
-
-                    <!-- FREQUÊNCIA -->
-                    <div class="streak-container">
-                        <span class="streak-icon">🔥</span>
-                        <span class="streak-text">{{ streak_count }} dias seguidos</span>
-                        <div class="streak-bar">
-                            <div class="streak-progress" style="width: {{ streak_progress }}%;"></div>
-                        </div>
-                    </div>
-
-                    <!-- INTERAÇÕES -->
-                    <div class="perfil-acoes">
-                        <button class="acao-btn">📝 Notes: {{ notes_count }}</button>
-                        <button class="acao-btn">❤️ Likes: {{ likes_count }}</button>
-                        <button class="acao-btn">⬇️ Downloads: {{ downloads_count }}</button>
-                        {% if user.user_type == 'professor' or user.is_staff %}
-                        <button class="acao-btn">⭐ Recomendados: {{ recommended_notes_count }}</button>
+            <!-- COLUNA DIREITA: NOME + E-MAIL -->
+            <div class="profile-info-section">
+                <div class="profile-name-row">
+                    <input type="text" 
+                           id="profile-name" 
+                           class="profile-name-input" 
+                           value="{{ user.username }}" 
+                           disabled
+                           maxlength="150">
+                    
+                    <button id="edit-name" class="btn-edit">✏️ Editar</button>
+                    <button id="save-name" class="btn-save" style="display:none;">💾 Salvar</button>
+                    <button id="cancel-edit" class="btn-cancel" style="display:none;">❌ Cancelar</button>
+                </div>
+                
+                {% if user.email %}
+                <div class="profile-email">
+                    📧 {{ user.email }}
+                </div>
+                {% endif %}
+                
+                <div>
+                    <span class="profile-type-badge">
+                        {% if user.user_type == 'professor' %}
+                            👨‍🏫 Professor
+                        {% elif user.user_type == 'admin' %}
+                            🛡️ Administrador
+                        {% else %}
+                            🎓 Estudante
                         {% endif %}
-                    </div>
+                    </span>
+                </div>
+
+                <div style="margin-top: 20px;">
+                    <a href="{% url 'accounts:logout' %}" class="btn-logout">
+                        🚪 Sair da Conta
+                    </a>
                 </div>
             </div>
+        </div>
 
-            <!-- RODAPÉ: Voltar e Tutorial -->
-            <div class="perfil-footer">
-                <button class="voltar-btn" onclick="window.history.back()">← Voltar</button>
-                <button class="tutorial-btn" title="Tutorial (em breve)">?</button>
+        <!-- FREQUÊNCIA (STREAK) -->
+        <div class="streak-container">
+            <span class="streak-icon">🔥</span>
+            <span class="streak-text">{{ streak_count }} dias seguidos</span>
+            <div class="streak-bar">
+                <div class="streak-progress" style="width: {{ streak_progress }}%;"></div>
             </div>
+            <small style="display: block; margin-top: 15px; opacity: 0.8; font-size: 1rem;">
+                Continue fazendo login diariamente para manter sua sequência!
+            </small>
+        </div>
+
+        <!-- INTERAÇÕES (NOTES, LIKES, DOWNLOADS, RECOMENDADOS) -->
+        <div class="interactions-section">
+            <button class="interaction-btn">
+                <span class="emoji">📝</span>
+                <span class="count">{{ notes_count }}</span>
+                <span class="label">Notes Criados</span>
+            </button>
+            
+            <button class="interaction-btn">
+                <span class="emoji">❤️</span>
+                <span class="count">{{ likes_count }}</span>
+                <span class="label">Curtidas</span>
+            </button>
+            
+            <button class="interaction-btn">
+                <span class="emoji">⬇️</span>
+                <span class="count">{{ downloads_count }}</span>
+                <span class="label">Downloads</span>
+            </button>
+
+            {% if user.user_type == 'professor' or user.is_staff %}
+            <button class="interaction-btn">
+                <span class="emoji">⭐</span>
+                <span class="count">{{ recommended_notes_count }}</span>
+                <span class="label">Recomendados</span>
+            </button>
+            {% endif %}
+        </div>
+
+        <!-- RODAPÉ: VOLTAR + TUTORIAL -->
+        <div class="profile-footer">
+            <button class="btn-back" onclick="window.history.back()">
+                ← Voltar
+            </button>
+
+            <button class="tutorial-btn" onclick="showTutorialPlaceholder()" title="Tutorial (em breve)">
+                ?
+            </button>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        const nomeField = document.getElementById('nomeUsuario');
-        const editBtn = document.getElementById('editarNome');
-        const saveBtn = document.getElementById('salvarNome');
-        const cancelBtn = document.getElementById('cancelarNome');
+        const nameField = document.getElementById('profile-name');
+        const editBtn = document.getElementById('edit-name');
+        const saveBtn = document.getElementById('save-name');
+        const cancelBtn = document.getElementById('cancel-edit');
         const csrftoken = '{{ csrf_token }}';
 
-        // Botão Editar
+        // EDIÇÃO DE NOME
         editBtn.addEventListener('click', () => {
             const confirmChange = confirm("Você só pode alterar seu nome a cada 7 dias. Deseja continuar?");
             if (!confirmChange) return;
 
-            nomeField.disabled = false;
-            nomeField.focus();
-            nomeField.select();
+            nameField.disabled = false;
+            nameField.focus();
+            nameField.select();
             
             editBtn.style.display = 'none';
             saveBtn.style.display = 'inline-block';
             cancelBtn.style.display = 'inline-block';
         });
 
-        // Botão Cancelar
         cancelBtn.addEventListener('click', () => {
-            nomeField.value = nomeField.getAttribute('value');
-            nomeField.disabled = true;
+            nameField.value = nameField.getAttribute('value');
+            nameField.disabled = true;
             
             saveBtn.style.display = 'none';
             cancelBtn.style.display = 'none';
             editBtn.style.display = 'inline-block';
         });
 
-        // Botão Salvar
         saveBtn.addEventListener('click', async () => {
-            const newName = nomeField.value.trim();
-            const oldName = nomeField.getAttribute('value');
+            const newName = nameField.value.trim();
+            const oldName = nameField.getAttribute('value');
             
             if (newName === '') {
                 showToast('O nome não pode ficar em branco.', 'error');
@@ -514,21 +651,21 @@
                 const data = await response.json();
 
                 if (data.success) {
-                    showToast(`Nome alterado com sucesso! De ${data.old_name} para ${data.new_name}.`, 'success');
+                    showToast(`Nome alterado com sucesso!`, 'success');
                     
-                    nomeField.setAttribute('value', newName);
-                    nomeField.disabled = true;
+                    nameField.setAttribute('value', newName);
+                    nameField.disabled = true;
                     
                     saveBtn.style.display = 'none';
                     cancelBtn.style.display = 'none';
                     editBtn.style.display = 'inline-block';
                     
-                    document.getElementById('fotoPerfil').textContent = newName.charAt(0).toUpperCase();
+                    document.querySelector('.profile-avatar').textContent = newName.charAt(0).toUpperCase();
                 } else if (data.wait_days) {
                     showToast(data.message, 'error');
                     
-                    nomeField.value = oldName;
-                    nomeField.disabled = true;
+                    nameField.value = oldName;
+                    nameField.disabled = true;
                     
                     saveBtn.style.display = 'none';
                     cancelBtn.style.display = 'none';
@@ -540,6 +677,38 @@
             }
         });
 
+        // EDIÇÃO DE FOTO (PLACEHOLDER)
+        const btnEditPhoto = document.getElementById('btnEditPhoto');
+        const photoInput = document.getElementById('photoInput');
+
+        btnEditPhoto.addEventListener('click', () => {
+            photoInput.click();
+        });
+
+        photoInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                if (file.size > 2 * 1024 * 1024) {
+                    showToast('A imagem deve ser menor que 2MB.', 'error');
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const avatar = document.getElementById('profileAvatar');
+                    avatar.innerHTML = `<img src="${e.target.result}" alt="Foto de perfil">`;
+                    showToast('Foto atualizada! (Funcionalidade de salvamento será implementada)', 'success');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // BOTÃO TUTORIAL (PLACEHOLDER)
+        function showTutorialPlaceholder() {
+            showToast('Tutorial interativo será implementado em breve! 🎓', 'success');
+        }
+
+        // TOAST DE NOTIFICAÇÃO
         function showToast(message, type = 'success') {
             const toast = document.createElement('div');
             toast.className = `toast-notification ${type === 'error' ? 'error' : ''}`;
