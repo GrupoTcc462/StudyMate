@@ -6,6 +6,7 @@
     <title>Perfil - StudyMate</title>
     {% load static %}
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
     <style>
         :root {
             --primary: rgb(178, 34, 34);
@@ -30,7 +31,6 @@
             padding: 20px;
         }
 
-        /* MODAL CENTRALIZADO COM 70% DA TELA */
         .profile-modal {
             background: white;
             border-radius: 20px;
@@ -44,17 +44,24 @@
         }
 
         @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        /* LAYOUT EM DUAS COLUNAS (FOTO | INFORMAÇÕES) */
+        /* AVISO EDITAR PERFIL - SOBRE O NOME */
+        .edit-hint {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 0.95rem;
+            color: #856404;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
         .profile-header {
             display: grid;
             grid-template-columns: 1fr 1.5fr;
@@ -64,7 +71,6 @@
             border-bottom: 2px solid #e9ecef;
         }
 
-        /* COLUNA ESQUERDA: FOTO + BOTÃO EDITAR FOTO */
         .profile-photo-section {
             display: flex;
             flex-direction: column;
@@ -85,7 +91,6 @@
             font-weight: 700;
             box-shadow: 0 8px 25px rgba(178, 34, 34, 0.4);
             margin-bottom: 20px;
-            cursor: pointer;
             transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
@@ -93,7 +98,6 @@
 
         .profile-avatar:hover {
             transform: scale(1.05);
-            box-shadow: 0 12px 35px rgba(178, 34, 34, 0.5);
         }
 
         .profile-avatar img {
@@ -103,29 +107,6 @@
             border-radius: 50%;
         }
 
-        .btn-edit-photo {
-            background: #6c757d;
-            color: white;
-            padding: 12px 25px;
-            border: none;
-            border-radius: 25px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 0.95rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
-        }
-
-        .btn-edit-photo:hover {
-            background: #5a6268;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 18px rgba(108, 117, 125, 0.4);
-        }
-
-        /* COLUNA DIREITA: NOME + E-MAIL */
         .profile-info-section {
             display: flex;
             flex-direction: column;
@@ -137,37 +118,54 @@
             align-items: center;
             gap: 15px;
             margin-bottom: 15px;
+            flex-wrap: wrap;
         }
 
-        .profile-name-input {
+        .profile-name {
             font-size: 2rem;
             font-weight: 700;
             color: #2c2c2c;
-            border: 2px solid transparent;
-            padding: 10px 20px;
-            border-radius: 12px;
-            background: transparent;
-            transition: all 0.3s ease;
-            flex: 1;
         }
 
-        .profile-name-input:disabled {
-            background: transparent;
-            cursor: default;
+        /* BADGE PROFESSOR/ALUNO - TEXTO AZUL SEM FUNDO */
+        .user-badge {
+            color: #1976d2;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: help;
+            position: relative;
         }
 
-        .profile-name-input:focus {
-            outline: none;
-            border-color: var(--primary);
-            background: #f8f9fa;
+        /* TOOLTIP PURO CSS */
+        .user-badge:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.85);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            white-space: nowrap;
+            font-size: 0.85rem;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
         }
 
-        .profile-name-input:not(:disabled) {
-            background: #f8f9fa;
-            border-color: var(--primary);
+        .user-badge:hover::before {
+            content: '';
+            position: absolute;
+            bottom: 115%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 6px solid transparent;
+            border-top-color: rgba(0,0,0,0.85);
         }
 
-        .btn-edit, .btn-save, .btn-cancel {
+        .btn-edit-profile {
+            background: var(--primary);
+            color: white;
             padding: 10px 22px;
             border: none;
             border-radius: 25px;
@@ -175,60 +173,24 @@
             cursor: pointer;
             transition: all 0.3s ease;
             font-size: 0.9rem;
-            white-space: nowrap;
-        }
-
-        .btn-edit {
-            background: var(--primary);
-            color: white;
             box-shadow: 0 4px 12px rgba(178, 34, 34, 0.3);
         }
 
-        .btn-edit:hover {
+        .btn-edit-profile:hover {
             background: var(--primary-dark);
             transform: translateY(-2px);
-        }
-
-        .btn-save {
-            background: #28a745;
-            color: white;
-            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
-        }
-
-        .btn-save:hover {
-            background: #218838;
-            transform: translateY(-2px);
-        }
-
-        .btn-cancel {
-            background: #6c757d;
-            color: white;
-        }
-
-        .btn-cancel:hover {
-            background: #5a6268;
         }
 
         .profile-email {
             color: #6c757d;
             font-size: 1.1rem;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             display: flex;
             align-items: center;
             gap: 8px;
         }
 
-        .profile-type-badge {
-            display: inline-block;
-            background: var(--primary);
-            color: white;
-            padding: 8px 20px;
-            border-radius: 25px;
-            font-size: 0.95rem;
-            font-weight: 600;
-        }
-
-        /* FREQUÊNCIA (STREAK) */
+        /* STREAK */
         .streak-container {
             background: rgba(255, 255, 255, 0.15);
             border: 1.5px solid gold;
@@ -269,7 +231,7 @@
             transition: width 0.3s ease;
         }
 
-        /* SEÇÃO DE INTERAÇÕES (NOTES, LIKES, DOWNLOADS, RECOMENDADOS) */
+        /* INTERAÇÕES */
         .interactions-section {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -316,7 +278,7 @@
             opacity: 0.8;
         }
 
-        /* RODAPÉ INTERNO (VOLTAR + TUTORIAL) */
+        /* RODAPÉ INTERNO - BOTÕES REPOSICIONADOS */
         .profile-footer {
             display: flex;
             justify-content: space-between;
@@ -325,35 +287,58 @@
             border-top: 1px solid #e9ecef;
         }
 
-        .btn-back {
-            background: transparent;
-            border: none;
-            font-size: 1.1rem;
-            color: var(--primary);
-            cursor: pointer;
-            transition: 0.2s;
+        .action-btn {
+            padding: 12px 25px;
+            border-radius: 25px;
             font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            border: none;
+            cursor: pointer;
+            min-width: 110px;
+            transition: all 0.3s ease;
         }
 
-        .btn-back:hover {
-            color: #ff7043;
+        /* VOLTAR: AZUL */
+        .action-btn--primary {
+            background: transparent;
+            color: #1976d2;
+            border: 2px solid rgba(25,118,210,0.12);
+        }
+
+        .action-btn--primary:hover {
+            background: rgba(25,118,210,0.1);
             transform: translateX(-5px);
         }
 
+        /* SAIR: CINZA SEM EMOJI */
+        .action-btn--secondary {
+            background: #f2f2f2;
+            color: #555;
+            border: 2px solid rgba(0,0,0,0.06);
+        }
+
+        .action-btn--secondary:hover {
+            background: #dc3545;
+            color: white;
+            border-color: #dc3545;
+        }
+
+        .right-footer {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        /* TUTORIAL: CIRCULAR */
         .tutorial-btn {
-            width: 35px;
-            height: 35px;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
-            border: none;
-            background: rgba(25, 118, 210, 0.15);
+            background: rgba(25,118,210,0.12);
             color: #1976d2;
-            font-weight: bold;
-            font-size: 1.2rem;
+            border: none;
+            font-weight: 700;
             cursor: pointer;
-            transition: 0.2s;
+            transition: all 0.3s ease;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -362,33 +347,109 @@
         .tutorial-btn:hover {
             background: #1976d2;
             color: white;
-            box-shadow: 0 0 8px rgba(25, 118, 210, 0.5);
             transform: scale(1.1);
         }
 
-        .btn-logout {
-            background: #dc3545;
-            color: white;
-            padding: 12px 30px;
+        /* MODAL DE EDIÇÃO */
+        .modal-content {
+            border-radius: 15px;
             border: none;
-            border-radius: 50px;
+        }
+
+        .modal-header {
+            background: var(--primary);
+            color: white;
+            border-radius: 15px 15px 0 0;
+        }
+
+        .form-label {
             font-weight: 600;
+            color: #2c2c2c;
+            margin-bottom: 8px;
+        }
+
+        .form-control {
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.2rem rgba(178, 34, 34, 0.1);
+        }
+
+        .field-valid {
+            border-color: #28a745 !important;
+        }
+
+        .field-invalid {
+            border-color: #dc3545 !important;
+        }
+
+        .field-msg {
+            font-size: 0.875rem;
+            margin-top: 5px;
+        }
+
+        .field-msg.valid {
+            color: #28a745;
+        }
+
+        .field-msg.invalid {
+            color: #dc3545;
+        }
+
+        .password-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .password-row input {
+            flex: 1;
+        }
+
+        .toggle-password {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 10px 15px;
             cursor: pointer;
             transition: all 0.3s ease;
-            font-size: 1rem;
-            box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
-            text-decoration: none;
-            display: inline-block;
-            margin-left: auto;
         }
 
-        .btn-logout:hover {
-            background: #c82333;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
-            color: white;
+        .toggle-password:hover {
+            background: #e9ecef;
         }
 
+        .pwd-strength {
+            height: 6px;
+            background: #e9ecef;
+            border-radius: 10px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+
+        .pwd-strength-bar {
+            height: 6px;
+            transition: all 0.3s ease;
+            border-radius: 10px;
+        }
+
+        /* CROPPER */
+        .crop-container {
+            max-width: 100%;
+            max-height: 400px;
+            margin: 20px 0;
+        }
+
+        .crop-container img {
+            max-width: 100%;
+        }
+
+        /* TOAST */
         .toast-notification {
             position: fixed;
             top: 20px;
@@ -401,8 +462,6 @@
             z-index: 9999;
             animation: slideIn 0.3s ease;
             max-width: 400px;
-            font-size: 1rem;
-            color: #2c2c2c;
         }
 
         .toast-notification.error {
@@ -410,25 +469,13 @@
         }
 
         @keyframes slideIn {
-            from {
-                transform: translateX(400px);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
+            from { transform: translateX(400px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
         }
 
         @keyframes slideOut {
-            from {
-                transform: translateX(0);
-                opacity: 1;
-            }
-            to {
-                transform: translateX(400px);
-                opacity: 0;
-            }
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(400px); opacity: 0; }
         }
 
         /* RESPONSIVIDADE */
@@ -447,10 +494,6 @@
                 border-bottom: 2px solid #e9ecef;
                 padding-bottom: 30px;
             }
-
-            .interactions-section {
-                grid-template-columns: repeat(2, 1fr);
-            }
         }
 
         @media (max-width: 576px) {
@@ -459,7 +502,7 @@
                 padding: 25px;
             }
 
-            .profile-name-input {
+            .profile-name {
                 font-size: 1.5rem;
             }
 
@@ -469,16 +512,12 @@
                 font-size: 3rem;
             }
 
-            .interactions-section {
-                grid-template-columns: 1fr;
-            }
-
             .profile-name-row {
                 flex-direction: column;
                 align-items: stretch;
             }
 
-            .btn-edit, .btn-save, .btn-cancel {
+            .btn-edit-profile {
                 width: 100%;
             }
         }
@@ -491,27 +530,33 @@
             <!-- COLUNA ESQUERDA: FOTO -->
             <div class="profile-photo-section">
                 <div class="profile-avatar" id="profileAvatar">
-                    {{ user.username|slice:":1"|upper }}
+                    {% if user.perfil.photo %}
+                        <img src="{{ user.perfil.photo.url }}" alt="Foto de perfil">
+                    {% else %}
+                        {{ user.username|slice:":1"|upper }}
+                    {% endif %}
                 </div>
-                <button class="btn-edit-photo" id="btnEditPhoto">
-                    📸 Editar Foto
-                </button>
-                <input type="file" id="photoInput" accept=".jpg,.jpeg,.png" style="display: none;">
             </div>
 
             <!-- COLUNA DIREITA: NOME + E-MAIL -->
             <div class="profile-info-section">
+                <!-- AVISO EDITAR PERFIL - SOBRE O NOME -->
+                <div class="edit-hint">
+                    ⚠️ Você pode editar seu perfil a cada 7 dias
+                </div>
+
                 <div class="profile-name-row">
-                    <input type="text" 
-                           id="profile-name" 
-                           class="profile-name-input" 
-                           value="{{ user.username }}" 
-                           disabled
-                           maxlength="150">
+                    <span class="profile-name">{{ user.username }}</span>
                     
-                    <button id="edit-name" class="btn-edit">✏️ Editar</button>
-                    <button id="save-name" class="btn-save" style="display:none;">💾 Salvar</button>
-                    <button id="cancel-edit" class="btn-cancel" style="display:none;">❌ Cancelar</button>
+                    <!-- BADGE PROFESSOR/ALUNO COM TOOLTIP -->
+                    <span class="user-badge" 
+                          data-tooltip="{% if user.user_type == 'professor' %}Conta verificada de professor – acesso a recursos exclusivos{% else %}Conta de Aluno – acesso limitado a recursos{% endif %}">
+                        {% if user.user_type == 'professor' %}Professor{% else %}Aluno{% endif %}
+                    </span>
+                    
+                    <button class="btn-edit-profile" data-bs-toggle="modal" data-bs-target="#editarPerfilModal">
+                        Editar Perfil
+                    </button>
                 </div>
                 
                 {% if user.email %}
@@ -519,24 +564,6 @@
                     📧 {{ user.email }}
                 </div>
                 {% endif %}
-                
-                <div>
-                    <span class="profile-type-badge">
-                        {% if user.user_type == 'professor' %}
-                            👨‍🏫 Professor
-                        {% elif user.user_type == 'admin' %}
-                            🛡️ Administrador
-                        {% else %}
-                            🎓 Estudante
-                        {% endif %}
-                    </span>
-                </div>
-
-                <div style="margin-top: 20px;">
-                    <a href="{% url 'accounts:logout' %}" class="btn-logout">
-                        🚪 Sair da Conta
-                    </a>
-                </div>
             </div>
         </div>
 
@@ -552,7 +579,7 @@
             </small>
         </div>
 
-        <!-- INTERAÇÕES (NOTES, LIKES, DOWNLOADS, RECOMENDADOS) -->
+        <!-- INTERAÇÕES -->
         <div class="interactions-section">
             <button class="interaction-btn">
                 <span class="emoji">📝</span>
@@ -581,145 +608,388 @@
             {% endif %}
         </div>
 
-        <!-- RODAPÉ: VOLTAR + TUTORIAL -->
+        <!-- RODAPÉ: VOLTAR + SAIR + TUTORIAL -->
         <div class="profile-footer">
-            <button class="btn-back" onclick="window.history.back()">
+            <button class="action-btn action-btn--primary" onclick="window.history.back()">
                 ← Voltar
             </button>
 
-            <button class="tutorial-btn" onclick="showTutorialPlaceholder()" title="Tutorial (em breve)">
-                ?
-            </button>
+            <div class="right-footer">
+                <form id="logout-form" method="post" action="{% url 'accounts:logout' %}" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="action-btn action-btn--secondary">
+                        Sair
+                    </button>
+                </form>
+
+                <button class="tutorial-btn" onclick="showTutorial()" title="Tutorial (em breve)">
+                    ?
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL EDITAR PERFIL -->
+    <div class="modal fade" id="editarPerfilModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Editar Perfil</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editarPerfilForm" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <!-- NOME -->
+                        <div class="mb-3">
+                            <label for="nome" class="form-label">Nome</label>
+                            <input type="text" id="nome" name="name" class="form-control" 
+                                   value="{{ user.username }}" maxlength="150">
+                            <div id="nome-msg" class="field-msg"></div>
+                        </div>
+
+                        <!-- EMAIL -->
+                        <div class="mb-3">
+                            <label for="email" class="form-label">E-mail</label>
+                            <input type="email" id="email" name="email" class="form-control" 
+                                   value="{{ user.email }}">
+                            <div id="email-msg" class="field-msg"></div>
+                        </div>
+
+                        <!-- SENHA ATUAL -->
+                        <div class="mb-3">
+                            <label for="senha_atual" class="form-label">Senha atual</label>
+                            <input type="password" id="senha_atual" name="current_password" 
+                                   class="form-control" autocomplete="current-password">
+                            <div id="senha-atual-msg" class="field-msg"></div>
+                        </div>
+
+                        <!-- NOVA SENHA -->
+                        <div class="mb-3">
+                            <label for="senha_nova" class="form-label">Nova senha</label>
+                            <div class="password-row">
+                                <input type="password" id="senha_nova" name="new_password" class="form-control">
+                                <button type="button" class="toggle-password" id="toggle-senha-nova">👁️</button>
+                            </div>
+                            <div id="forca-senha" class="pwd-strength">
+                                <div id="forca-senha-bar" class="pwd-strength-bar"></div>
+                            </div>
+                            <small class="text-muted">Mínimo 8 caracteres</small>
+                        </div>
+
+                        <!-- CONFIRMAR SENHA -->
+                        <div class="mb-3">
+                            <label for="senha_confirma" class="form-label">Confirmar nova senha</label>
+                            <input type="password" id="senha_confirma" name="new_password_confirm" class="form-control">
+                            <div id="confirma-msg" class="field-msg"></div>
+                        </div>
+
+                        <!-- FOTO -->
+                        <div class="mb-3">
+                            <label class="form-label">Foto de perfil</label>
+                            <input type="file" id="fotoInput" class="form-control" accept=".jpg,.jpeg,.png">
+                            <small class="text-muted">Máximo 2MB (JPG, JPEG ou PNG)</small>
+                            
+                            <!-- CONTAINER DO CROPPER -->
+                            <div id="crop-container" class="crop-container" style="display:none;">
+                                <img id="cropper-image" src="">
+                            </div>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-primary" id="save-edit" 
+                                    style="background: var(--primary); border: none;">Salvar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
     <script>
-        const nameField = document.getElementById('profile-name');
-        const editBtn = document.getElementById('edit-name');
-        const saveBtn = document.getElementById('save-name');
-        const cancelBtn = document.getElementById('cancel-edit');
         const csrftoken = '{{ csrf_token }}';
+        let cropper = null;
 
-        // EDIÇÃO DE NOME
-        editBtn.addEventListener('click', () => {
-            const confirmChange = confirm("Você só pode alterar seu nome a cada 7 dias. Deseja continuar?");
-            if (!confirmChange) return;
+        // ========================================
+        // VALIDAÇÃO DE NOME (APENAS LETRAS E ESPAÇOS)
+        // ========================================
+        const nameInput = document.getElementById('nome');
+        const nameRegex = /^[A-Za-zÀ-ÿÇç\s]+$/;
 
-            nameField.disabled = false;
-            nameField.focus();
-            nameField.select();
-            
-            editBtn.style.display = 'none';
-            saveBtn.style.display = 'inline-block';
-            cancelBtn.style.display = 'inline-block';
+        nameInput.addEventListener('keypress', e => {
+            if (!nameRegex.test(e.key)) {
+                e.preventDefault();
+                showFieldMsg('nome', 'Apenas letras e espaços são permitidos.', 'invalid');
+            }
         });
 
-        cancelBtn.addEventListener('click', () => {
-            nameField.value = nameField.getAttribute('value');
-            nameField.disabled = true;
-            
-            saveBtn.style.display = 'none';
-            cancelBtn.style.display = 'none';
-            editBtn.style.display = 'inline-block';
+        nameInput.addEventListener('paste', e => e.preventDefault());
+
+        // ========================================
+        // VALIDAÇÃO DE E-MAIL
+        // ========================================
+        const emailInput = document.getElementById('email');
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        emailInput.addEventListener('input', e => {
+            const val = e.target.value.trim();
+            if (val && !emailRegex.test(val)) {
+                showFieldMsg('email', 'Formato de e-mail inválido.', 'invalid');
+                emailInput.classList.add('field-invalid');
+            } else {
+                clearFieldMsg('email');
+                emailInput.classList.remove('field-invalid');
+            }
         });
 
-        saveBtn.addEventListener('click', async () => {
-            const newName = nameField.value.trim();
-            const oldName = nameField.getAttribute('value');
-            
-            if (newName === '') {
-                showToast('O nome não pode ficar em branco.', 'error');
+        // ========================================
+        // VERIFICAÇÃO DE SENHA ATUAL EM TEMPO REAL
+        // ========================================
+        const curPwd = document.getElementById('senha_atual');
+        let pwdTimer;
+
+        curPwd.addEventListener('input', () => {
+            clearTimeout(pwdTimer);
+            pwdTimer = setTimeout(async () => {
+                if (curPwd.value.length < 3) return;
+
+                try {
+                    const response = await fetch('/perfil/check_password/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': csrftoken
+                        },
+                        body: JSON.stringify({ password: curPwd.value })
+                    });
+
+                    const data = await response.json();
+
+                    if (data.ok) {
+                        showFieldMsg('senha_atual', 'Senha atual confirmada.', 'valid');
+                        curPwd.classList.remove('field-invalid');
+                        curPwd.classList.add('field-valid');
+                    } else {
+                        showFieldMsg('senha_atual', 'Senha atual incorreta.', 'invalid');
+                        curPwd.classList.remove('field-valid');
+                        curPwd.classList.add('field-invalid');
+                    }
+                } catch (error) {
+                    console.error('Erro ao verificar senha:', error);
+                }
+            }, 400);
+        });
+
+        // ========================================
+        // NOVA SENHA - FORÇA E TOGGLE VISIBILIDADE
+        // ========================================
+        const newPwd = document.getElementById('senha_nova');
+        const toggleNewPwd = document.getElementById('toggle-senha-nova');
+        const forcaSenhaBar = document.getElementById('forca-senha-bar');
+
+        toggleNewPwd.addEventListener('click', () => {
+            const type = newPwd.type === 'password' ? 'text' : 'password';
+            newPwd.type = type;
+            toggleNewPwd.textContent = type === 'password' ? '👁️' : '🙈';
+        });
+
+        newPwd.addEventListener('input', () => {
+            const s = newPwd.value;
+            let score = 0;
+
+            if (s.length >= 8) score += 25;
+            if (/[a-z]/.test(s)) score += 25;
+            if (/[A-Z]/.test(s)) score += 25;
+            if (/[0-9]/.test(s)) score += 25;
+
+            forcaSenhaBar.style.width = score + '%';
+
+            if (score < 50) {
+                forcaSenhaBar.style.background = '#dc3545';
+            } else if (score < 75) {
+                forcaSenhaBar.style.background = '#ffc107';
+            } else {
+                forcaSenhaBar.style.background = '#28a745';
+            }
+        });
+
+        // ========================================
+        // CONFIRMAR SENHA
+        // ========================================
+        const confirmPwd = document.getElementById('senha_confirma');
+
+        function checkConfirm() {
+            if (!confirmPwd.value) return;
+
+            if (newPwd.value !== confirmPwd.value) {
+                showFieldMsg('senha_confirma', 'A senha tem que ser igual a nova senha.', 'invalid');
+                confirmPwd.classList.add('field-invalid');
+                confirmPwd.classList.remove('field-valid');
+            } else {
+                showFieldMsg('senha_confirma', 'Senhas conferem.', 'valid');
+                confirmPwd.classList.remove('field-invalid');
+                confirmPwd.classList.add('field-valid');
+            }
+        }
+
+        newPwd.addEventListener('input', checkConfirm);
+        confirmPwd.addEventListener('input', checkConfirm);
+
+        // ========================================
+        // CROPPER DE FOTO
+        // ========================================
+        const fotoInput = document.getElementById('fotoInput');
+        const cropContainer = document.getElementById('crop-container');
+        const cropperImage = document.getElementById('cropper-image');
+
+        fotoInput.addEventListener('change', e => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            if (file.size > 2 * 1024 * 1024) {
+                showToast('Foto muito grande. Máximo 2MB.', 'error');
                 return;
             }
 
-            if (newName === oldName) {
-                showToast('Nenhuma alteração foi feita.', 'error');
-                return;
-            }
+            const url = URL.createObjectURL(file);
+            cropperImage.src = url;
+            cropContainer.style.display = 'block';
+
+            if (cropper) cropper.destroy();
+
+            cropper = new Cropper(cropperImage, {
+                aspectRatio: 1,
+                viewMode: 1,
+                background: false,
+                modal: true,
+                guides: false,
+                autoCropArea: 1
+            });
+        });
+
+        // ========================================
+        // SUBMIT DO FORMULÁRIO
+        // ========================================
+        const editarPerfilForm = document.getElementById('editarPerfilForm');
+
+        editarPerfilForm.addEventListener('submit', async e => {
+            e.preventDefault();
+
+            const saveBtn = document.getElementById('save-edit');
+            saveBtn.disabled = true;
+            saveBtn.textContent = 'Salvando...';
 
             try {
-                const response = await fetch("{% url 'perfil:editar_nome' %}", {
+                const formData = new FormData();
+
+                // Adicionar campos do formulário
+                formData.append('name', nameInput.value);
+                formData.append('email', emailInput.value);
+                formData.append('current_password', curPwd.value);
+                formData.append('new_password', newPwd.value);
+                formData.append('new_password_confirm', confirmPwd.value);
+
+                // Adicionar foto recortada (se houver)
+                if (cropper) {
+                    const canvas = cropper.getCroppedCanvas({
+                        width: 400,
+                        height: 400,
+                        imageSmoothingQuality: 'high'
+                    });
+
+                    await new Promise(resolve => {
+                        canvas.toBlob(blob => {
+                            formData.append('photo', blob, 'avatar.png');
+                            resolve();
+                        }, 'image/png');
+                    });
+                }
+
+                // Enviar para o servidor
+                const response = await fetch('/perfil/editar/', {
                     method: 'POST',
                     headers: {
-                        'X-CSRFToken': csrftoken,
-                        'Content-Type': 'application/json'
+                        'X-CSRFToken': csrftoken
                     },
-                    body: JSON.stringify({ name: newName })
+                    body: formData
                 });
 
                 const data = await response.json();
 
                 if (data.success) {
-                    showToast(`Nome alterado com sucesso!`, 'success');
-                    
-                    nameField.setAttribute('value', newName);
-                    nameField.disabled = true;
-                    
-                    saveBtn.style.display = 'none';
-                    cancelBtn.style.display = 'none';
-                    editBtn.style.display = 'inline-block';
-                    
-                    document.querySelector('.profile-avatar').textContent = newName.charAt(0).toUpperCase();
-                } else if (data.wait_days) {
-                    showToast(data.message, 'error');
-                    
-                    nameField.value = oldName;
-                    nameField.disabled = true;
-                    
-                    saveBtn.style.display = 'none';
-                    cancelBtn.style.display = 'none';
-                    editBtn.style.display = 'inline-block';
+                    showToast('Perfil atualizado com sucesso!', 'success');
+
+                    // Atualizar foto na página
+                    if (data.new_photo_url) {
+                        document.getElementById('profileAvatar').innerHTML = 
+                            `<img src="${data.new_photo_url}" alt="Foto de perfil">`;
+                    }
+
+                    // Fechar modal
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('editarPerfilModal'));
+                    modal.hide();
+
+                    // Recarregar página após 1.5s
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    showToast(data.error, 'error');
+                    saveBtn.disabled = false;
+                    saveBtn.textContent = 'Salvar';
                 }
             } catch (error) {
                 console.error('Erro:', error);
-                showToast('Erro ao alterar nome. Tente novamente.', 'error');
+                showToast('Erro ao atualizar perfil. Tente novamente.', 'error');
+                saveBtn.disabled = false;
+                saveBtn.textContent = 'Salvar';
             }
         });
 
-        // EDIÇÃO DE FOTO (PLACEHOLDER)
-        const btnEditPhoto = document.getElementById('btnEditPhoto');
-        const photoInput = document.getElementById('photoInput');
-
-        btnEditPhoto.addEventListener('click', () => {
-            photoInput.click();
-        });
-
-        photoInput.addEventListener('change', function() {
-            const file = this.files[0];
-            if (file) {
-                if (file.size > 2 * 1024 * 1024) {
-                    showToast('A imagem deve ser menor que 2MB.', 'error');
-                    return;
-                }
-
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const avatar = document.getElementById('profileAvatar');
-                    avatar.innerHTML = `<img src="${e.target.result}" alt="Foto de perfil">`;
-                    showToast('Foto atualizada! (Funcionalidade de salvamento será implementada)', 'success');
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-
-        // BOTÃO TUTORIAL (PLACEHOLDER)
-        function showTutorialPlaceholder() {
-            showToast('Tutorial interativo será implementado em breve! 🎓', 'success');
+        // ========================================
+        // FUNÇÕES AUXILIARES
+        // ========================================
+        function showFieldMsg(fieldId, message, type) {
+            const msgEl = document.getElementById(`${fieldId}-msg`);
+            msgEl.textContent = message;
+            msgEl.className = `field-msg ${type}`;
         }
 
-        // TOAST DE NOTIFICAÇÃO
+        function clearFieldMsg(fieldId) {
+            const msgEl = document.getElementById(`${fieldId}-msg`);
+            msgEl.textContent = '';
+            msgEl.className = 'field-msg';
+        }
+
         function showToast(message, type = 'success') {
             const toast = document.createElement('div');
             toast.className = `toast-notification ${type === 'error' ? 'error' : ''}`;
             toast.textContent = message;
             document.body.appendChild(toast);
-            
+
             setTimeout(() => {
                 toast.style.animation = 'slideOut 0.3s ease';
                 setTimeout(() => toast.remove(), 300);
             }, 4000);
         }
+
+        function showTutorial() {
+            showToast('Tutorial interativo será implementado em breve! 🎓', 'success');
+        }
+
+        // ========================================
+        // LIMPAR CROPPER AO FECHAR MODAL
+        // ========================================
+        document.getElementById('editarPerfilModal').addEventListener('hidden.bs.modal', () => {
+            if (cropper) {
+                cropper.destroy();
+                cropper = null;
+            }
+            cropContainer.style.display = 'none';
+            fotoInput.value = '';
+        });
     </script>
 </body>
 </html>
