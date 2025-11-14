@@ -2,106 +2,276 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Cadastro - StudyMate</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #2B2D42;
-            color: #EDF2F4;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-        .form-container {
-            background-color: #8D99AE;
-            padding: 30px;
-            border-radius: 10px;
-            width: 350px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.3);
-        }
-        h2 {
-            text-align: center;
-            margin-bottom: 20px;
-            color: #2B2D42;
-        }
-        label {
-            display: block;
-            margin-top: 10px;
-            color: #2B2D42;
-        }
-        input, select {
-            width: 100%;
-            padding: 8px;
-            border: none;
-            border-radius: 5px;
-            margin-top: 5px;
-        }
-        button {
-            background-color: #178222;
-            color: white;
-            border: none;
-            width: 100%;
-            padding: 10px;
-            border-radius: 5px;
-            margin-top: 15px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #14691b;
-        }
-        .messages {
-            background: #EDF2F4;
-            color: #2B2D42;
-            padding: 10px;
-            border-radius: 5px;
-            margin-bottom: 10px;
-            text-align: center;
-        }
-        a {
-            color: #2B2D42;
-            text-decoration: none;
-            display: block;
-            text-align: center;
-            margin-top: 10px;
-        }
-    </style>
+    <title>Cadastro</title>
+    {% load static %}
 </head>
+
+<style> 
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: rgb(43, 45, 66);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .header {
+        background: rgb(178, 34, 34);
+        color: white;
+        padding: 20px 0;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    }
+
+    .header-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+        text-align: center;
+    }
+
+    .header h1 {
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+        font-weight: 700;
+        letter-spacing: 2px;
+    }
+
+    .header .subtitle {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        font-weight: 300;
+    }
+
+    .school-info {
+        background: #ffffff;
+        border-left: 5px solid #003366;
+        padding: 15px;
+        margin: 20px auto;
+        max-width: 800px;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .school-info h2 {
+        color: #003366;
+        font-size: 1.3rem;
+        margin-bottom: 5px;
+    }
+
+    .school-info p {
+        color: #555;
+        font-size: 1rem;
+        margin-bottom: 3px;
+    }
+
+    .main-content {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 20px;
+    }
+
+    .register-container {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+        padding: 40px;
+        width: 100%;
+        max-width: 450px;
+        border-top: 5px solid #003366;
+    }
+
+    .register-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .register-header h3 {
+        color: #003366;
+        font-size: 2rem;
+        margin-bottom: 10px;
+    }
+
+    .register-header p {
+        color: #666;
+        font-size: 1rem;
+    }
+
+    .form-group {
+        margin-bottom: 25px;
+    }
+
+    .form-group label {
+        display: block;
+        color: #003366;
+        font-weight: 600;
+        margin-bottom: 8px;
+        font-size: 1rem;
+    }
+
+    .form-group input,
+    .form-group select {
+        width: 100%;
+        padding: 15px;
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: #f9f9f9;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+        outline: none;
+        border-color: #003366;
+        background: white;
+        box-shadow: 0 0 10px rgba(0,51,102,0.1);
+    }
+
+    .form-group select {
+        cursor: pointer;
+    }
+
+    .btn-register {
+        width: 100%;
+        background: rgb(178, 34, 34);
+        color: white;
+        padding: 15px;
+        border: none;
+        border-radius: 8px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-bottom: 20px;
+    }
+
+    .btn-register:hover {
+        background: rgb(220, 43, 43);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,51,102,0.3);
+    }
+
+
+    .footer {
+        background: rgb(178, 34, 34);
+        color: white;
+        text-align: center;
+        padding: 20px;
+        margin-top: auto;
+    }
+
+    .messages {
+        background: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeeba;
+        padding: 12px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    a {
+        color: #2B2D42;
+        text-decoration: none;
+        display: block;
+        text-align: center;
+        margin-top: 10px;
+        transition: color 0.3s ease;
+    }
+
+    a:hover {
+        color: #003366;
+    }
+
+    @media (max-width: 768px) {
+        .header h1 {
+            font-size: 2rem;
+        }
+        
+        .register-container {
+            padding: 30px 20px;
+        }
+        
+        .team-members {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
 <body>
-    <div class="form-container">
-        <h2>Cadastro de Usuário</h2>
 
-        {% if messages %}
-            <div class="messages">
-                {% for message in messages %}
-                    <p>{{ message }}</p>
-                {% endfor %}
-            </div>
-        {% endif %}
+    <header class="header">
+        <div class="header-content">
+            <img src="{% static 'accounts/img/logoMate.png' %}" height="87,75px" width="164,5px">
+            <p class="subtitle">SEMPRE COM VOCÊ</p>
+        </div>
+    </header>
 
-        <form method="POST">
-            {% csrf_token %}
-            <label for="username">Nome de Usuário:</label>
-            <input type="text" name="username" id="username" required>
-
-            <label for="password1">Senha:</label>
-            <input type="password" name="password1" id="password1" required>
-
-            <label for="password2">Confirmar Senha:</label>
-            <input type="password" name="password2" id="password2" required>
-
-            <label for="user_type">Tipo de Usuário:</label>
-            <select name="user_type" id="user_type" required>
-                <option value="">Selecione...</option>
-                <option value="student">Estudante</option>
-                <option value="teacher">Professor</option>
-                <option value="admin">Administrador</option>
-            </select>
-
-            <button type="submit">Registrar</button>
-        </form>
-
-        <a href="{% url 'accounts:login' %}">Já tem uma conta? Faça login</a>
+    <div class="school-info">
+        <h2>CENTRO PAULA SOUZA</h2>
+        <p><strong>ETEC JOÃO MARIA STEVANATTO</strong></p>
     </div>
+
+    <main class="main-content">
+        <div class="register-container">
+            {% if messages %}
+                <div class="messages">
+                    {% for message in messages %}
+                        <p>{{ message }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <form method="POST">
+                {% csrf_token %}
+
+                <div class="register-header">
+                    <h3>Cadastro</h3>
+                    <p>Crie sua conta na plataforma</p>
+                </div>
+
+                <div class="form-group">
+                    <label for="username">Nome de Usuário:</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password1">Senha:</label>
+                    <input type="password" id="password1" name="password1" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password2">Confirmar Senha:</label>
+                    <input type="password" id="password2" name="password2" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="user_type">Tipo de Usuário:</label>
+                    <select name="user_type" id="user_type" required>
+                        <option value="">Selecione...</option>
+                        <option value="student">Estudante</option>
+                        <option value="teacher">Professor</option>
+                        <option value="admin">Administrador</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn-register">Registrar</button>
+                <a href="{% url 'accounts:login' %}">Já tem uma conta? Faça login</a>
+            </form> 
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2025 Centro Paula Souza - ETEC João Maria Stevanatto - Itapira/SP</p>
+    </footer>
+
 </body>
 </html>
