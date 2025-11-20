@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro - StudyMate</title>
+    {% load static %}
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: rgb(43, 45, 66);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: rgb(178, 34, 34);
+            color: white;
+            padding: 20px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+            letter-spacing: 2px;
+        }
+
+        .header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+
+        .school-info {
+            background: #ffffff;
+            border-left: 5px solid #003366;
+            padding: 15px;
+            margin: 20px auto;
+            max-width: 800px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .school-info h2 {
+            color: #003366;
+            font-size: 1.3rem;
+            margin-bottom: 5px;
+        }
+
+        .school-info p {
+            color: #555;
+            font-size: 1rem;
+            margin-bottom: 3px;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        .register-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+            padding: 40px;
+            width: 100%;
+            max-width: 500px;
+            border-top: 5px solid #003366;
+        }
+
+        .register-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .register-header h3 {
+            color: #003366;
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .register-header p {
+            color: #666;
+            font-size: 1rem;
+        }
+
+        /* ETAPAS OCULTAS */
+        .step {
+            display: none;
+        }
+
+        .step.active {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* PROGRESSO */
+        .progress-bar {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .progress-bar::before {
+            content: '';
+            position: absolute;
+            top: 15px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: #e9ecef;
+            z-index: 0;
+        }
+
+        .progress-step {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: #6c757d;
+            position: relative;
+            z-index: 1;
+            transition: all 0.3s ease;
+        }
+
+        .progress-step.active {
+            background: #003366;
+            color: white;
+        }
+
+        .progress-step.completed {
+            background: #28a745;
+            color: white;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #003366;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 1rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: #f9f9f9;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #003366;
+            background: white;
+            box-shadow: 0 0 10px rgba(0,51,102,0.1);
+        }
+
+        .form-group input.error {
+            border-color: #dc3545;
+        }
+
+        .form-group input.success {
+            border-color: #28a745;
+        }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 0.875rem;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .success-message {
+            color: #28a745;
+            font-size: 0.875rem;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        /* CÓDIGO DE VERIFICAÇÃO */
+        .code-input-container {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin: 25px 0;
+        }
+
+        .code-digit {
+            width: 50px;
+            height: 60px;
+            text-align: center;
+            font-size: 1.8rem;
+            font-weight: 700;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .code-digit:focus {
+            border-color: #003366;
+            box-shadow: 0 0 10px rgba(0,51,102,0.2);
+        }
+
+        /* SENHA COM TOGGLE */
+        .password-wrapper {
+            position: relative;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.3rem;
+        }
+
+        /* FORÇA DA SENHA */
+        .password-strength {
+            height: 6px;
+            background: #e9ecef;
+            border-radius: 10px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+
+        .password-strength-bar {
+            height: 6px;
+            transition: all 0.3s ease;
+            border-radius: 10px;
+        }
+
+        .password-requirements {
+            font-size: 0.85rem;
+            color: #6c757d;
+            margin-top: 8px;
+        }
+
+        .requirement {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin: 3px 0;
+        }
+
+        .requirement.met {
+            color: #28a745;
+        }
+
+        .btn-primary {
+            width: 100%;
+            background: rgb(178, 34, 34);
+            color: white;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 15px;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: rgb(220, 43, 43);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,51,102,0.3);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            width: 100%;
+            background: #6c757d;
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .text-muted {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        a {
+            color: #2B2D42;
+            text-decoration: none;
+            display: block;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .footer {
+            background: rgb(178, 34, 34);
+            color: white;
+            text-align: center;
+            padding: 20px;
+            margin-top: auto;
+        }
+
+        /* LOADER */
+        .spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .spinner.show {
+            display: block;
+        }
+
+        /* SHAKE ANIMATION */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .shake {
+            animation: shake 0.4s ease;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .register-container {
+                padding: 30px 20px;
+            }
+
+            .code-digit {
+                width: 40px;
+                height: 50px;
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="header-content">
+            <img src="{% static 'accounts/img/logoMate.png' %}" height="87,75px" width="164,5px">
+            <p class="subtitle">SEMPRE COM VOCÊ</p>
+        </div>
+    </header>
+
+    <div class="school-info">
+        <h2>CENTRO PAULA SOUZA</h2>
+        <p><strong>ETEC JOÃO MARIA STEVANATTO</strong></p>
+    </div>
+
+    <main class="main-content">
+        <div class="register-container">
+            <div class="register-header">
+                <h3>Cadastro</h3>
+                <p>Crie sua conta em 3 etapas simples</p>
+            </div>
+
+            <!-- BARRA DE PROGRESSO -->
+            <div class="progress-bar">
+                <div class="progress-step active" id="progress-1">1</div>
+                <div class="progress-step" id="progress-2">2</div>
+                <div class="progress-step" id="progress-3">3</div>
+            </div>
+
+            <!-- ========================================
+                 ETAPA 1: E-MAIL INSTITUCIONAL
+            ======================================== -->
+            <div class="step active" id="step-email">
+                <div class="form-group">
+                    <label for="email">E-mail Institucional *</label>
+                    <input type="email" id="email" name="email" 
+                           placeholder="seu.nome@etec.sp.gov.br" required>
+                    <div class="error-message" id="email-error"></div>
+                    <div class="success-message" id="email-success"></div>
+                </div>
+
+                <button type="button" class="btn-primary" id="btn-send-code" onclick="sendVerificationCode()">
+                    <span id="btn-send-text">Enviar Código</span>
+                    <div class="spinner" id="btn-send-spinner"></div>
+                </button>
+
+                <a href="{% url 'accounts:login' %}">Já tem uma conta? Faça login</a>
+            </div>
+
+            <!-- ========================================
+                 ETAPA 2: CÓDIGO DE VERIFICAÇÃO
+            ======================================== -->
+            <div class="step" id="step-code">
+                <div class="text-center" style="margin-bottom: 20px;">
+                    <p class="text-muted">Enviamos um código de 6 dígitos para:</p>
+                    <strong id="display-email"></strong>
+                </div>
+
+                <div class="code-input-container">
+                    <input type="text" class="code-digit" maxlength="1" id="digit1" oninput="moveToNext(this, 'digit2')" onkeydown="moveToPrev(event, this, null)">
+                    <input type="text" class="code-digit" maxlength="1" id="digit2" oninput="moveToNext(this, 'digit3')" onkeydown="moveToPrev(event, this, 'digit1')">
+                    <input type="text" class="code-digit" maxlength="1" id="digit3" oninput="moveToNext(this, 'digit4')" onkeydown="moveToPrev(event, this, 'digit2')">
+                    <input type="text" class="code-digit" maxlength="1" id="digit4" oninput="moveToNext(this, 'digit5')" onkeydown="moveToPrev(event, this, 'digit3')">
+                    <input type="text" class="code-digit" maxlength="1" id="digit5" oninput="moveToNext(this, 'digit6')" onkeydown="moveToPrev(event, this, 'digit4')">
+                    <input type="text" class="code-digit" maxlength="1" id="digit6" oninput="validateCode()" onkeydown="moveToPrev(event, this, 'digit5')">
+                </div>
+
+                <div class="error-message" id="code-error"></div>
+                <div class="success-message" id="code-success"></div>
+
+                <button type="button" class="btn-primary" id="btn-verify-code" onclick="verifyCode()" disabled>
+                    <span id="btn-verify-text">Verificar Código</span>
+                    <div class="spinner" id="btn-verify-spinner"></div>
+                </button>
+
+                <button type="button" class="btn-secondary" onclick="resendCode()">
+                    Reenviar Código
+                </button>
+
+                <p class="text-center text-muted" style="margin-top: 15px;">
+                    Código expira em: <strong id="timer">30:00</strong>
+                </p>
+            </div>
+
+            <!-- ========================================
+                 ETAPA 3: CRIAÇÃO DE SENHA
+            ======================================== -->
+            <div class="step" id="step-password">
+                <div class="form-group">
+                    <label for="password">Senha *</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="password" name="password" placeholder="Crie uma senha forte">
+                        <button type="button" class="password-toggle" onclick="togglePassword('password', this)">👁️</button>
+                    </div>
+                    <div class="password-strength">
+                        <div class="password-strength-bar" id="strength-bar"></div>
+                    </div>
+                    <div class="password-requirements">
+                        <div class="requirement" id="req-length">
+                            <span>○</span> Mínimo 8 caracteres
+                        </div>
+                        <div class="requirement" id="req-upper">
+                            <span>○</span> Uma letra maiúscula
+                        </div>
+                        <div class="requirement" id="req-lower">
+                            <span>○</span> Uma letra minúscula
+                        </div>
+                        <div class="requirement" id="req-number">
+                            <span>○</span> Um número
+                        </div>
+                        <div class="requirement" id="req-special">
+                            <span>○</span> Um caractere especial (@$!%*#?&)
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password_confirm">Confirmar Senha *</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="password_confirm" name="password_confirm" placeholder="Digite a senha novamente">
+                        <button type="button" class="password-toggle" onclick="togglePassword('password_confirm', this)">👁️</button>
+                    </div>
+                    <div class="error-message" id="confirm-error"></div>
+                    <div class="success-message" id="confirm-success"></div>
+                </div>
+
+                <button type="button" class="btn-primary" id="btn-create-account" onclick="createAccount()" disabled>
+                    <span id="btn-create-text">Criar Conta</span>
+                    <div class="spinner" id="btn-create-spinner"></div>
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2025 Centro Paula Souza - ETEC João Maria Stevanatto - Itapira/SP</p>
+    </footer>
+
+    <script>
+        const csrfToken = '{{ csrf_token }}';
+        let currentStep = 1;
+        let userEmail = '';
+        let userType = '';
+        let timerInterval = null;
+        let expirationTime = null;
+
+        // ========================================
+        // NAVEGAÇÃO ENTRE ETAPAS
+        // ========================================
+        function showStep(stepNumber) {
+            document.querySelectorAll('.step').forEach(step => step.classList.remove('active'));
+            document.getElementById(`step-${['email', 'code', 'password'][stepNumber - 1]}`).classList.add('active');
+            
+            // Atualizar barra de progresso
+            for (let i = 1; i <= 3; i++) {
+                const progressStep = document.getElementById(`progress-${i}`);
+                progressStep.classList.remove('active', 'completed');
+                
+                if (i < stepNumber) {
+                    progressStep.classList.add('completed');
+                } else if (i === stepNumber) {
+                    progressStep.classList.add('active');
+                }
+            }
+            
+            currentStep = stepNumber;
+            
+            // Salvar etapa na sessão
+            sessionStorage.setItem('cadastro_etapa', stepNumber);
+        }
+
+        // ========================================
+        // ETAPA 1: VALIDAÇÃO E ENVIO DE E-MAIL
+        // ========================================
+        async function sendVerificationCode() {
+            const emailInput = document.getElementById('email');
+            const email = emailInput.value.trim().toLowerCase();
+            const emailError = document.getElementById('email-error');
+            const emailSuccess = document.getElementById('email-success');
+            const btnSend = document.getElementById('btn-send-code');
+            const btnText = document.getElementById('btn-send-text');
+            const btnSpinner = document.getElementById('btn-send-spinner');
+
+            // Validar formato de e-mail institucional
+            const emailRegex = /^[a-z0-9._%+-]+@etec\.sp\.gov\.br$/;
+            
+            if (!emailRegex.test(email)) {
+                showError(emailInput, emailError, 'Use um e-mail institucional válido (@etec.sp.gov.br).');
+                return;
+            }
+
+            // Detectar tipo de usuário
+            const localPart = email.split('@')[0];
+            const hasNumbers = /\d/.test(localPart);
+            userType = hasNumbers ? 'aluno' : 'professor';
+
+            // Desabilitar botão e mostrar loading
+            btnSend.disabled = true;
+            btnText.style.display = 'none';
+            btnSpinner.classList.add('show');
+
+            try {
+                const response = await fetch('/accounts/send-verification-code/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: JSON.stringify({ email, user_type: userType })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    userEmail = email;
+                    showSuccess(emailInput, emailSuccess, `✔ E-mail válido. Identificado como ${userType}.`);
+                    
+                    // Exibir e-mail na próxima etapa
+                    document.getElementById('display-email').textContent = email;
+                    
+                    // Iniciar timer de expiração
+                    startExpirationTimer(data.expires_at);
+                    
+                    // Avançar para etapa 2
+                    setTimeout(() => {
+                        showStep(2);
+                        document.getElementById('digit1').focus();
+                    }, 1000);
+                } else {
+                    showError(emailInput, emailError, data.error || 'Este e-mail já está registrado.');
+                }
+            } catch (error) {
+                showError(emailInput, emailError, 'Erro ao enviar código. Tente novamente.');
+            } finally {
+                btnSend.disabled = false;
+                btnText.style.display = 'inline';
+                btnSpinner.classList.remove('show');
+            }
+        }
+
+        // ========================================
+        // ETAPA 2: CÓDIGO DE VERIFICAÇÃO
+        // ========================================
+        function moveToNext(current, nextId) {
+            if (current.value.length === 1 && nextId) {
+                document.getElementById(nextId).focus();
+            }
+            validateCode();
+        }
+
+        function moveToPrev(event, current, prevId) {
+            if (event.key === 'Backspace' && current.value === '' && prevId) {
+                document.getElementById(prevId).focus();
+            }
+        }
+
+        function validateCode() {
+            const digits = ['digit1', 'digit2', 'digit3', 'digit4', 'digit5', 'digit6'];
+            const code = digits.map(id => document.getElementById(id).value).join('');
+            
+            const btnVerify = document.getElementById('btn-verify-code');
+            btnVerify.disabled = code.length !== 6;
+        }
+
+        async function verifyCode() {
+            const digits = ['digit1', 'digit2', 'digit3', 'digit4', 'digit5', 'digit6'];
+            const code = digits.map(id => document.getElementById(id).value).join('');
+            
+            const codeError = document.getElementById('code-error');
+            const codeSuccess = document.getElementById('code-success');
+            const btnVerify = document.getElementById('btn-verify-code');
+            const btnText = document.getElementById('btn-verify-text');
+            const btnSpinner = document.getElementById('btn-verify-spinner');
+
+            btnVerify.disabled = true;
+            btnText.style.display = 'none';
+            btnSpinner.classList.add('show');
+
+            try {
+                const response = await fetch('/accounts/verify-code/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: JSON.stringify({ email: userEmail, code })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    codeError.classList.remove('show');
+                    codeSuccess.textContent = '✔ Código verificado com sucesso!';
+                    codeSuccess.classList.add('show');
+                    
+                    // Parar timer
+                    clearInterval(timerInterval);
+                    
+                    // Avançar para etapa 3
+                    setTimeout(() => {
+                        showStep(3);
+                        document.getElementById('password').focus();
+                    }, 1000);
+                } else {
+                    codeSuccess.classList.remove('show');
+                    codeError.textContent = data.error || 'Código incorreto. Tente novamente.';
+                    codeError.classList.add('show');
+                    
+                    // Adicionar animação de shake
+                    document.querySelector('.code-input-container').classList.add('shake');
+                    setTimeout(() => {
+                        document.querySelector('.code-input-container').classList.remove('shake');
+                    }, 400);
+                    
+                    // Limpar campos
+                    digits.forEach(id => document.getElementById(id).value = '');
+                    document.getElementById('digit1').focus();
+                }
+            } catch (error) {
+                codeError.textContent = 'Erro ao verificar código. Tente novamente.';
+                codeError.classList.add('show');
+            } finally {
+                btnVerify.disabled = false;
+                btnText.style.display = 'inline';
+                btnSpinner.classList.remove('show');
+            }
+        }
+
+        async function resendCode() {
+            await sendVerificationCode();
+            
+            // Limpar campos de código
+            ['digit1', 'digit2', 'digit3', 'digit4', 'digit5', 'digit6'].forEach(id => {
+                document.getElementById(id).value = '';
+            });
+            
+            document.getElementById('digit1').focus();
+        }
+
+        function startExpirationTimer(expiresAt) {
+            expirationTime = new Date(expiresAt);
+            
+            timerInterval = setInterval(() => {
+                const now = new Date();
+                const diff = Math.floor((expirationTime - now) / 1000);
+                
+                if (diff <= 0) {
+                    clearInterval(timerInterval);
+                    document.getElementById('timer').textContent = '00:00';
+                    document.getElementById('code-error').textContent = '🔴 Código expirado. Gere um novo código.';
+                    document.getElementById('code-error').classList.add('show');
+                    document.getElementById('btn-verify-code').disabled = true;
+                } else {
+                    const minutes = Math.floor(diff / 60);
+                    const seconds = diff % 60;
+                    document.getElementById('timer').textContent = 
+                        `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                }
+            }, 1000);
+        }
+
+        // ========================================
+        // ETAPA 3: VALIDAÇÃO DE SENHA
+        // ========================================
+        function togglePassword(inputId, button) {
+            const input = document.getElementById(inputId);
+            const type = input.type === 'password' ? 'text' : 'password';
+            input.type = type;
+            button.textContent = type === 'password' ? '👁️' : '🙈';
+        }
+
+        const passwordInput = document.getElementById('password');
+        const confirmInput = document.getElementById('password_confirm');
+        const strengthBar = document.getElementById('strength-bar');
+        const btnCreate = document.getElementById('btn-create-account');
+
+        passwordInput.addEventListener('input', function() {
+            const password = this.value;
+            let score = 0;
+            const requirements = {
+                length: password.length >= 8,
+                upper: /[A-Z]/.test(password),
+                lower: /[a-z]/.test(password),
+                number: /\d/.test(password),
+                special: /[@$!%*#?&]/.test(password)
+            };
+
+            // Atualizar requisitos visuais
+            Object.keys(requirements).forEach(key => {
+                const element = document.getElementById(`req-${key}`);
+                if (requirements[key]) {
+                    element.classList.add('met');
+                    element.querySelector('span').textContent = '✓';
+                    score += 20;
+                } else {
+                    element.classList.remove('met');
+                    element.querySelector('span').textContent = '○';
+                }
+            });
+
+            // Atualizar barra de força
+            strengthBar.style.width = score + '%';
+            
+            if (score < 60) {
+                strengthBar.style.background = '#dc3545';
+            } else if (score < 100) {
+                strengthBar.style.background = '#ffc107';
+            } else {
+                strengthBar.style.background = '#28a745';
+            }
+
+            checkPasswordMatch();
+        });
+
+        confirmInput.addEventListener('input', checkPasswordMatch);
+
+        function checkPasswordMatch() {
+            const password = passwordInput.value;
+            const confirm = confirmInput.value;
+            const confirmError = document.getElementById('confirm-error');
+            const confirmSuccess = document.getElementById('confirm-success');
+
+            if (!confirm) {
+                confirmError.classList.remove('show');
+                confirmSuccess.classList.remove('show');
+                btnCreate.disabled = true;
+                return;
+            }
+
+            if (password !== confirm) {
+                confirmError.textContent = '🔴 As senhas devem ser idênticas.';
+                confirmError.classList.add('show');
+                confirmSuccess.classList.remove('show');
+                confirmInput.classList.add('error');
+                confirmInput.classList.remove('success');
+                btnCreate.disabled = true;
+            } else {
+                // Validar senha forte
+                const isStrong = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*#?&]).{8,}$/.test(password);
+                
+                if (!isStrong) {
+                    confirmError.textContent = '🔴 A senha não atende aos requisitos mínimos.';
+                    confirmError.classList.add('show');
+                    confirmSuccess.classList.remove('show');
+                    confirmInput.classList.add('error');
+                    confirmInput.classList.remove('success');
+                    btnCreate.disabled = true;
+                } else {
+                    confirmError.classList.remove('show');
+                    confirmSuccess.textContent = '✔ Senhas conferem.';
+                    confirmSuccess.classList.add('show');
+                    confirmInput.classList.remove('error');
+                    confirmInput.classList.add('success');
+                    btnCreate.disabled = false;
+                }
+            }
+        }
+
+        // ========================================
+        // CRIAR CONTA
+        // ========================================
+        async function createAccount() {
+            const password = passwordInput.value;
+            const passwordConfirm = confirmInput.value;
+            
+            const btnCreate = document.getElementById('btn-create-account');
+            const btnText = document.getElementById('btn-create-text');
+            const btnSpinner = document.getElementById('btn-create-spinner');
+
+            btnCreate.disabled = true;
+            btnText.style.display = 'none';
+            btnSpinner.classList.add('show');
+
+            try {
+                const response = await fetch('/accounts/create-account/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: JSON.stringify({
+                        email: userEmail,
+                        password: password,
+                        password_confirm: passwordConfirm,
+                        user_type: userType
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Limpar sessão
+                    sessionStorage.removeItem('cadastro_etapa');
+                    
+                    // Redirecionar para home
+                    window.location.href = data.redirect_url;
+                } else {
+                    alert(data.error || 'Erro ao criar conta. Tente novamente.');
+                }
+            } catch (error) {
+                alert('Erro ao processar requisição. Tente novamente.');
+            } finally {
+                btnCreate.disabled = false;
+                btnText.style.display = 'inline';
+                btnSpinner.classList.remove('show');
+            }
+        }
+
+        // ========================================
+        // FUNÇÕES AUXILIARES
+        // ========================================
+        function showError(input, errorElement, message) {
+            input.classList.add('error');
+            input.classList.remove('success');
+            errorElement.textContent = message;
+            errorElement.classList.add('show');
+            
+            const successElement = errorElement.nextElementSibling;
+            if (successElement && successElement.classList.contains('success-message')) {
+                successElement.classList.remove('show');
+            }
+        }
+
+        function showSuccess(input, successElement, message) {
+            input.classList.remove('error');
+            input.classList.add('success');
+            successElement.textContent = message;
+            successElement.classList.add('show');
+            
+            const errorElement = successElement.previousElementSibling;
+            if (errorElement && errorElement.classList.contains('error-message')) {
+                errorElement.classList.remove('show');
+            }
+        }
+
+        // ========================================
+        // RESTAURAR ETAPA AO RECARREGAR PÁGINA
+        // ========================================
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedStep = sessionStorage.getItem('cadastro_etapa');
+            if (savedStep && savedStep !== '1') {
+                // Verificar se ainda há sessão válida no servidor
+                fetch('/accounts/check-session/', {
+                    method: 'GET',
+                    headers: {
+                        'X-CSRFToken': csrfToken
+                    }
+                }).then(response => response.json())
+                  .then(data => {
+                      if (data.valid && data.step) {
+                          userEmail = data.email || '';
+                          userType = data.user_type || '';
+                          
+                          if (data.step === 2) {
+                              document.getElementById('display-email').textContent = userEmail;
+                              if (data.expires_at) {
+                                  startExpirationTimer(data.expires_at);
+                              }
+                          }
+                          
+                          showStep(parseInt(data.step));
+                      }
+                  });
+            }
+        });
+
+        // ========================================
+        // PERMITIR ENTER PARA AVANÇAR
+        // ========================================
+        document.getElementById('email').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendVerificationCode();
+        });
+
+        document.getElementById('password_confirm').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !btnCreate.disabled) createAccount();
+        });
+    </script>
+
+</body>
+</html>

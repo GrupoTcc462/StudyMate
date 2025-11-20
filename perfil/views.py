@@ -1,9 +1,10 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_http_methods
 from django.db.models import Sum
 from django.utils import timezone
+from django.contrib.auth import authenticate
 import json
 from perfil.models import PerfilUsuario
 from notes.models import Note, NoteLike, NoteRecommendation
@@ -49,58 +50,119 @@ def perfil_view(request):
 
 
 @login_required
-@require_POST
-def editar_nome(request):
+@require_http_methods(["POST"])
+def check_password(request):
     """
-    View para editar nome do usuário (máximo 1 vez a cada 7 dias)
+    Verifica senha atual em tempo real
     """
     try:
         data = json.loads(request.body)
-        new_name = data.get('name', '').strip()
+        password = data.get('password', '')
         
-        if not new_name:
+        # Autenticar usuário
+        user = authenticate(username=request.user.username, password=password)
+        
+        return JsonResponse({'ok': user is not None})
+        
+    except Exception as e:
+        return JsonResponse({'ok': False, 'error': str(e)})
+
+
+@login_required
+@require_http_methods(["POST"])
+def editar_perfil(request):
+    """
+    Edita perfil do usuário (com restrição de 7 dias)
+    """
+    try:
+        name = request.POST.get('name', '').strip()
+        email = request.POST.get('email', '').strip()
+        current_password = request.POST.get('current_password', '').strip()
+        new_password = request.POST.get('new_password', '').strip()
+        new_password_confirm = request.POST.get('new_password_confirm', '').strip()
+        photo = request.FILES.get('photo')
+        
+        user = request.user
+        perfil, created = PerfilUsuario.objects.get_or_create(user=user)
+        
+        # Verificar se pode editar (7 dias)
+        if not perfil.pode_editar():
             return JsonResponse({
                 'success': False,
-                'message': 'O nome não pode ficar em branco.'
-            }, status=400)
-        
-        # Obter ou criar perfil
-        perfil, created = PerfilUsuario.objects.get_or_create(user=request.user)
-        
-        # Verificar se pode alterar nome
-        if not perfil.pode_alterar_nome():
-            dias_restantes = perfil.dias_ate_proxima_mudanca()
-            return JsonResponse({
-                'success': False,
-                'wait_days': dias_restantes,
-                'message': f'Você só pode alterar o nome novamente em {dias_restantes} dia(s).'
+                'error': f'Você só pode editar o perfil novamente em {perfil.dias_ate_proxima_edicao()} dia(s).'
             }, status=403)
         
-        # Salvar nome antigo para retornar na resposta
-        old_name = request.user.username
+        # Validar nome (apenas letras e espaços)
+        if name:
+            import re
+            if not re.match(r'^[A-Za-zÀ-ÿÇç\s]+$', name):
+                return JsonResponse({
+                    'success': False,
+                    'error': 'O nome só pode conter letras e espaços.'
+                }, status=400)
+            user.username = name
         
-        # Atualizar nome
-        request.user.username = new_name
-        request.user.save()
+        # Validar e-mail
+        if email and email != user.email:
+            from django.core.validators import validate_email
+            from django.core.exceptions import ValidationError
+            try:
+                validate_email(email)
+                user.email = email
+            except ValidationError:
+                return JsonResponse({
+                    'success': False,
+                    'error': 'Formato de e-mail inválido.'
+                }, status=400)
         
-        # Atualizar data da última mudança
-        perfil.last_name_change = timezone.now()
+        # Alterar senha (se fornecida)
+        if new_password:
+            # Verificar senha atual
+            if not authenticate(username=user.username, password=current_password):
+                return JsonResponse({
+                    'success': False,
+                    'error': 'Senha atual incorreta.'
+                }, status=400)
+            
+            # Verificar confirmação
+            if new_password != new_password_confirm:
+                return JsonResponse({
+                    'success': False,
+                    'error': 'As senhas não conferem.'
+                }, status=400)
+            
+            # Validar força da senha
+            import re
+            if not re.match(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*#?&]).{8,}$', new_password):
+                return JsonResponse({
+                    'success': False,
+                    'error': 'A senha não atende aos requisitos mínimos.'
+                }, status=400)
+            
+            user.set_password(new_password)
+        
+        # Alterar foto
+        new_photo_url = None
+        if photo:
+            perfil.photo = photo
+            perfil.save()
+            new_photo_url = perfil.photo.url
+        
+        # Salvar alterações
+        user.save()
+        
+        # Atualizar timestamp de última edição
+        perfil.last_edit = timezone.now()
         perfil.save()
         
         return JsonResponse({
             'success': True,
-            'old_name': old_name,
-            'new_name': new_name,
-            'message': 'Nome alterado com sucesso!'
+            'message': 'Perfil atualizado com sucesso!',
+            'new_photo_url': new_photo_url
         })
         
-    except json.JSONDecodeError:
-        return JsonResponse({
-            'success': False,
-            'message': 'Dados inválidos.'
-        }, status=400)
     except Exception as e:
         return JsonResponse({
             'success': False,
-            'message': f'Erro ao alterar nome: {str(e)}'
+            'error': f'Erro ao atualizar perfil: {str(e)}'
         }, status=500)

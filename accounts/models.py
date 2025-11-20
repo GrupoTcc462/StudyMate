@@ -8,19 +8,22 @@ class User(AbstractUser):
     USER_TYPE_CHOICES = (
         ('admin', 'Administrador'),
         ('professor', 'Professor'),
-        ('estudante', 'Estudante'),
+        ('aluno', 'Aluno'),  # Atualizado de 'estudante' para 'aluno'
     )
     
     user_type = models.CharField(
         max_length=20,
         choices=USER_TYPE_CHOICES,
-        default='estudante',
+        default='aluno',  # Atualizado
         verbose_name='Tipo de Usuário'
     )
     
     # Campos adicionais opcionais
     matricula = models.CharField(max_length=20, blank=True, null=True, verbose_name='Matrícula')
     telefone = models.CharField(max_length=15, blank=True, null=True, verbose_name='Telefone')
+    
+    # Controle de primeiro login
+    first_login = models.BooleanField(default=True, verbose_name='Primeiro Login')
     
     class Meta:
         verbose_name = 'Usuário'
@@ -35,5 +38,5 @@ class User(AbstractUser):
     def is_professor(self):
         return self.user_type == 'professor'
     
-    def is_estudante(self):
-        return self.user_type == 'estudante'
+    def is_aluno(self):
+        return self.user_type == 'aluno'
