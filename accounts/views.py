@@ -13,14 +13,34 @@ from .models import User
 
 
 # ========================================
-# LOGIN DE USUÁRIO
+# LOGIN DE USUÁRIO (ATUALIZADO - ACEITA USERNAME OU EMAIL)
 # ========================================
 def login_view(request):
     if request.method == 'POST':
-        username = request.POST.get('username')
+        credential = request.POST.get('credential', '').strip()
         password = request.POST.get('password')
 
-        user = authenticate(request, username=username, password=password)
+        # Verificar se é um e-mail
+        email_pattern = re.compile(r'^[^\s@]+@[^\s@]+\.[^\s@]+$')
+        institutional_pattern = re.compile(r'^[a-z0-9._%+-]+@etec\.sp\.gov\.br$', re.IGNORECASE)
+        
+        user = None
+        
+        if email_pattern.match(credential):
+            # É um e-mail
+            if not institutional_pattern.match(credential):
+                messages.error(request, 'Use um e-mail institucional válido (@etec.sp.gov.br)')
+                return redirect('accounts:login')
+            
+            # Buscar usuário pelo e-mail
+            try:
+                user_obj = User.objects.get(email__iexact=credential)
+                user = authenticate(request, username=user_obj.username, password=password)
+            except User.DoesNotExist:
+                user = None
+        else:
+            # É um nome de usuário
+            user = authenticate(request, username=credential, password=password)
 
         if user is not None:
             login(request, user)
@@ -38,7 +58,7 @@ def login_view(request):
             
             return redirect('study:home')
         else:
-            messages.error(request, 'Usuário ou senha incorretos.')
+            messages.error(request, 'Usuário/E-mail ou senha incorretos.')
             return redirect('accounts:login')
 
     return render(request, 'accounts/login.html')
