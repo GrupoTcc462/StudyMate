@@ -59,34 +59,33 @@
             <h4>Portal do Estudante - Sua plataforma de estudos</h4>
             <br> 
             
-            <!-- ========================================
-                 NAVBAR UNIFICADA (TODAS AS ABAS)
-            ======================================== -->
-            <div class="nav">
-                <button class="nav-btn active" onclick="showSection('home')">🏠 Home</button>
-                <button class="nav-btn" onclick="showSection('materias')">📚 Matérias</button>
-                
-                <!-- CHAT - AGORA LINK PARA ATIVIDADES -->
-                <a href="{% url 'atividades:lista' %}" style="background: rgb(100, 105, 120); color: white; text-decoration: none; padding: 15px 25px; border-radius: 50px; font-weight: 600; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(178, 34, 34, 0.3); display: inline-block;">
-                    💬 Chat
-                </a>
-                
-                <a href="{% url 'notes:list' %}" style="background: rgb(100, 105, 120); color: white; text-decoration: none; padding: 15px 25px; border-radius: 50px; font-weight: 600; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(178, 34, 34, 0.3); display: inline-block;">
-                    📝 Notes
-                </a>
-                
-                <button class="nav-btn" onclick="showSection('horarios')">🕐 Horários</button>
+            <!-- SUBSTITUIR A NAVBAR COMPLETA NO home.html POR ESTA: -->
 
-                {% if user.is_authenticated %}
-                    <a href="{% url 'perfil:perfil' %}" style="background: rgb(100, 105, 120); color: white; text-decoration: none; padding: 15px 25px; border-radius: 50px; font-weight: 600; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(178, 34, 34, 0.3); display: inline-block;">
-                        👤 Perfil
-                    </a>
-                {% else %}
-                    <a href="{% url 'accounts:login' %}" style="background: rgb(100, 105, 120); color: white; text-decoration: none; padding: 15px 25px; border-radius: 50px; font-weight: 600; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(178, 34, 34, 0.3); display: inline-block;">
-                        🔐 Login
-                    </a>
-                {% endif %}
-            </div>
+<div class="nav">
+    <button class="nav-btn active" onclick="showSection('home')">🏠 Home</button>
+    <button class="nav-btn" onclick="showSection('materias')">📚 Matérias</button>
+    
+    <!-- CHAT CORRIGIDO - AGORA VAI PARA LISTA DE ATIVIDADES -->
+    <a href="{% url 'atividades:lista' %}" style="background: rgb(178, 34, 34, 0.3); color: white; text-decoration: none; padding: 15px 25px; border-radius: 50px; font-weight: 600; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(178, 34, 34, 0.3); display: inline-block;">
+        💬 Chat
+    </a>
+    
+    <a href="{% url 'notes:list' %}" style="background: rgb(178, 34, 34, 0.3); color: white; text-decoration: none; padding: 15px 25px; border-radius: 50px; font-weight: 600; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(178, 34, 34, 0.3); display: inline-block;">
+        📝 Notes
+    </a>
+    
+    <button class="nav-btn" onclick="showSection('horarios')">🕐 Horários</button>
+
+    {% if user.is_authenticated %}
+        <a href="{% url 'perfil:perfil' %}" style="background: rgb(178, 34, 34, 0.3); color: white; text-decoration: none; padding: 15px 25px; border-radius: 50px; font-weight: 600; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(178, 34, 34, 0.3); display: inline-block;">
+            👤 Perfil
+        </a>
+    {% else %}
+        <a href="{% url 'accounts:login' %}" style="background: rgb(178, 34, 34, 0.3); color: white; text-decoration: none; padding: 15px 25px; border-radius: 50px; font-weight: 600; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(178, 34, 34, 0.3); display: inline-block;">
+            🔐 Login
+        </a>
+    {% endif %}
+</div>
         </div>
 
         <div class="content">

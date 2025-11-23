@@ -9,6 +9,7 @@ from .models import Atividade, AtividadeVisualizacao, AtividadeEnvio, AtividadeS
 from .forms import AtividadeForm, AtividadeEnvioForm
 import os
 import mimetypes
+import re
 
 
 def is_professor(user):
@@ -24,11 +25,33 @@ def is_aluno(user):
 @login_required
 def lista_atividades(request):
     """
-    Lista de atividades - REDIRECIONA PROFESSOR PARA PAINEL
+    Lista de atividades - PROCESSA CRIAÇÃO VIA MODAL
     """
-    # Se for professor, redirecionar para painel
+    # Se for professor, processar criação ou exibir suas atividades
     if is_professor(request.user):
-        return redirect('atividades:painel_professor')
+        # PROCESSAR CRIAÇÃO DE ATIVIDADE VIA MODAL (POST)
+        if request.method == 'POST':
+            return processar_criacao_atividade(request)
+        
+        # Exibir lista com modal
+        atividades = Atividade.objects.filter(professor=request.user).order_by('-criado_em')
+        
+        atividades_anotadas = []
+        for atividade in atividades:
+            atividades_anotadas.append({
+                'atividade': atividade,
+                'visualizou': False,
+                'envio': None,
+                'salvou': False,
+            })
+        
+        context = {
+            'atividades_anotadas': atividades_anotadas,
+            'filtro_tipo': '',
+            'filtro_status': '',
+        }
+        
+        return render(request, 'atividades/lista_aluno.html', context)
     
     # Se não for aluno nem professor, erro
     if not is_aluno(request.user):
@@ -47,17 +70,14 @@ def lista_atividades(request):
     
     # Separar atividades por status
     if filtro_status == 'abertas':
-        # Atividades não enviadas ou sem prazo
         atividades = atividades.exclude(
             envios__aluno=request.user
         ).filter(
             Q(prazo_entrega__gte=timezone.now()) | Q(prazo_entrega__isnull=True)
         )
     elif filtro_status == 'enviadas':
-        # Atividades já enviadas
         atividades = atividades.filter(envios__aluno=request.user)
     elif filtro_status == 'pendentes':
-        # Atividades não enviadas COM prazo
         atividades = atividades.exclude(
             envios__aluno=request.user
         ).filter(
@@ -67,19 +87,16 @@ def lista_atividades(request):
     # Anotar status de cada atividade para o aluno
     atividades_anotadas = []
     for atividade in atividades:
-        # Verificar se visualizou
         visualizou = AtividadeVisualizacao.objects.filter(
             atividade=atividade, 
             aluno=request.user
         ).exists()
         
-        # Verificar se enviou
         envio = AtividadeEnvio.objects.filter(
             atividade=atividade, 
             aluno=request.user
         ).first()
         
-        # Verificar se salvou
         salvou = AtividadeSalva.objects.filter(
             atividade=atividade,
             aluno=request.user
@@ -101,6 +118,77 @@ def lista_atividades(request):
     return render(request, 'atividades/lista_aluno.html', context)
 
 
+def processar_criacao_atividade(request):
+    """
+    Função auxiliar para processar criação de atividade via modal
+    """
+    titulo = request.POST.get('titulo', '').strip()
+    descricao = request.POST.get('descricao', '').strip()
+    tipo = request.POST.get('tipo', '')
+    ano_1 = request.POST.get('ano_1') == 'true'
+    ano_2 = request.POST.get('ano_2') == 'true'
+    ano_3 = request.POST.get('ano_3') == 'true'
+    todos = request.POST.get('todos') == 'true'
+    prazo_entrega = request.POST.get('prazo_entrega', '')
+    anexo = request.FILES.get('anexo')
+    
+    # VALIDAÇÕES
+    if not titulo or len(titulo) > 50:
+        messages.error(request, 'Título inválido (máx 50 caracteres).')
+        return redirect('atividades:lista')
+    
+    titulo_regex = r'^[A-Za-zÀ-ÿÇç\s]+$'
+    if not re.match(titulo_regex, titulo):
+        messages.error(request, 'Título contém caracteres não permitidos. Use apenas letras e espaços.')
+        return redirect('atividades:lista')
+    
+    if not descricao or len(descricao) > 800:
+        messages.error(request, 'Descrição inválida (máx 800 caracteres).')
+        return redirect('atividades:lista')
+    
+    if not any([ano_1, ano_2, ano_3, todos]):
+        messages.error(request, 'Selecione pelo menos um ano ou "Todos".')
+        return redirect('atividades:lista')
+    
+    if tipo not in ['ATIVIDADE', 'AVISO_PROVA', 'AVISO_SIMPLES']:
+        messages.error(request, 'Tipo de atividade inválido.')
+        return redirect('atividades:lista')
+    
+    # CRIAR ATIVIDADE
+    atividade = Atividade(
+        professor=request.user,
+        titulo=titulo,
+        descricao=descricao,
+        tipo=tipo,
+        ano_1=ano_1,
+        ano_2=ano_2,
+        ano_3=ano_3,
+        todos=todos
+    )
+    
+    if prazo_entrega:
+        from django.utils.dateparse import parse_datetime
+        atividade.prazo_entrega = parse_datetime(prazo_entrega)
+    
+    if anexo:
+        atividade.anexo = anexo
+    
+    if tipo in ['AVISO_PROVA', 'AVISO_SIMPLES']:
+        atividade.permite_envio = False
+    
+    try:
+        atividade.full_clean()
+        atividade.save()
+        
+        anos_destino = atividade.get_anos_destino_display()
+        messages.success(request, f'✅ Atividade criada com sucesso para: {anos_destino}.')
+        
+        return redirect('atividades:lista')
+    except Exception as e:
+        messages.error(request, f'Erro ao criar atividade: {str(e)}')
+        return redirect('atividades:lista')
+
+
 @login_required
 def detalhe_atividade(request, pk):
     """
@@ -119,10 +207,8 @@ def detalhe_atividade(request, pk):
     )
     
     if created:
-        # Incrementar contador
         Atividade.objects.filter(pk=pk).update(visualizacoes=F('visualizacoes') + 1)
         
-        # Marcar como visualizado
         if not atividade.foi_visualizado:
             atividade.foi_visualizado = True
             atividade.save(update_fields=['foi_visualizado'])
@@ -161,21 +247,18 @@ def enviar_atividade(request, pk):
     
     atividade = get_object_or_404(Atividade, pk=pk)
     
-    # Validar se permite envio
     if not atividade.permite_envio:
         return JsonResponse({
             'success': False, 
             'error': 'Esta atividade não permite envio.'
         }, status=400)
     
-    # Validar prazo
     if atividade.esta_encerrada():
         return JsonResponse({
             'success': False, 
             'error': 'O prazo de entrega expirou.'
         }, status=400)
     
-    # Verificar se já enviou
     if AtividadeEnvio.objects.filter(atividade=atividade, aluno=request.user).exists():
         return JsonResponse({
             'success': False, 
@@ -270,7 +353,6 @@ def gerar_ics(request, pk):
         messages.error(request, 'Esta atividade não possui prazo.')
         return redirect('atividades:detalhe', pk=pk)
     
-    # Gerar conteúdo .ics
     from datetime import timedelta
     
     dtstart = atividade.prazo_entrega.strftime('%Y%m%dT%H%M%S')
@@ -310,7 +392,6 @@ def painel_professor(request):
     """
     atividades = Atividade.objects.filter(professor=request.user).order_by('-criado_em')
     
-    # Anotar estatísticas
     atividades_anotadas = []
     for atividade in atividades:
         atividades_anotadas.append({
@@ -330,26 +411,74 @@ def painel_professor(request):
 @user_passes_test(is_professor)
 def criar_atividade(request):
     """
-    Criação de atividade por professor
+    Criação de atividade por professor (PÁGINA SEPARADA - MANTIDA PARA COMPATIBILIDADE)
     """
     if request.method == 'POST':
-        form = AtividadeForm(request.POST, request.FILES)
+        titulo = request.POST.get('titulo', '').strip()
+        descricao = request.POST.get('descricao', '').strip()
+        tipo = request.POST.get('tipo', '')
+        ano_1 = request.POST.get('ano_1') == 'true'
+        ano_2 = request.POST.get('ano_2') == 'true'
+        ano_3 = request.POST.get('ano_3') == 'true'
+        todos = request.POST.get('todos') == 'true'
+        prazo_entrega = request.POST.get('prazo_entrega', '')
+        anexo = request.FILES.get('anexo')
         
-        if form.is_valid():
-            atividade = form.save(commit=False)
-            atividade.professor = request.user
+        if not titulo or len(titulo) > 50:
+            messages.error(request, 'Título inválido (máx 50 caracteres).')
+            return redirect('atividades:criar')
+        
+        titulo_regex = r'^[A-Za-zÀ-ÿÇç\s]+$'
+        if not re.match(titulo_regex, titulo):
+            messages.error(request, 'Título contém caracteres não permitidos. Use apenas letras e espaços.')
+            return redirect('atividades:criar')
+        
+        if not descricao or len(descricao) > 800:
+            messages.error(request, 'Descrição inválida (máx 800 caracteres).')
+            return redirect('atividades:criar')
+        
+        if not any([ano_1, ano_2, ano_3, todos]):
+            messages.error(request, 'Selecione pelo menos um ano ou "Todos".')
+            return redirect('atividades:criar')
+        
+        if tipo not in ['ATIVIDADE', 'AVISO_PROVA', 'AVISO_SIMPLES']:
+            messages.error(request, 'Tipo de atividade inválido.')
+            return redirect('atividades:criar')
+        
+        atividade = Atividade(
+            professor=request.user,
+            titulo=titulo,
+            descricao=descricao,
+            tipo=tipo,
+            ano_1=ano_1,
+            ano_2=ano_2,
+            ano_3=ano_3,
+            todos=todos
+        )
+        
+        if prazo_entrega:
+            from django.utils.dateparse import parse_datetime
+            atividade.prazo_entrega = parse_datetime(prazo_entrega)
+        
+        if anexo:
+            atividade.anexo = anexo
+        
+        if tipo in ['AVISO_PROVA', 'AVISO_SIMPLES']:
+            atividade.permite_envio = False
+        
+        try:
+            atividade.full_clean()
             atividade.save()
             
-            messages.success(request, 'Atividade criada com sucesso!')
+            anos_destino = atividade.get_anos_destino_display()
+            messages.success(request, f'✅ Atividade criada com sucesso para: {anos_destino}.')
+            
             return redirect('atividades:painel_professor')
-    else:
-        form = AtividadeForm()
+        except Exception as e:
+            messages.error(request, f'Erro ao criar atividade: {str(e)}')
+            return redirect('atividades:criar')
     
-    context = {
-        'form': form,
-    }
-    
-    return render(request, 'atividades/criar_atividade.html', context)
+    return render(request, 'atividades/criar_atividade.html')
 
 
 @login_required
