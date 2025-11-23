@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel do Professor - StudyMate</title>
+    {% load static %}
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: rgb(178, 34, 34);
+            --primary-dark: rgb(222, 30, 53);
+            --background: rgb(43, 45, 66);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--background);
+            min-height: 100vh;
+            color: #2c2c2c;
+        }
+
+        .header {
+            background: rgb(237, 242, 244);
+            border-radius: 20px;
+            padding: 30px;
+            margin: 20px auto;
+            max-width: 1200px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .action-bar {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        .btn-criar {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 25px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-criar:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+            color: white;
+        }
+
+        .atividade-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            transition: transform 0.3s ease;
+        }
+
+        .atividade-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .atividade-titulo {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #2c2c2c;
+            margin-bottom: 10px;
+        }
+
+        .badge {
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-right: 8px;
+        }
+
+        .stats {
+            display: flex;
+            gap: 30px;
+            margin: 15px 0;
+            color: #6c757d;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-acao {
+            padding: 8px 18px;
+            border-radius: 20px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 5px;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-ver {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .btn-ver:hover {
+            background: #138496;
+            color: white;
+        }
+
+        .btn-excluir {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-excluir:hover {
+            background: #c82333;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            background: white;
+            border-radius: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <img src="{% static 'study/img/logoStudyMate.png' %}" height="144px" width="293">
+        <h4>Painel do Professor - Atividades</h4>
+        <div style="margin-top: 20px;">
+            <a href="{% url 'study:home' %}" class="btn btn-secondary">← Voltar para Home</a>
+        </div>
+    </div>
+
+    <div class="container">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="action-bar">
+            <h2 style="margin: 0;">Minhas Atividades</h2>
+            <a href="{% url 'atividades:criar' %}" class="btn-criar">+ Criar Nova Atividade</a>
+        </div>
+
+        {% if atividades_anotadas %}
+            {% for item in atividades_anotadas %}
+                <div class="atividade-card">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h3 class="atividade-titulo">{{ item.atividade.titulo }}</h3>
+                            <span class="badge bg-primary">{{ item.atividade.get_tipo_display }}</span>
+                            <span class="badge bg-secondary">{{ item.atividade.get_anos_destino_display }}</span>
+                        </div>
+                        <div>
+                            <small class="text-muted">
+                                Criado em {{ item.atividade.criado_em|date:"d/m/Y" }}
+                            </small>
+                        </div>
+                    </div>
+
+                    {% if item.atividade.prazo_entrega %}
+                        <p style="margin-top: 10px; color: #6c757d;">
+                            <strong>Prazo:</strong> {{ item.atividade.prazo_entrega|date:"d/m/Y às H:i" }}
+                            {% if item.atividade.esta_encerrada %}
+                                <span class="badge bg-danger">Encerrada</span>
+                            {% endif %}
+                        </p>
+                    {% endif %}
+
+                    <div class="stats">
+                        <div class="stat-item">
+                            <span>👁️</span>
+                            <span><strong>{{ item.total_visualizacoes }}</strong> visualizações</span>
+                        </div>
+                        {% if item.atividade.permite_envio %}
+                            <div class="stat-item">
+                                <span>📬</span>
+                                <span><strong>{{ item.total_envios }}</strong> envios</span>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div style="margin-top: 15px;">
+                        {% if item.atividade.permite_envio %}
+                            <a href="{% url 'atividades:ver_envios' item.atividade.pk %}" class="btn-acao btn-ver">
+                                Ver Envios ({{ item.total_envios }})
+                            </a>
+                        {% endif %}
+                        
+                        <a href="{% url 'atividades:excluir' item.atividade.pk %}" class="btn-acao btn-excluir" 
+                           onclick="return confirm('Tem certeza que deseja excluir esta atividade?')">
+                            Excluir
+                        </a>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <div style="font-size: 4rem; margin-bottom: 20px;">📚</div>
+                <h3 style="color: #6c757d; margin-bottom: 10px;">Nenhuma atividade criada</h3>
+                <p style="color: #adb5bd; margin-bottom: 30px;">
+                    Comece criando sua primeira atividade para os alunos!
+                </p>
+                <a href="{% url 'atividades:criar' %}" class="btn-criar">+ Criar Primeira Atividade</a>
+            </div>
+        {% endif %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

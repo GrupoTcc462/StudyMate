@@ -369,7 +369,34 @@
 </head>
 <body>
     <div class="container">
-        <a href="{% url 'notes:list' %}" class="btn-back">← Voltar para Notes</a>
+        <!-- NAVBAR CORRIGIDA - Substitua o bloco <div class="nav"> completo por este -->
+<div class="nav">
+    <a href="{% url 'study:home' %}" style="background: rgb(100, 105, 120); color: white; text-decoration: none; padding: 15px 25px; border-radius: 50px; font-weight: 600; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(178, 34, 34, 0.3); display: inline-block;">
+        🏠 Home
+    </a>
+    <a href="{% url 'study:home' %}#materias" style="background: rgb(100, 105, 120); color: white; text-decoration: none; padding: 15px 25px; border-radius: 50px; font-weight: 600; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(178, 34, 34, 0.3); display: inline-block;">
+        📚 Matérias
+    </a>
+    <a href="{% url 'atividades:lista' %}" style="background: rgb(100, 105, 120); color: white; text-decoration: none; padding: 15px 25px; border-radius: 50px; font-weight: 600; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(178, 34, 34, 0.3); display: inline-block;">
+        💬 Chat
+    </a>
+    <a href="{% url 'notes:list' %}" style="background: var(--primary-dark); color: white; text-decoration: none; padding: 15px 25px; border-radius: 50px; font-weight: 600; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(178, 34, 34, 0.3); display: inline-block;">
+        📝 Notes
+    </a>
+    <a href="{% url 'study:home' %}#horarios" style="background: rgb(100, 105, 120); color: white; text-decoration: none; padding: 15px 25px; border-radius: 50px; font-weight: 600; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(178, 34, 34, 0.3); display: inline-block;">
+        🕐 Horários
+    </a>
+
+    {% if user.is_authenticated %}
+        <a href="{% url 'perfil:perfil' %}" style="background: rgb(100, 105, 120); color: white; text-decoration: none; padding: 15px 25px; border-radius: 50px; font-weight: 600; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(178, 34, 34, 0.3); display: inline-block;">
+            👤 Perfil
+        </a>
+    {% else %}
+        <a href="{% url 'accounts:login' %}" style="background: rgb(100, 105, 120); color: white; text-decoration: none; padding: 15px 25px; border-radius: 50px; font-weight: 600; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(178, 34, 34, 0.3); display: inline-block;">
+            🔐 Login
+        </a>
+    {% endif %}
+</div>
 
         <div class="note-detail-card">
             <!-- RECOMENDAÇÃO BANNER -->

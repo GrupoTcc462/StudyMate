@@ -1,0 +1,279 @@
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atividades - StudyMate</title>
+    {% load static %}
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: rgb(178, 34, 34);
+            --primary-dark: rgb(222, 30, 53);
+            --background: rgb(43, 45, 66);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--background);
+            min-height: 100vh;
+            color: #2c2c2c;
+        }
+
+        .header {
+            background: rgb(237, 242, 244);
+            border-radius: 20px;
+            padding: 30px;
+            margin: 20px auto;
+            max-width: 1200px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .filters-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        .filter-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .atividade-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            transition: transform 0.3s ease;
+        }
+
+        .atividade-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .atividade-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .atividade-titulo {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #2c2c2c;
+            margin-bottom: 10px;
+        }
+
+        .badge {
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .badge-atividade {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .badge-prova {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .badge-aviso {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .status-nao-vista {
+            background: #dc3545;
+            color: white;
+        }
+
+        .status-vista {
+            background: #ffc107;
+            color: #000;
+        }
+
+        .status-enviada {
+            background: #28a745;
+            color: white;
+        }
+
+        .atividade-info {
+            margin: 15px 0;
+            color: #6c757d;
+        }
+
+        .btn-acao {
+            padding: 10px 20px;
+            border-radius: 25px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+
+        .btn-ver {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-ver:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-salvar {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .btn-salvar.salva {
+            background: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <img src="{% static 'study/img/logoStudyMate.png' %}" height="144px" width="293">
+        <h4>Atividades Acadêmicas</h4>
+        <div style="margin-top: 20px;">
+            <a href="{% url 'study:home' %}" class="btn btn-secondary">← Voltar</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="filters-section">
+            <form method="get">
+                <div class="filter-row">
+                    <select name="tipo" class="form-select">
+                        <option value="">Todos os Tipos</option>
+                        <option value="ATIVIDADE" {% if filtro_tipo == 'ATIVIDADE' %}selected{% endif %}>Atividade</option>
+                        <option value="AVISO_PROVA" {% if filtro_tipo == 'AVISO_PROVA' %}selected{% endif %}>Aviso de Prova</option>
+                        <option value="AVISO_SIMPLES" {% if filtro_tipo == 'AVISO_SIMPLES' %}selected{% endif %}>Aviso Simples</option>
+                    </select>
+
+                    <select name="status" class="form-select">
+                        <option value="">Todos os Status</option>
+                        <option value="abertas" {% if filtro_status == 'abertas' %}selected{% endif %}>Abertas</option>
+                        <option value="enviadas" {% if filtro_status == 'enviadas' %}selected{% endif %}>Enviadas</option>
+                        <option value="pendentes" {% if filtro_status == 'pendentes' %}selected{% endif %}>Pendentes</option>
+                    </select>
+
+                    <button type="submit" class="btn btn-primary">🔍 Filtrar</button>
+                    <a href="{% url 'atividades:lista' %}" class="btn btn-secondary">❌ Limpar</a>
+                </div>
+            </form>
+        </div>
+
+        {% for item in atividades_anotadas %}
+            <div class="atividade-card">
+                <div class="atividade-header">
+                    <div>
+                        <h3 class="atividade-titulo">
+                            {% if not item.visualizou %}
+                                🔴
+                            {% elif item.envio %}
+                                🟢
+                            {% else %}
+                                🟠
+                            {% endif %}
+                            {{ item.atividade.titulo }}
+                        </h3>
+                        <span class="badge {% if item.atividade.tipo == 'ATIVIDADE' %}badge-atividade{% elif item.atividade.tipo == 'AVISO_PROVA' %}badge-prova{% else %}badge-aviso{% endif %}">
+                            {{ item.atividade.get_tipo_display }}
+                        </span>
+                    </div>
+                    <div>
+                        {% if not item.visualizou %}
+                            <span class="status-badge status-nao-vista">Não Vista</span>
+                        {% elif item.envio %}
+                            <span class="status-badge status-enviada">Enviada</span>
+                        {% else %}
+                            <span class="status-badge status-vista">Vista</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="atividade-info">
+                    <p><strong>Professor(a):</strong> {{ item.atividade.professor.username }}</p>
+                    <p><strong>Destinado:</strong> {{ item.atividade.get_anos_destino_display }}</p>
+                    {% if item.atividade.prazo_entrega %}
+                        <p><strong>📅 Prazo:</strong> {{ item.atividade.prazo_entrega|date:"d/m/Y às H:i" }}</p>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <a href="{% url 'atividades:detalhe' item.atividade.pk %}" class="btn-acao btn-ver">Ver Atividade</a>
+                    
+                    <button class="btn-acao btn-salvar {% if item.salvou %}salva{% endif %}" 
+                            onclick="salvarAtividade({{ item.atividade.pk }}, this)">
+                        {% if item.salvou %}★ Salva{% else %}☆ Salvar{% endif %}
+                    </button>
+                </div>
+            </div>
+        {% empty %}
+            <div style="text-align: center; padding: 60px; background: white; border-radius: 15px;">
+                <h3 style="color: #6c757d;">Nenhuma atividade encontrada</h3>
+                <p>Não há atividades disponíveis no momento.</p>
+            </div>
+        {% endfor %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const csrfToken = '{{ csrf_token }}';
+
+        async function salvarAtividade(atividadeId, button) {
+            try {
+                const response = await fetch(`/atividades/${atividadeId}/salvar/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrfToken,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    if (data.action === 'saved') {
+                        button.classList.add('salva');
+                        button.textContent = '★ Salva';
+                    } else {
+                        button.classList.remove('salva');
+                        button.textContent = '☆ Salvar';
+                    }
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+            }
+        }
+    </script>
+</body>
+</html>

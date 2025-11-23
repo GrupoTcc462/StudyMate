@@ -65,14 +65,26 @@
             <div class="nav">
                 <button class="nav-btn active" onclick="showSection('home')">🏠 Home</button>
                 <button class="nav-btn" onclick="showSection('materias')">📚 Matérias</button>
-                <button class="nav-btn" onclick="showSection('chat')">💬 Chat</button>
-                <a href="{% url 'notes:list' %}" class="nav-btn" style="text-decoration: none;">📝 Notes</a>
+                
+                <!-- CHAT - AGORA LINK PARA ATIVIDADES -->
+                <a href="{% url 'atividades:lista' %}" style="background: rgb(100, 105, 120); color: white; text-decoration: none; padding: 15px 25px; border-radius: 50px; font-weight: 600; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(178, 34, 34, 0.3); display: inline-block;">
+                    💬 Chat
+                </a>
+                
+                <a href="{% url 'notes:list' %}" style="background: rgb(100, 105, 120); color: white; text-decoration: none; padding: 15px 25px; border-radius: 50px; font-weight: 600; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(178, 34, 34, 0.3); display: inline-block;">
+                    📝 Notes
+                </a>
+                
                 <button class="nav-btn" onclick="showSection('horarios')">🕐 Horários</button>
 
                 {% if user.is_authenticated %}
-                    <a href="{% url 'perfil:perfil' %}" class="nav-btn" style="text-decoration: none;">👤 Perfil</a>
+                    <a href="{% url 'perfil:perfil' %}" style="background: rgb(100, 105, 120); color: white; text-decoration: none; padding: 15px 25px; border-radius: 50px; font-weight: 600; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(178, 34, 34, 0.3); display: inline-block;">
+                        👤 Perfil
+                    </a>
                 {% else %}
-                    <a href="{% url 'accounts:login' %}" class="nav-btn" style="text-decoration: none;">🔐 Login</a>
+                    <a href="{% url 'accounts:login' %}" style="background: rgb(100, 105, 120); color: white; text-decoration: none; padding: 15px 25px; border-radius: 50px; font-weight: 600; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(178, 34, 34, 0.3); display: inline-block;">
+                        🔐 Login
+                    </a>
                 {% endif %}
             </div>
         </div>
@@ -110,7 +122,7 @@
                     <div class="card">
                         <h3>⚡ Funcionalidades</h3>
                         <p>• Acesso às matérias organizadas<br>
-                        • Chat colaborativo entre alunos<br>
+                        • Sistema de atividades acadêmicas<br>
                         • Sistema de notes compartilhadas<br>
                         • Horários das aulas atualizados<br>
                         • Interface responsiva moderna</p>
@@ -124,8 +136,8 @@
                     <div class="card">
                         <h3>🆕 Novidades</h3>
                         <p>• Nova interface com cores suaves<br>
+                        • Sistema de atividades acadêmicas<br>
                         • Sistema de busca nas notes<br>
-                        • Chat em tempo real<br>
                         • Design responsivo otimizado<br>
                         • Animações fluidas</p>
                     </div>
@@ -176,84 +188,6 @@
                         <button class="subject-btn" onclick="openSubject('Geografia Física')">Geografia Física</button>
                         <button class="subject-btn" onclick="openSubject('Geografia Humana')">Geografia Humana</button>
                         <button class="subject-btn" onclick="openSubject('Cartografia')">Cartografia</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- CHAT SECTION -->
-            <div id="chat" class="section">
-                <h2>💬 Chat das Salas</h2>
-                
-                <div class="class-selector">
-                    <label for="chatClass">Selecione sua turma:</label>
-                    <select id="chatClass" onchange="changeChat()">
-                        <option value="1info">1º C - Integral</option>
-                        <option value="2info">2º C - Integral</option>
-                        <option value="3info">3º C - Integral</option>
-                        <option value="1adm">1º A - Manhã</option>
-                        <option value="2adm">2º A - Manhã</option>
-                        <option value="3adm">3º A - Manhã</option>
-                    </select>
-                </div>
-
-                <div class="chat-container">
-                    <div class="chat-messages" id="chatMessages">
-                        <div class="message">João: Alguém tem o resumo de matemática da prova?</div>
-                        <div class="message">Maria: Eu tenho! Vou postar nos notes 📝</div>
-                        <div class="message own">Você: Obrigado, pessoal! 👍</div>
-                        <div class="message">Pedro: A prova de física foi adiada para sexta</div>
-                        <div class="message">Ana: Ótima notícia! Mais tempo para estudar 📚</div>
-                    </div>
-                    
-                    <div class="chat-input-container">
-                        <input type="text" class="chat-input" id="messageInput" placeholder="Digite sua mensagem..." onkeypress="handleKeyPress(event)">
-                        <button class="send-btn" onclick="sendMessage()">Enviar</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- NOTES SECTION -->
-            <div id="notes" class="section">
-                <h2>📝 Notes Compartilhadas</h2>
-                
-                <div class="search-container">
-                    <div class="search-box">
-                        <input type="text" class="search-input" placeholder="Pesquisar notes..." id="searchInput" onkeyup="searchNotes()">
-                        <button class="search-btn" onclick="searchNotes()">🔍</button>
-                    </div>
-                </div>
-                
-                <button class="add-note-btn" onclick="addNote()">+ Nova Note</button>
-                
-                <div class="notes-container">
-                    <div class="note-item" data-search="trigonometria matematica seno cosseno">
-                        <div class="note-title">📐 Resumo - Trigonometria (Maria, 2º Info)</div>
-                        <p>Seno, cosseno e tangente são as principais funções trigonométricas. Sen²x + Cos²x = 1 (identidade fundamental)</p>
-                        <small>⏰ Compartilhado há 2 horas</small>
-                    </div>
-                    
-                    <div class="note-item" data-search="revolucao industrial historia mapa mental">
-                        <div class="note-title">🧠 Mapa Mental - Revolução Industrial (João, 3º Adm)</div>
-                        <p>Mapa mental completo sobre a 1ª Revolução Industrial: causas, consequências, inovações tecnológicas e impactos sociais</p>
-                        <small>⏰ Compartilhado ontem</small>
-                    </div>
-                    
-                    <div class="note-item" data-search="quimica organica formulas alcanos">
-                        <div class="note-title">⚗️ Fórmulas - Química Orgânica (Ana, 2º Info)</div>
-                        <p>Principais fórmulas e reações da química orgânica: alcanos, alcenos, álcoois, aldeídos e cetonas</p>
-                        <small>⏰ Compartilhado há 3 dias</small>
-                    </div>
-                    
-                    <div class="note-item" data-search="algoritmos programacao estruturas dados python">
-                        <div class="note-title">💾 Algoritmos - Estruturas de Dados (Pedro, 3º Info)</div>
-                        <p>Resumo sobre listas, pilhas, filas e árvores binárias com exemplos práticos em Python</p>
-                        <small>⏰ Compartilhado há 1 semana</small>
-                    </div>
-                    
-                    <div class="note-item" data-search="literatura brasileira romantismo realismo">
-                        <div class="note-title">📚 Resumo - Literatura Brasileira (Carla, 1º Adm)</div>
-                        <p>Principais movimentos literários: Romantismo, Realismo, Modernismo e autores representativos</p>
-                        <small>⏰ Compartilhado há 5 dias</small>
                     </div>
                 </div>
             </div>
@@ -354,123 +288,6 @@
 
         function openSubject(subject) {
             alert(`Abrindo conteúdo de ${subject}. Em breve, materiais completos estarão disponíveis!`);
-        }
-
-        function sendMessage() {
-            const input = document.getElementById('messageInput');
-            const message = input.value.trim();
-            
-            if (message) {
-                const chatMessages = document.getElementById('chatMessages');
-                const messageDiv = document.createElement('div');
-                messageDiv.className = 'message own';
-                messageDiv.textContent = `Você: ${message}`;
-                chatMessages.appendChild(messageDiv);
-                
-                input.value = '';
-                chatMessages.scrollTop = chatMessages.scrollHeight;
-                
-                setTimeout(() => {
-                    const responseDiv = document.createElement('div');
-                    responseDiv.className = 'message';
-                    responseDiv.textContent = 'Colega: Interessante! 👍';
-                    chatMessages.appendChild(responseDiv);
-                    chatMessages.scrollTop = chatMessages.scrollHeight;
-                }, 1000);
-            }
-        }
-
-        function handleKeyPress(event) {
-            if (event.key === 'Enter') {
-                sendMessage();
-            }
-        }
-
-        function changeChat() {
-            const selectedClass = document.getElementById('chatClass').value;
-            const chatMessages = document.getElementById('chatMessages');
-            
-            const messages = {
-                '1info': [
-                    'Ana: Alguém entendeu a matéria de algoritmos?',
-                    'Carlos: Estou com dúvida também! 🤔',
-                    'Maria: Vou explicar na próxima aula!'
-                ],
-                '2info': [
-                    'João: A prova de BD vai ser difícil...',
-                    'Pedro: Vamos estudar juntos? 📚',
-                    'Você: Boa ideia!'
-                ],
-                '3info': [
-                    'Sofia: Alguém já terminou o TCC?',
-                    'Bruno: Ainda estou no capítulo 2 😅',
-                    'Lisa: Vamos marcar um grupo de estudos!'
-                ],
-                '1adm': [
-                    'Carla: A apresentação é amanhã!',
-                    'Diego: Já terminei os slides! 📊',
-                    'Fernanda: Alguém pode revisar?'
-                ],
-                '2adm': [
-                    'Amanda: O projeto está ficando ótimo!',
-                    'Gustavo: Nossa equipe é top! 🚀',
-                    'Patrícia: Falta só a pesquisa'
-                ],
-                '3adm': [
-                    'Isabela: Estágio está sendo incrível!',
-                    'Thiago: Onde conseguiu?',
-                    'Isabela: Na prefeitura!'
-                ]
-            };
-            
-            const classMessages = messages[selectedClass] || [
-                'Bem-vindo ao chat da turma!',
-                'Vamos colaborar e estudar juntos! 🚀'
-            ];
-            
-            chatMessages.innerHTML = '';
-            classMessages.forEach(msg => {
-                const messageDiv = document.createElement('div');
-                messageDiv.className = 'message';
-                messageDiv.textContent = msg;
-                chatMessages.appendChild(messageDiv);
-            });
-        }
-
-        function searchNotes() {
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            const notes = document.querySelectorAll('.note-item');
-            
-            notes.forEach(note => {
-                const title = note.querySelector('.note-title').textContent.toLowerCase();
-                const content = note.querySelector('p').textContent.toLowerCase();
-                const searchData = note.getAttribute('data-search').toLowerCase();
-                
-                if (title.includes(searchTerm) || content.includes(searchTerm) || searchData.includes(searchTerm)) {
-                    note.style.display = 'block';
-                } else {
-                    note.style.display = searchTerm ? 'none' : 'block';
-                }
-            });
-        }
-
-        function addNote() {
-            const title = prompt('Título da sua note:');
-            const content = prompt('Conteúdo da note:');
-            
-            if (title && content) {
-                const notesContainer = document.querySelector('.notes-container');
-                const noteDiv = document.createElement('div');
-                noteDiv.className = 'note-item';
-                noteDiv.setAttribute('data-search', title.toLowerCase() + ' ' + content.toLowerCase());
-                noteDiv.innerHTML = `
-                    <div class="note-title">📝 ${title} (Você)</div>
-                    <p>${content}</p>
-                    <small>⏰ Compartilhado agora</small>
-                `;
-                notesContainer.insertBefore(noteDiv, notesContainer.firstChild);
-                alert('Note adicionada com sucesso! 🎉');
-            }
         }
 
         function changeSchedule() {
