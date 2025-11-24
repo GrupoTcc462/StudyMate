@@ -40,14 +40,14 @@ class Atividade(models.Model):
         ('TODOS', 'Todos'),
     ]
     
-    # Informações básicas
+    # CORRIGIDO: Remover limit_choices_to que estava causando o erro
     professor = models.ForeignKey(
         User, 
         on_delete=models.CASCADE, 
         related_name='atividades_criadas',
-        limit_choices_to={'user_type': 'professor'},
         verbose_name='Professor'
     )
+    
     titulo = models.CharField(max_length=50, verbose_name='Título')
     
     # DESCRIÇÃO SEM LIMITE CONFORME RELATÓRIO
@@ -96,6 +96,10 @@ class Atividade(models.Model):
         # Pelo menos um público deve ser selecionado
         if not any([self.ano_1, self.ano_2, self.ano_3, self.todos]):
             raise ValidationError('Selecione pelo menos um ano ou "Todos".')
+        
+        # CORRIGIDO: Validar se o usuário é realmente professor (apenas em clean, não no campo)
+        if self.professor and self.professor.user_type not in ['professor', 'admin'] and not self.professor.is_staff:
+            raise ValidationError('Apenas professores podem criar atividades.')
     
     def save(self, *args, **kwargs):
         self.full_clean()
@@ -149,7 +153,6 @@ class AtividadeVisualizacao(models.Model):
     aluno = models.ForeignKey(
         User, 
         on_delete=models.CASCADE,
-        limit_choices_to={'user_type': 'aluno'},
         verbose_name='Aluno'
     )
     visualizado_em = models.DateTimeField(auto_now_add=True, verbose_name='Visualizado em')
@@ -183,7 +186,6 @@ class AtividadeEnvio(models.Model):
     aluno = models.ForeignKey(
         User, 
         on_delete=models.CASCADE,
-        limit_choices_to={'user_type': 'aluno'},
         verbose_name='Aluno'
     )
     
@@ -229,7 +231,6 @@ class AtividadeSalva(models.Model):
     aluno = models.ForeignKey(
         User, 
         on_delete=models.CASCADE,
-        limit_choices_to={'user_type': 'aluno'},
         verbose_name='Aluno'
     )
     atividade = models.ForeignKey(

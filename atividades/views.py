@@ -125,26 +125,46 @@ def processar_criacao_atividade(request):
     FUNÇÃO CORRIGIDA - Processa criação de atividade via modal
     """
     try:
+        # Capturar dados do POST
         titulo = request.POST.get('titulo', '').strip()
         descricao = request.POST.get('descricao', '').strip()
         tipo = request.POST.get('tipo', '')
         
-        # CORRIGIDO: Verificar se checkboxes foram marcados
+        # CORRIGIDO: Capturar checkboxes
+        # Quando checkbox está marcado, vem como 'on' no POST
         ano_1 = 'ano_1' in request.POST
         ano_2 = 'ano_2' in request.POST
         ano_3 = 'ano_3' in request.POST
         todos = 'todos' in request.POST
         
-        prazo_entrega = request.POST.get('prazo_entrega', '')
+        prazo_entrega = request.POST.get('prazo_entrega', '').strip()
         anexo = request.FILES.get('anexo')
+        
+        # DEBUG - Ver o que está chegando
+        print(f"=== DEBUG CRIAÇÃO ATIVIDADE ===")
+        print(f"Título: {titulo}")
+        print(f"Descrição: {descricao}")
+        print(f"Tipo: {tipo}")
+        print(f"Ano 1: {ano_1}")
+        print(f"Ano 2: {ano_2}")
+        print(f"Ano 3: {ano_3}")
+        print(f"Todos: {todos}")
+        print(f"Prazo: {prazo_entrega}")
+        print(f"Anexo: {anexo}")
+        print(f"POST completo: {request.POST}")
+        print(f"===========================")
         
         # ========================================
         # VALIDAÇÕES 
         # ========================================
         
         # 1. VALIDAR TÍTULO (50 CARACTERES, APENAS LETRAS E ESPAÇOS)
-        if not titulo or len(titulo) > 50:
-            messages.error(request, '❌ Título inválido (máx 50 caracteres).')
+        if not titulo:
+            messages.error(request, '❌ O título é obrigatório.')
+            return redirect('atividades:lista')
+            
+        if len(titulo) > 50:
+            messages.error(request, '❌ Título muito longo (máx 50 caracteres).')
             return redirect('atividades:lista')
         
         titulo_regex = r'^[A-Za-zÀ-ÿÇç\s]+$'
@@ -154,7 +174,7 @@ def processar_criacao_atividade(request):
         
         # 2. VALIDAR DESCRIÇÃO
         if not descricao:
-            messages.error(request, '❌ Descrição é obrigatória.')
+            messages.error(request, '❌ A descrição é obrigatória.')
             return redirect('atividades:lista')
         
         # 3. VALIDAR PÚBLICO-ALVO
@@ -164,7 +184,7 @@ def processar_criacao_atividade(request):
         
         # 4. VALIDAR TIPO
         if tipo not in ['ATIVIDADE', 'AVISO_PROVA', 'AVISO_SIMPLES']:
-            messages.error(request, '❌ Tipo de atividade inválido.')
+            messages.error(request, '❌ Selecione o tipo de atividade.')
             return redirect('atividades:lista')
         
         # 5. CRIAR ATIVIDADE
@@ -208,6 +228,8 @@ def processar_criacao_atividade(request):
         # 9. SALVAR NO BANCO DE DADOS
         atividade.save()
         
+        print(f"✅ Atividade salva com ID: {atividade.id}")
+        
         # 10. MENSAGEM DE SUCESSO
         anos_destino = atividade.get_anos_destino_display()
         messages.success(request, f'✅ Atividade "{titulo}" criada com sucesso para: {anos_destino}.')
@@ -215,6 +237,9 @@ def processar_criacao_atividade(request):
         return redirect('atividades:lista')
         
     except Exception as e:
+        print(f"❌ ERRO AO CRIAR ATIVIDADE: {str(e)}")
+        import traceback
+        traceback.print_exc()
         messages.error(request, f'❌ Erro ao criar atividade: {str(e)}')
         return redirect('atividades:lista')
 

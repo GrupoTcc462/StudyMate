@@ -115,13 +115,14 @@ def conversa(request, chat_id):
 @login_required
 def nova_conversa(request):
     """
-    Busca usuários para iniciar nova conversa
+    CORRIGIDO - Busca usuários e cria nova conversa
     """
+    # GET com AJAX - Buscar usuários
     if request.method == 'GET':
         query = request.GET.get('q', '').strip()
         
+        # Se for requisição AJAX de busca
         if query and len(query) >= 3:
-            # Buscar usuários (exceto o próprio usuário)
             usuarios = User.objects.filter(
                 Q(username__icontains=query) | Q(email__icontains=query)
             ).exclude(id=request.user.id)[:10]
@@ -135,6 +136,10 @@ def nova_conversa(request):
             
             return JsonResponse({'resultados': resultados})
         
+        # Se não houver query, renderizar página
+        if not query:
+            return render(request, 'chat/nova_conversa.html')
+        
         return JsonResponse({'resultados': []})
     
     # POST - Criar novo chat
@@ -143,27 +148,28 @@ def nova_conversa(request):
         
         if not destinatario_id:
             messages.error(request, 'Selecione um usuário.')
-            return redirect('chat:lista')
+            return redirect('chat:nova')
         
         try:
             destinatario = User.objects.get(id=destinatario_id)
         except User.DoesNotExist:
             messages.error(request, 'Usuário não encontrado.')
-            return redirect('chat:lista')
+            return redirect('chat:nova')
         
-        # Verificar se já existe chat
+        # CORRIGIDO - Evitar conversa duplicada (bidirecional)
         chat = Chat.objects.filter(
             Q(remetente=request.user, destinatario=destinatario) |
             Q(remetente=destinatario, destinatario=request.user)
         ).first()
         
         if not chat:
-            # Criar novo chat
             chat = Chat.objects.create(
                 remetente=request.user,
                 destinatario=destinatario
             )
             messages.success(request, f'Chat iniciado com {destinatario.username}!')
+        else:
+            messages.info(request, f'Você já tem uma conversa com {destinatario.username}.')
         
         return redirect('chat:conversa', chat_id=chat.id)
     
