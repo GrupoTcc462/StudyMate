@@ -49,7 +49,10 @@ class Atividade(models.Model):
         verbose_name='Professor'
     )
     titulo = models.CharField(max_length=50, verbose_name='Título')
-    descricao = models.TextField(max_length=800, blank=True, verbose_name='Descrição/Orientações')
+    
+    # DESCRIÇÃO SEM LIMITE CONFORME RELATÓRIO
+    descricao = models.TextField(blank=True, verbose_name='Descrição/Orientações')
+    
     tipo = models.CharField(max_length=20, choices=TIPO_CHOICES, verbose_name='Tipo de Atividade')
     
     # Público-alvo (pode ser múltiplo)

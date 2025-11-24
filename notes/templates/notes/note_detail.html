@@ -26,12 +26,36 @@
             padding: 20px;
         }
 
+        /* BOTÃO VOLTAR (ESTILO PERFIL - ESQUERDA E BRANCO) */
+        .btn-back {
+            background: white;
+            color: #495057;
+            border: 2px solid rgba(0,0,0,0.1);
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            margin-bottom: 20px;
+            float: left;
+        }
+
+        .btn-back:hover {
+            background: #f8f9fa;
+            color: #495057;
+            border-color: rgba(0,0,0,0.2);
+            transform: translateX(-5px);
+        }
+
         .note-detail-card {
             background: white;
             border-radius: 20px;
             padding: 40px;
             box-shadow: 0 8px 30px rgba(0,0,0,0.15);
             margin-bottom: 30px;
+            clear: both;
         }
 
         .note-header {
@@ -256,6 +280,9 @@
             border-radius: 10px;
             font-size: 1rem;
             resize: vertical;
+            /* QUEBRA DE LINHA AUTOMÁTICA */
+            word-wrap: break-word;
+            white-space: pre-wrap;
         }
 
         .comment-input:focus {
@@ -291,6 +318,10 @@
         .comment-text {
             color: #495057;
             line-height: 1.6;
+            /* QUEBRA DE LINHA AUTOMÁTICA */
+            word-wrap: break-word;
+            white-space: pre-wrap;
+            overflow-wrap: break-word;
         }
 
         .comment-date {
@@ -299,24 +330,7 @@
             margin-top: 5px;
         }
 
-        .btn-back {
-            background: #6c757d;
-            color: white;
-            padding: 12px 25px;
-            border-radius: 25px;
-            text-decoration: none;
-            display: inline-block;
-            font-weight: 600;
-            margin-bottom: 20px;
-        }
-
-        .btn-back:hover {
-            background: #5a6268;
-            color: white;
-            transform: translateY(-2px);
-        }
-
-        /* MODAL LOGIN */
+        /* MODAL */
         .modal-content {
             border-radius: 15px !important;
             overflow: hidden;
@@ -369,34 +383,8 @@
 </head>
 <body>
     <div class="container">
-        <!-- NAVBAR CORRIGIDA - Substitua o bloco <div class="nav"> completo por este -->
-<div class="nav">
-    <a href="{% url 'study:home' %}" style="background: rgb(100, 105, 120); color: white; text-decoration: none; padding: 15px 25px; border-radius: 50px; font-weight: 600; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(178, 34, 34, 0.3); display: inline-block;">
-        🏠 Home
-    </a>
-    <a href="{% url 'study:home' %}#materias" style="background: rgb(100, 105, 120); color: white; text-decoration: none; padding: 15px 25px; border-radius: 50px; font-weight: 600; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(178, 34, 34, 0.3); display: inline-block;">
-        📚 Matérias
-    </a>
-    <a href="{% url 'atividades:lista' %}" style="background: rgb(100, 105, 120); color: white; text-decoration: none; padding: 15px 25px; border-radius: 50px; font-weight: 600; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(178, 34, 34, 0.3); display: inline-block;">
-        💬 Chat
-    </a>
-    <a href="{% url 'notes:list' %}" style="background: var(--primary-dark); color: white; text-decoration: none; padding: 15px 25px; border-radius: 50px; font-weight: 600; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(178, 34, 34, 0.3); display: inline-block;">
-        📝 Notes
-    </a>
-    <a href="{% url 'study:home' %}#horarios" style="background: rgb(100, 105, 120); color: white; text-decoration: none; padding: 15px 25px; border-radius: 50px; font-weight: 600; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(178, 34, 34, 0.3); display: inline-block;">
-        🕐 Horários
-    </a>
-
-    {% if user.is_authenticated %}
-        <a href="{% url 'perfil:perfil' %}" style="background: rgb(100, 105, 120); color: white; text-decoration: none; padding: 15px 25px; border-radius: 50px; font-weight: 600; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(178, 34, 34, 0.3); display: inline-block;">
-            👤 Perfil
-        </a>
-    {% else %}
-        <a href="{% url 'accounts:login' %}" style="background: rgb(100, 105, 120); color: white; text-decoration: none; padding: 15px 25px; border-radius: 50px; font-weight: 600; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(178, 34, 34, 0.3); display: inline-block;">
-            🔐 Login
-        </a>
-    {% endif %}
-</div>
+        <!-- BOTÃO VOLTAR (CANTO SUPERIOR DIREITO) -->
+        <a href="{% url 'notes:list' %}" class="btn-back">← Voltar</a>
 
         <div class="note-detail-card">
             <!-- RECOMENDAÇÃO BANNER -->

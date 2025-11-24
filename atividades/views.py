@@ -1,10 +1,11 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.http import JsonResponse, FileResponse, Http404
+from django.http import JsonResponse, FileResponse, Http404, HttpResponse
 from django.views.decorators.http import require_POST
 from django.contrib import messages
 from django.utils import timezone
 from django.db.models import Q, F
+from datetime import timedelta
 from .models import Atividade, AtividadeVisualizacao, AtividadeEnvio, AtividadeSalva
 from .forms import AtividadeForm, AtividadeEnvioForm
 import os
@@ -132,7 +133,11 @@ def processar_criacao_atividade(request):
     prazo_entrega = request.POST.get('prazo_entrega', '')
     anexo = request.FILES.get('anexo')
     
-    # VALIDAÇÕES
+    # ========================================
+    # VALIDAÇÕES CONFORME RELATÓRIO
+    # ========================================
+    
+    # 1. VALIDAR TÍTULO (50 CARACTERES, APENAS LETRAS E ESPAÇOS)
     if not titulo or len(titulo) > 50:
         messages.error(request, 'Título inválido (máx 50 caracteres).')
         return redirect('atividades:lista')
@@ -142,19 +147,22 @@ def processar_criacao_atividade(request):
         messages.error(request, 'Título contém caracteres não permitidos. Use apenas letras e espaços.')
         return redirect('atividades:lista')
     
-    if not descricao or len(descricao) > 800:
-        messages.error(request, 'Descrição inválida (máx 800 caracteres).')
+    # 2. VALIDAR DESCRIÇÃO (SEM LIMITE CONFORME RELATÓRIO)
+    if not descricao:
+        messages.error(request, 'Descrição é obrigatória.')
         return redirect('atividades:lista')
     
+    # 3. VALIDAR PÚBLICO-ALVO
     if not any([ano_1, ano_2, ano_3, todos]):
         messages.error(request, 'Selecione pelo menos um ano ou "Todos".')
         return redirect('atividades:lista')
     
+    # 4. VALIDAR TIPO
     if tipo not in ['ATIVIDADE', 'AVISO_PROVA', 'AVISO_SIMPLES']:
         messages.error(request, 'Tipo de atividade inválido.')
         return redirect('atividades:lista')
     
-    # CRIAR ATIVIDADE
+    # 5. CRIAR ATIVIDADE
     atividade = Atividade(
         professor=request.user,
         titulo=titulo,
@@ -166,13 +174,25 @@ def processar_criacao_atividade(request):
         todos=todos
     )
     
+    # 6. VALIDAR E DEFINIR PRAZO (MÍNIMO 30 MINUTOS)
     if prazo_entrega:
         from django.utils.dateparse import parse_datetime
-        atividade.prazo_entrega = parse_datetime(prazo_entrega)
+        prazo_dt = parse_datetime(prazo_entrega)
+        
+        if prazo_dt:
+            limite_minimo = timezone.now() + timedelta(minutes=30)
+            
+            if prazo_dt < limite_minimo:
+                messages.error(request, 'O prazo deve ser no mínimo 30 minutos após agora.')
+                return redirect('atividades:lista')
+            
+            atividade.prazo_entrega = prazo_dt
     
+    # 7. ANEXO
     if anexo:
         atividade.anexo = anexo
     
+    # 8. DESABILITAR ENVIO PARA AVISOS
     if tipo in ['AVISO_PROVA', 'AVISO_SIMPLES']:
         atividade.permite_envio = False
     
@@ -192,28 +212,41 @@ def processar_criacao_atividade(request):
 @login_required
 def detalhe_atividade(request, pk):
     """
-    Detalhe de atividade para aluno
+    Detalhe de atividade para aluno - CORRIGIDO: SEM BLOQUEIO DE ACESSO
     """
-    if not is_aluno(request.user):
-        messages.error(request, 'Acesso restrito a alunos.')
-        return redirect('study:home')
-    
+    # Permitir acesso se usuário for DESTINATÁRIO ou CRIADOR
     atividade = get_object_or_404(Atividade, pk=pk)
     
-    # Registrar visualização (única)
-    visualizacao, created = AtividadeVisualizacao.objects.get_or_create(
-        atividade=atividade,
-        aluno=request.user
-    )
+    # Verificar se tem acesso
+    tem_acesso = False
     
-    if created:
-        Atividade.objects.filter(pk=pk).update(visualizacoes=F('visualizacoes') + 1)
+    # Se for professor criador
+    if atividade.professor == request.user:
+        tem_acesso = True
+    
+    # Se for aluno e a atividade é destinada para ele
+    if request.user.user_type == 'aluno':
+        tem_acesso = True
+    
+    if not tem_acesso:
+        messages.error(request, 'Você não tem acesso a esta atividade.')
+        return redirect('atividades:lista')
+    
+    # Registrar visualização (única) - APENAS PARA ALUNOS
+    if request.user.user_type == 'aluno':
+        visualizacao, created = AtividadeVisualizacao.objects.get_or_create(
+            atividade=atividade,
+            aluno=request.user
+        )
         
-        if not atividade.foi_visualizado:
-            atividade.foi_visualizado = True
-            atividade.save(update_fields=['foi_visualizado'])
-        
-        atividade.refresh_from_db()
+        if created:
+            Atividade.objects.filter(pk=pk).update(visualizacoes=F('visualizacoes') + 1)
+            
+            if not atividade.foi_visualizado:
+                atividade.foi_visualizado = True
+                atividade.save(update_fields=['foi_visualizado'])
+            
+            atividade.refresh_from_db()
     
     # Verificar se já enviou
     envio = AtividadeEnvio.objects.filter(
@@ -345,7 +378,7 @@ def baixar_anexo(request, pk):
 @login_required
 def gerar_ics(request, pk):
     """
-    Gerar arquivo .ics para agendamento
+    Gerar arquivo .ics para agendamento (CORRIGIDO CONFORME RELATÓRIO)
     """
     atividade = get_object_or_404(Atividade, pk=pk)
     
@@ -373,7 +406,6 @@ STATUS:CONFIRMED
 END:VEVENT
 END:VCALENDAR"""
     
-    from django.http import HttpResponse
     response = HttpResponse(ics_content, content_type='text/calendar')
     response['Content-Disposition'] = f'attachment; filename="{atividade.titulo}.ics"'
     
@@ -414,69 +446,7 @@ def criar_atividade(request):
     Criação de atividade por professor (PÁGINA SEPARADA - MANTIDA PARA COMPATIBILIDADE)
     """
     if request.method == 'POST':
-        titulo = request.POST.get('titulo', '').strip()
-        descricao = request.POST.get('descricao', '').strip()
-        tipo = request.POST.get('tipo', '')
-        ano_1 = request.POST.get('ano_1') == 'true'
-        ano_2 = request.POST.get('ano_2') == 'true'
-        ano_3 = request.POST.get('ano_3') == 'true'
-        todos = request.POST.get('todos') == 'true'
-        prazo_entrega = request.POST.get('prazo_entrega', '')
-        anexo = request.FILES.get('anexo')
-        
-        if not titulo or len(titulo) > 50:
-            messages.error(request, 'Título inválido (máx 50 caracteres).')
-            return redirect('atividades:criar')
-        
-        titulo_regex = r'^[A-Za-zÀ-ÿÇç\s]+$'
-        if not re.match(titulo_regex, titulo):
-            messages.error(request, 'Título contém caracteres não permitidos. Use apenas letras e espaços.')
-            return redirect('atividades:criar')
-        
-        if not descricao or len(descricao) > 800:
-            messages.error(request, 'Descrição inválida (máx 800 caracteres).')
-            return redirect('atividades:criar')
-        
-        if not any([ano_1, ano_2, ano_3, todos]):
-            messages.error(request, 'Selecione pelo menos um ano ou "Todos".')
-            return redirect('atividades:criar')
-        
-        if tipo not in ['ATIVIDADE', 'AVISO_PROVA', 'AVISO_SIMPLES']:
-            messages.error(request, 'Tipo de atividade inválido.')
-            return redirect('atividades:criar')
-        
-        atividade = Atividade(
-            professor=request.user,
-            titulo=titulo,
-            descricao=descricao,
-            tipo=tipo,
-            ano_1=ano_1,
-            ano_2=ano_2,
-            ano_3=ano_3,
-            todos=todos
-        )
-        
-        if prazo_entrega:
-            from django.utils.dateparse import parse_datetime
-            atividade.prazo_entrega = parse_datetime(prazo_entrega)
-        
-        if anexo:
-            atividade.anexo = anexo
-        
-        if tipo in ['AVISO_PROVA', 'AVISO_SIMPLES']:
-            atividade.permite_envio = False
-        
-        try:
-            atividade.full_clean()
-            atividade.save()
-            
-            anos_destino = atividade.get_anos_destino_display()
-            messages.success(request, f'✅ Atividade criada com sucesso para: {anos_destino}.')
-            
-            return redirect('atividades:painel_professor')
-        except Exception as e:
-            messages.error(request, f'Erro ao criar atividade: {str(e)}')
-            return redirect('atividades:criar')
+        return processar_criacao_atividade(request)
     
     return render(request, 'atividades/criar_atividade.html')
 

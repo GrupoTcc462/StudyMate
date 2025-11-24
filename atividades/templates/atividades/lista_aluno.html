@@ -30,6 +30,7 @@
             text-align: center;
         }
 
+        /* NAVBAR CORRIGIDA - MESMA COR PARA TODOS OS BOTÕES */
         .nav {
             display: flex;
             justify-content: center;
@@ -40,7 +41,7 @@
 
         .nav a,
         .nav button {
-            background: rgb(100, 105, 120);
+            background: var(--primary);
             color: white;
             text-decoration: none;
             padding: 15px 25px;
@@ -106,6 +107,7 @@
             box-shadow: 0 7px 25px rgba(40, 167, 69, 0.5);
         }
 
+        /* FILTROS */
         .filters-section {
             background: white;
             border-radius: 15px;
@@ -114,11 +116,84 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.08);
         }
 
+        .filters-section h4 {
+            color: #2c2c2c;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
         .filter-row {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 15px;
             margin-bottom: 15px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-group label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+
+        .filter-group select {
+            padding: 10px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 15px;
+        }
+
+        .btn-filter,
+        .btn-clear {
+            padding: 10px 25px;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            font-size: 0.95rem;
+        }
+
+        .btn-filter {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-filter:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-clear {
+            background: #6c757d;
+            color: white;
+            text-decoration: none;
+        }
+
+        .btn-clear:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+            color: white;
         }
 
         .atividade-card {
@@ -226,7 +301,7 @@
             background: #6c757d;
         }
 
-        /* ESTILOS DO MODAL */
+        /* MODAL */
         .modal-content {
             border-radius: 15px;
             border: none;
@@ -307,19 +382,16 @@
         <img src="{% static 'study/img/logoStudyMate.png' %}" height="144px" width="293">
         <h4>Atividades Acadêmicas</h4>
         
+        <!-- NAVBAR CORRIGIDA - TODAS AS CORES VERMELHAS -->
         <div class="nav">
             <a href="{% url 'study:home' %}">🏠 Home</a>
             <a href="{% url 'study:home' %}#materias">📚 Matérias</a>
+            <a href="{% url 'atividades:lista' %}" class="active">💬 Chat</a>
             <a href="{% url 'notes:list' %}">📝 Notes</a>
             <a href="{% url 'study:home' %}#horarios">🕐 Horários</a>
-            <a href="{% url 'atividades:lista' %}" class="active">💬 Chat</a>
 
             {% if user.is_authenticated %}
                 <a href="{% url 'perfil:perfil' %}">👤 Perfil</a>
-                <form method="post" action="{% url 'accounts:logout' %}" style="display:inline;">
-                    {% csrf_token %}
-                    <button type="submit">🚪 Sair</button>
-                </form>
             {% else %}
                 <a href="{% url 'accounts:login' %}">🔐 Login</a>
             {% endif %}
@@ -327,7 +399,7 @@
     </div>
 
     <div class="container">
-        <!-- BOTÃO CRIAR ATIVIDADE (APENAS PROFESSORES) - ABRE MODAL -->
+        <!-- BOTÃO CRIAR ATIVIDADE (APENAS PROFESSORES) -->
         {% if user.user_type == 'professor' or user.is_staff %}
             {% if not atividades_anotadas %}
                 <div class="create-first-activity">
@@ -345,26 +417,45 @@
             {% endif %}
         {% endif %}
 
-        <!-- FILTROS -->
+        <!-- FILTROS COM LEGENDAS -->
         <div class="filters-section">
+            <h4>🔍 Filtros</h4>
             <form method="get">
                 <div class="filter-row">
-                    <select name="tipo" class="form-select">
-                        <option value="">Todos os Tipos</option>
-                        <option value="ATIVIDADE" {% if filtro_tipo == 'ATIVIDADE' %}selected{% endif %}>Atividade</option>
-                        <option value="AVISO_PROVA" {% if filtro_tipo == 'AVISO_PROVA' %}selected{% endif %}>Aviso de Prova</option>
-                        <option value="AVISO_SIMPLES" {% if filtro_tipo == 'AVISO_SIMPLES' %}selected{% endif %}>Aviso Simples</option>
-                    </select>
+                    <div class="filter-group">
+                        <label>Tipo da atividade</label>
+                        <select name="tipo" class="form-select">
+                            <option value="">Todos</option>
+                            <option value="ATIVIDADE" {% if filtro_tipo == 'ATIVIDADE' %}selected{% endif %}>Atividade/Tarefa</option>
+                            <option value="AVISO_PROVA" {% if filtro_tipo == 'AVISO_PROVA' %}selected{% endif %}>Aviso de Prova</option>
+                            <option value="AVISO_SIMPLES" {% if filtro_tipo == 'AVISO_SIMPLES' %}selected{% endif %}>Aviso Simples</option>
+                        </select>
+                    </div>
 
-                    <select name="status" class="form-select">
-                        <option value="">Todos os Status</option>
-                        <option value="abertas" {% if filtro_status == 'abertas' %}selected{% endif %}>Abertas</option>
-                        <option value="enviadas" {% if filtro_status == 'enviadas' %}selected{% endif %}>Enviadas</option>
-                        <option value="pendentes" {% if filtro_status == 'pendentes' %}selected{% endif %}>Pendentes</option>
-                    </select>
+                    <div class="filter-group">
+                        <label>Status</label>
+                        <select name="status" class="form-select">
+                            <option value="">Todos</option>
+                            <option value="pendentes" {% if filtro_status == 'pendentes' %}selected{% endif %}>Pendentes</option>
+                            <option value="enviadas" {% if filtro_status == 'enviadas' %}selected{% endif %}>Enviados</option>
+                            <option value="abertas" {% if filtro_status == 'abertas' %}selected{% endif %}>Abertos</option>
+                        </select>
+                    </div>
 
-                    <button type="submit" class="btn btn-primary">🔍 Filtrar</button>
-                    <a href="{% url 'atividades:lista' %}" class="btn btn-secondary">❌ Limpar</a>
+                    <div class="filter-group">
+                        <label>Ordenação</label>
+                        <select name="order" class="form-select">
+                            <option value="recent">Mais recentes</option>
+                            <option value="views">Mais visualizados</option>
+                            <option value="deadline">Em prazo curto</option>
+                            <option value="saved">Salvos</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="filter-actions">
+                    <button type="submit" class="btn-filter">🔍 Filtrar</button>
+                    <a href="{% url 'atividades:lista' %}" class="btn-clear">❌ Limpar filtros</a>
                 </div>
             </form>
         </div>
@@ -403,7 +494,7 @@
                     <p><strong>Professor(a):</strong> {{ item.atividade.professor.username }}</p>
                     <p><strong>Destinado:</strong> {{ item.atividade.get_anos_destino_display }}</p>
                     {% if item.atividade.prazo_entrega %}
-                        <p><strong>📅 Prazo:</strong> {{ item.atividade.prazo_entrega|date:"d/m/Y às H:i" }}</p>
+                        <p><strong>📅 Prazo:</strong> {{ item.atividade.prazo_entrega|date:"d/m/Y 'às' H:i" }}</p>
                     {% endif %}
                 </div>
 
@@ -424,9 +515,7 @@
         {% endfor %}
     </div>
 
-    <!-- ========================================
-         MODAL DE CRIAÇÃO DE ATIVIDADE
-    ======================================== -->
+    <!-- MODAL DE CRIAÇÃO -->
     <div class="modal fade" id="criarAtividadeModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
@@ -438,7 +527,7 @@
                     <form method="POST" enctype="multipart/form-data" id="criarAtividadeForm">
                         {% csrf_token %}
 
-                        <!-- TÍTULO -->
+                        <!-- TÍTULO (50 CARACTERES, APENAS LETRAS E ESPAÇOS) -->
                         <div class="mb-3">
                             <label for="titulo" class="form-label required-field">Título da atividade</label>
                             <input type="text" id="titulo" name="titulo" class="form-control" 
@@ -446,17 +535,9 @@
                             <div class="char-counter" id="tituloCount">0/50</div>
                         </div>
 
-                        <!-- DESCRIÇÃO -->
-                        <div class="mb-3">
-                            <label for="descricao" class="form-label required-field">Descrição / Orientações</label>
-                            <textarea id="descricao" name="descricao" class="form-control" rows="4" 
-                                      maxlength="800" placeholder="Descreva a atividade..." required></textarea>
-                            <div class="char-counter" id="descricaoCount">0/800</div>
-                        </div>
-
                         <!-- TIPO -->
                         <div class="mb-3">
-                            <label class="form-label required-field">Tipo de atividade</label>
+                            <label class="form-label required-field">Tipo da atividade</label>
                             <div style="display: flex; flex-direction: column; gap: 10px;">
                                 <div class="form-check">
                                     <input class="form-check-input" type="radio" name="tipo" value="ATIVIDADE" 
@@ -474,6 +555,28 @@
                                     <label class="form-check-label" for="tipo3">📢 Aviso Simples</label>
                                 </div>
                             </div>
+                        </div>
+
+                        <!-- TIPO DE CONTEÚDO (APARECE APÓS SELEÇÃO DO TIPO) -->
+                        <div class="mb-3" id="tipoConteudoContainer" style="display: none;">
+                            <label class="form-label">Tipo de conteúdo</label>
+                            <select id="tipoConteudo" class="form-select">
+                                <option value="">Selecione...</option>
+                            </select>
+                        </div>
+
+                        <!-- PRAZO (MÍNIMO 30 MINUTOS) -->
+                        <div class="mb-3" id="prazoContainer" style="display: none;">
+                            <label for="prazo" class="form-label">⏳ Prazo de Entrega</label>
+                            <input type="datetime-local" id="prazo" name="prazo_entrega" class="form-control">
+                            <small class="text-muted">Mínimo 30 minutos após agora</small>
+                        </div>
+
+                        <!-- DESCRIÇÃO (SEM LIMITE) -->
+                        <div class="mb-3">
+                            <label for="descricao" class="form-label required-field">Descrição / Orientações</label>
+                            <textarea id="descricao" name="descricao" class="form-control" rows="4" 
+                                      placeholder="Descreva a atividade..." required></textarea>
                         </div>
 
                         <!-- DESTINADO PARA -->
@@ -497,13 +600,6 @@
                                     <label for="todos">Todos</label>
                                 </div>
                             </div>
-                            <small class="text-muted">Selecione pelo menos uma opção</small>
-                        </div>
-
-                        <!-- PRAZO -->
-                        <div class="mb-3" id="prazoContainer" style="display: none;">
-                            <label for="prazo" class="form-label">⏳ Prazo de Entrega</label>
-                            <input type="datetime-local" id="prazo" name="prazo_entrega" class="form-control">
                         </div>
 
                         <!-- ANEXO -->
@@ -511,14 +607,14 @@
                             <label for="anexo" class="form-label">📂 Anexo (opcional)</label>
                             <input type="file" id="anexo" name="anexo" class="form-control" 
                                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.zip">
-                            <small class="text-muted">Máximo 10MB • PDF, Word, Imagem ou ZIP</small>
+                            <small class="text-muted">Máximo 10MB</small>
                         </div>
 
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                             <button type="submit" class="btn btn-primary" id="btnCriar" 
                                     style="background: var(--primary); border: none;">
-                                Criar Atividade
+                                Salvar atividade
                             </button>
                         </div>
                     </form>
@@ -531,11 +627,9 @@
     <script>
         const csrfToken = '{{ csrf_token }}';
 
-        // CONTADORES
+        // CONTADOR TÍTULO (50 CARACTERES, APENAS LETRAS E ESPAÇOS)
         const titulo = document.getElementById('titulo');
-        const descricao = document.getElementById('descricao');
         const tituloCount = document.getElementById('tituloCount');
-        const descricaoCount = document.getElementById('descricaoCount');
 
         titulo.addEventListener('input', () => {
             tituloCount.textContent = `${titulo.value.length}/50`;
@@ -546,23 +640,60 @@
             }
         });
 
-        descricao.addEventListener('input', () => {
-            descricaoCount.textContent = `${descricao.value.length}/800`;
-        });
-
-        // MOSTRAR PRAZO
+        // MOSTRAR TIPO DE CONTEÚDO E PRAZO CONFORME TIPO SELECIONADO
         const tipoRadios = document.querySelectorAll('input[name="tipo"]');
+        const tipoConteudoContainer = document.getElementById('tipoConteudoContainer');
+        const tipoConteudoSelect = document.getElementById('tipoConteudo');
         const prazoContainer = document.getElementById('prazoContainer');
 
         tipoRadios.forEach(radio => {
             radio.addEventListener('change', () => {
-                if (radio.value === 'ATIVIDADE' || radio.value === 'AVISO_PROVA') {
-                    prazoContainer.style.display = 'block';
-                } else {
+                const tipo = radio.value;
+                
+                // Limpar opções anteriores
+                tipoConteudoSelect.innerHTML = '<option value="">Selecione...</option>';
+                
+                // Mostrar container
+                tipoConteudoContainer.style.display = 'block';
+                
+                if (tipo === 'AVISO_SIMPLES') {
+                    tipoConteudoSelect.innerHTML += `
+                        <option value="word">Word</option>
+                        <option value="imagem">Imagem</option>
+                    `;
                     prazoContainer.style.display = 'none';
-                    document.getElementById('prazo').value = '';
+                } else if (tipo === 'AVISO_PROVA') {
+                    tipoConteudoSelect.innerHTML += `
+                        <option value="word">Word</option>
+                        <option value="imagem">Imagem</option>
+                    `;
+                    prazoContainer.style.display = 'block';
+                } else if (tipo === 'ATIVIDADE') {
+                    tipoConteudoSelect.innerHTML += `
+                        <option value="word">Word</option>
+                        <option value="pdf">PDF</option>
+                        <option value="slides">Slides</option>
+                        <option value="imagem">Imagem</option>
+                        <option value="zip">ZIP</option>
+                        <option value="link">Link</option>
+                    `;
+                    prazoContainer.style.display = 'block';
                 }
             });
+        });
+
+        // VALIDAÇÃO DO PRAZO (MÍNIMO 30 MINUTOS)
+        const prazoInput = document.getElementById('prazo');
+        
+        prazoInput.addEventListener('change', () => {
+            const prazoDigitado = new Date(prazoInput.value);
+            const agora = new Date();
+            const limite = new Date(agora.getTime() + 30 * 60000);
+            
+            if (prazoDigitado < limite) {
+                alert('O prazo deve ser no mínimo 30 minutos após agora.');
+                prazoInput.value = '';
+            }
         });
 
         // VALIDAÇÃO CHECKBOX "TODOS"
