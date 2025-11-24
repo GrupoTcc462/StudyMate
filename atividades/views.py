@@ -27,7 +27,7 @@ def is_aluno(user):
 @login_required
 def lista_atividades(request):
     """
-    Lista de atividades - PROCESSA CRIAÇÃO VIA MODAL
+    Lista de atividades - CORRIGIDO: PROCESSA CRIAÇÃO VIA MODAL
     """
     # Se for professor, processar criação ou exibir suas atividades
     if is_professor(request.user):
@@ -122,97 +122,100 @@ def lista_atividades(request):
 
 def processar_criacao_atividade(request):
     """
-    Função auxiliar para processar criação de atividade via modal - CORRIGIDA
+    FUNÇÃO CORRIGIDA - Processa criação de atividade via modal
     """
-    titulo = request.POST.get('titulo', '').strip()
-    descricao = request.POST.get('descricao', '').strip()
-    tipo = request.POST.get('tipo', '')
-    
-    # CORRIGIDO: Verificar se checkboxes foram marcados
-    ano_1 = 'ano_1' in request.POST
-    ano_2 = 'ano_2' in request.POST
-    ano_3 = 'ano_3' in request.POST
-    todos = 'todos' in request.POST
-    
-    prazo_entrega = request.POST.get('prazo_entrega', '')
-    anexo = request.FILES.get('anexo')
-    
-    # ========================================
-    # VALIDAÇÕES 
-    # ========================================
-    
-    # 1. VALIDAR TÍTULO (50 CARACTERES, APENAS LETRAS E ESPAÇOS)
-    if not titulo or len(titulo) > 50:
-        messages.error(request, 'Título inválido (máx 50 caracteres).')
-        return redirect('atividades:lista')
-    
-    titulo_regex = r'^[A-Za-zÀ-ÿÇç\s]+$'
-    if not re.match(titulo_regex, titulo):
-        messages.error(request, 'Título contém caracteres não permitidos. Use apenas letras e espaços.')
-        return redirect('atividades:lista')
-    
-    # 2. VALIDAR DESCRIÇÃO
-    if not descricao:
-        messages.error(request, 'Descrição é obrigatória.')
-        return redirect('atividades:lista')
-    
-    # 3. VALIDAR PÚBLICO-ALVO
-    if not any([ano_1, ano_2, ano_3, todos]):
-        messages.error(request, 'Selecione pelo menos um ano ou "Todos".')
-        return redirect('atividades:lista')
-    
-    # 4. VALIDAR TIPO
-    if tipo not in ['ATIVIDADE', 'AVISO_PROVA', 'AVISO_SIMPLES']:
-        messages.error(request, 'Tipo de atividade inválido.')
-        return redirect('atividades:lista')
-    
-    # 5. CRIAR ATIVIDADE
-    atividade = Atividade(
-        professor=request.user,
-        titulo=titulo,
-        descricao=descricao,
-        tipo=tipo,
-        ano_1=ano_1,
-        ano_2=ano_2,
-        ano_3=ano_3,
-        todos=todos
-    )
-    
-    # 6. VALIDAR E DEFINIR PRAZO (MÍNIMO 30 MINUTOS)
-    if prazo_entrega:
-        from django.utils.dateparse import parse_datetime
-        prazo_dt = parse_datetime(prazo_entrega)
-        
-        if prazo_dt:
-            # Tornar timezone-aware
-            if timezone.is_naive(prazo_dt):
-                prazo_dt = timezone.make_aware(prazo_dt)
-            
-            limite_minimo = timezone.now() + timedelta(minutes=30)
-            
-            if prazo_dt < limite_minimo:
-                messages.error(request, 'O prazo deve ser no mínimo 30 minutos após agora.')
-                return redirect('atividades:lista')
-            
-            atividade.prazo_entrega = prazo_dt
-    
-    # 7. ANEXO
-    if anexo:
-        atividade.anexo = anexo
-    
-    # 8. DESABILITAR ENVIO PARA AVISOS
-    if tipo in ['AVISO_PROVA', 'AVISO_SIMPLES']:
-        atividade.permite_envio = False
-    
     try:
+        titulo = request.POST.get('titulo', '').strip()
+        descricao = request.POST.get('descricao', '').strip()
+        tipo = request.POST.get('tipo', '')
+        
+        # CORRIGIDO: Verificar se checkboxes foram marcados
+        ano_1 = 'ano_1' in request.POST
+        ano_2 = 'ano_2' in request.POST
+        ano_3 = 'ano_3' in request.POST
+        todos = 'todos' in request.POST
+        
+        prazo_entrega = request.POST.get('prazo_entrega', '')
+        anexo = request.FILES.get('anexo')
+        
+        # ========================================
+        # VALIDAÇÕES 
+        # ========================================
+        
+        # 1. VALIDAR TÍTULO (50 CARACTERES, APENAS LETRAS E ESPAÇOS)
+        if not titulo or len(titulo) > 50:
+            messages.error(request, '❌ Título inválido (máx 50 caracteres).')
+            return redirect('atividades:lista')
+        
+        titulo_regex = r'^[A-Za-zÀ-ÿÇç\s]+$'
+        if not re.match(titulo_regex, titulo):
+            messages.error(request, '❌ Título contém caracteres não permitidos. Use apenas letras e espaços.')
+            return redirect('atividades:lista')
+        
+        # 2. VALIDAR DESCRIÇÃO
+        if not descricao:
+            messages.error(request, '❌ Descrição é obrigatória.')
+            return redirect('atividades:lista')
+        
+        # 3. VALIDAR PÚBLICO-ALVO
+        if not any([ano_1, ano_2, ano_3, todos]):
+            messages.error(request, '❌ Selecione pelo menos um ano ou "Todos".')
+            return redirect('atividades:lista')
+        
+        # 4. VALIDAR TIPO
+        if tipo not in ['ATIVIDADE', 'AVISO_PROVA', 'AVISO_SIMPLES']:
+            messages.error(request, '❌ Tipo de atividade inválido.')
+            return redirect('atividades:lista')
+        
+        # 5. CRIAR ATIVIDADE
+        atividade = Atividade(
+            professor=request.user,
+            titulo=titulo,
+            descricao=descricao,
+            tipo=tipo,
+            ano_1=ano_1,
+            ano_2=ano_2,
+            ano_3=ano_3,
+            todos=todos
+        )
+        
+        # 6. VALIDAR E DEFINIR PRAZO (MÍNIMO 30 MINUTOS)
+        if prazo_entrega:
+            from django.utils.dateparse import parse_datetime
+            prazo_dt = parse_datetime(prazo_entrega)
+            
+            if prazo_dt:
+                # Tornar timezone-aware
+                if timezone.is_naive(prazo_dt):
+                    prazo_dt = timezone.make_aware(prazo_dt)
+                
+                limite_minimo = timezone.now() + timedelta(minutes=30)
+                
+                if prazo_dt < limite_minimo:
+                    messages.error(request, '❌ O prazo deve ser no mínimo 30 minutos após agora.')
+                    return redirect('atividades:lista')
+                
+                atividade.prazo_entrega = prazo_dt
+        
+        # 7. ANEXO
+        if anexo:
+            atividade.anexo = anexo
+        
+        # 8. DESABILITAR ENVIO PARA AVISOS
+        if tipo in ['AVISO_PROVA', 'AVISO_SIMPLES']:
+            atividade.permite_envio = False
+        
+        # 9. SALVAR NO BANCO DE DADOS
         atividade.save()
         
+        # 10. MENSAGEM DE SUCESSO
         anos_destino = atividade.get_anos_destino_display()
         messages.success(request, f'✅ Atividade "{titulo}" criada com sucesso para: {anos_destino}.')
         
         return redirect('atividades:lista')
+        
     except Exception as e:
-        messages.error(request, f'Erro ao criar atividade: {str(e)}')
+        messages.error(request, f'❌ Erro ao criar atividade: {str(e)}')
         return redirect('atividades:lista')
 
 

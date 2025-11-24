@@ -1,11 +1,9 @@
 from django.db import models
-
-# Create your models here.
-from django.db import models
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 import os
+import re
 
 User = get_user_model()
 
@@ -117,18 +115,17 @@ class Mensagem(models.Model):
         """Remove palavras ofensivas da mensagem"""
         palavras_proibidas = [
             'faca', 'facada', 'matar', 'morrer', 'droga', 'cocaina',
-            'maconha', 'crack', 'palavrao1', 'palavrao2'
-            # Adicione mais palavras conforme necessário
+            'maconha', 'crack', 'merda', 'porra', 'caralho', 'puta',
+            'viado', 'bicha', 'otario', 'idiota', 'burro', 'imbecil'
         ]
         
         mensagem_limpa = self.mensagem
         for palavra in palavras_proibidas:
-            if palavra.lower() in mensagem_limpa.lower():
+            # Usar regex para buscar palavra completa (case insensitive)
+            pattern = re.compile(r'\b' + re.escape(palavra) + r'\b', re.IGNORECASE)
+            if pattern.search(mensagem_limpa):
                 # Substituir por asteriscos do mesmo tamanho
-                mensagem_limpa = mensagem_limpa.replace(
-                    palavra, 
-                    '*' * len(palavra)
-                )
+                mensagem_limpa = pattern.sub('*' * len(palavra), mensagem_limpa)
         
         self.mensagem = mensagem_limpa
     
