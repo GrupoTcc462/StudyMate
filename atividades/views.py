@@ -1,10 +1,11 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.http import JsonResponse, FileResponse, Http404, HttpResponse
-from django.views.decorators.http import require_POST
+from django.http import JsonResponse, HttpResponseForbidden, FileResponse, Http404, HttpResponse
+from django.views.decorators.http import require_http_methods, require_POST
+from django.core.paginator import Paginator
+from django.db.models import F, Q
 from django.contrib import messages
 from django.utils import timezone
-from django.db.models import Q, F
 from datetime import timedelta
 from .models import Atividade, AtividadeVisualizacao, AtividadeEnvio, AtividadeSalva
 from .forms import AtividadeForm, AtividadeEnvioForm
@@ -121,15 +122,18 @@ def lista_atividades(request):
 
 def processar_criacao_atividade(request):
     """
-    Função auxiliar para processar criação de atividade via modal
+    Função auxiliar para processar criação de atividade via modal - CORRIGIDA
     """
     titulo = request.POST.get('titulo', '').strip()
     descricao = request.POST.get('descricao', '').strip()
     tipo = request.POST.get('tipo', '')
-    ano_1 = request.POST.get('ano_1') == 'true'
-    ano_2 = request.POST.get('ano_2') == 'true'
-    ano_3 = request.POST.get('ano_3') == 'true'
-    todos = request.POST.get('todos') == 'true'
+    
+    # CORRIGIDO: Verificar se checkboxes foram marcados
+    ano_1 = 'ano_1' in request.POST
+    ano_2 = 'ano_2' in request.POST
+    ano_3 = 'ano_3' in request.POST
+    todos = 'todos' in request.POST
+    
     prazo_entrega = request.POST.get('prazo_entrega', '')
     anexo = request.FILES.get('anexo')
     
@@ -147,7 +151,7 @@ def processar_criacao_atividade(request):
         messages.error(request, 'Título contém caracteres não permitidos. Use apenas letras e espaços.')
         return redirect('atividades:lista')
     
-    # 2. VALIDAR DESCRIÇÃO (SEM LIMITE CONFORME RELATÓRIO)
+    # 2. VALIDAR DESCRIÇÃO
     if not descricao:
         messages.error(request, 'Descrição é obrigatória.')
         return redirect('atividades:lista')
@@ -180,6 +184,10 @@ def processar_criacao_atividade(request):
         prazo_dt = parse_datetime(prazo_entrega)
         
         if prazo_dt:
+            # Tornar timezone-aware
+            if timezone.is_naive(prazo_dt):
+                prazo_dt = timezone.make_aware(prazo_dt)
+            
             limite_minimo = timezone.now() + timedelta(minutes=30)
             
             if prazo_dt < limite_minimo:
@@ -197,11 +205,10 @@ def processar_criacao_atividade(request):
         atividade.permite_envio = False
     
     try:
-        atividade.full_clean()
         atividade.save()
         
         anos_destino = atividade.get_anos_destino_display()
-        messages.success(request, f'✅ Atividade criada com sucesso para: {anos_destino}.')
+        messages.success(request, f'✅ Atividade "{titulo}" criada com sucesso para: {anos_destino}.')
         
         return redirect('atividades:lista')
     except Exception as e:
@@ -214,7 +221,6 @@ def detalhe_atividade(request, pk):
     """
     Detalhe de atividade para aluno - CORRIGIDO: SEM BLOQUEIO DE ACESSO
     """
-    # Permitir acesso se usuário for DESTINATÁRIO ou CRIADOR
     atividade = get_object_or_404(Atividade, pk=pk)
     
     # Verificar se tem acesso

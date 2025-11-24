@@ -74,6 +74,36 @@
             padding: 20px;
         }
 
+        /* BOTÃO NAVEGAÇÃO CHAT <-> ATIVIDADES */
+        .section-nav {
+            background: white;
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            display: flex;
+            justify-content: center;
+        }
+
+        .btn-section {
+            background: var(--primary);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 25px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-section:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            color: white;
+        }
+
         .create-first-activity {
             text-align: center;
             padding: 60px 20px;
@@ -386,7 +416,7 @@
         <div class="nav">
             <a href="{% url 'study:home' %}">🏠 Home</a>
             <a href="{% url 'study:home' %}#materias">📚 Matérias</a>
-            <a href="{% url 'atividades:lista' %}" class="active">💬 Chat</a>
+            <a href="{% url 'atividades:lista' %}" class="active">📋 Atividades</a>
             <a href="{% url 'notes:list' %}">📝 Notes</a>
             <a href="{% url 'study:home' %}#horarios">🕐 Horários</a>
 
@@ -399,6 +429,13 @@
     </div>
 
     <div class="container">
+        <!-- BOTÃO IR PARA CHAT -->
+        <div class="section-nav">
+            <a href="{% url 'chat:lista' %}" class="btn-section">
+                💬 Ir para Chat
+            </a>
+        </div>
+
         <!-- BOTÃO CRIAR ATIVIDADE (APENAS PROFESSORES) -->
         {% if user.user_type == 'professor' or user.is_staff %}
             {% if not atividades_anotadas %}
@@ -557,14 +594,6 @@
                             </div>
                         </div>
 
-                        <!-- TIPO DE CONTEÚDO (APARECE APÓS SELEÇÃO DO TIPO) -->
-                        <div class="mb-3" id="tipoConteudoContainer" style="display: none;">
-                            <label class="form-label">Tipo de conteúdo</label>
-                            <select id="tipoConteudo" class="form-select">
-                                <option value="">Selecione...</option>
-                            </select>
-                        </div>
-
                         <!-- PRAZO (MÍNIMO 30 MINUTOS) -->
                         <div class="mb-3" id="prazoContainer" style="display: none;">
                             <label for="prazo" class="form-label">⏳ Prazo de Entrega</label>
@@ -640,44 +669,17 @@
             }
         });
 
-        // MOSTRAR TIPO DE CONTEÚDO E PRAZO CONFORME TIPO SELECIONADO
+        // MOSTRAR PRAZO CONFORME TIPO SELECIONADO
         const tipoRadios = document.querySelectorAll('input[name="tipo"]');
-        const tipoConteudoContainer = document.getElementById('tipoConteudoContainer');
-        const tipoConteudoSelect = document.getElementById('tipoConteudo');
         const prazoContainer = document.getElementById('prazoContainer');
 
         tipoRadios.forEach(radio => {
             radio.addEventListener('change', () => {
-                const tipo = radio.value;
-                
-                // Limpar opções anteriores
-                tipoConteudoSelect.innerHTML = '<option value="">Selecione...</option>';
-                
-                // Mostrar container
-                tipoConteudoContainer.style.display = 'block';
-                
-                if (tipo === 'AVISO_SIMPLES') {
-                    tipoConteudoSelect.innerHTML += `
-                        <option value="word">Word</option>
-                        <option value="imagem">Imagem</option>
-                    `;
+                if (radio.value === 'ATIVIDADE' || radio.value === 'AVISO_PROVA') {
+                    prazoContainer.style.display = 'block';
+                } else {
                     prazoContainer.style.display = 'none';
-                } else if (tipo === 'AVISO_PROVA') {
-                    tipoConteudoSelect.innerHTML += `
-                        <option value="word">Word</option>
-                        <option value="imagem">Imagem</option>
-                    `;
-                    prazoContainer.style.display = 'block';
-                } else if (tipo === 'ATIVIDADE') {
-                    tipoConteudoSelect.innerHTML += `
-                        <option value="word">Word</option>
-                        <option value="pdf">PDF</option>
-                        <option value="slides">Slides</option>
-                        <option value="imagem">Imagem</option>
-                        <option value="zip">ZIP</option>
-                        <option value="link">Link</option>
-                    `;
-                    prazoContainer.style.display = 'block';
+                    document.getElementById('prazo').value = '';
                 }
             });
         });
