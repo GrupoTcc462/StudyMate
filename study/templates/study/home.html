@@ -61,31 +61,31 @@
             
             <!-- SUBSTITUIR A NAVBAR COMPLETA NO home.html POR ESTA: -->
 
-<div class="nav">
-    <button class="nav-btn active" onclick="showSection('home')">🏠 Home</button>
-    <button class="nav-btn" onclick="showSection('materias')">📚 Matérias</button>
-    
-    <!-- CHAT CORRIGIDO - AGORA VAI PARA LISTA DE ATIVIDADES -->
-    <a href="{% url 'atividades:lista' %}" class="nav-btn">
-        💬 Chat
-    </a>
-    
-    <a href="{% url 'notes:list' %}" class="nav-btn">
-        📝 Notes
-    </a>
-    
-    <button class="nav-btn" onclick="showSection('horarios')">🕐 Horários</button>
+            <div class="nav">
+                <button class="nav-btn active" onclick="showSection('home')">🏠 Home</button>
+                <button class="nav-btn" onclick="showSection('materias')">📚 Matérias</button>
+                
+                <!-- CHAT CORRIGIDO - AGORA VAI PARA LISTA DE ATIVIDADES -->
+                <a href="{% url 'atividades:lista' %}" class="nav-btn">
+                    💬 Chat
+                </a>
+                
+                <a href="{% url 'notes:list' %}" class="nav-btn">
+                    📝 Notes
+                </a>
+                
+                <button class="nav-btn" onclick="showSection('horarios')">🕐 Horários</button>
 
-    {% if user.is_authenticated %}
-        <a href="{% url 'perfil:perfil' %}" class="nav-btn">
-            👤 Perfil
-        </a>
-    {% else %}
-        <a href="{% url 'accounts:login' %}" class="nav-btn">
-            🔐 Login
-        </a>
-    {% endif %}
-</div>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'perfil:perfil' %}" class="nav-btn">
+                        👤 Perfil
+                    </a>
+                {% else %}
+                    <a href="{% url 'accounts:login' %}" class="nav-btn">
+                        🔐 Login
+                    </a>
+                {% endif %}
+            </div>
         </div>
 
         <div class="content">

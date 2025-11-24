@@ -134,7 +134,7 @@ def processar_criacao_atividade(request):
     anexo = request.FILES.get('anexo')
     
     # ========================================
-    # VALIDAÇÕES CONFORME RELATÓRIO
+    # VALIDAÇÕES 
     # ========================================
     
     # 1. VALIDAR TÍTULO (50 CARACTERES, APENAS LETRAS E ESPAÇOS)

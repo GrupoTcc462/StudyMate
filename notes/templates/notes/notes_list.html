@@ -39,12 +39,7 @@
             text-align: center;
         }
 
-        .header h4 {
-            color: #2c2c2c;
-            font-size: 1.1rem;
-            margin-top: 10px;
-            font-weight: 400;
-        }
+      
 
         /* NAVBAR CORRIGIDA */
         .nav {
@@ -452,7 +447,7 @@
                     </div>
 
                     <div class="filter-box">
-                        <label>📄 Tipo de Conteúdo</label>
+                        <label> Tipo de Conteúdo</label>
                         <select name="file_type" id="typeFilter" class="filter-field">
                             <option value="">Todos os tipos</option>
                             {% for code, name in file_types %}
@@ -464,7 +459,7 @@
                     </div>
 
                     <div class="filter-box">
-                        <label>🔢 Ordenar por</label>
+                        <label> Ordenar por</label>
                         <select name="order" id="orderFilter" class="filter-field">
                             <option value="recent" {% if current_order == 'recent' %}selected{% endif %}>Mais Recentes</option>
                             <option value="likes" {% if current_order == 'likes' %}selected{% endif %}>Mais Curtidos</option>
@@ -474,7 +469,7 @@
                     </div>
 
                     <div class="filter-box">
-                        <label>⭐ Recomendados</label>
+                        <label> Recomendados</label>
                         <select name="recommended" id="recommendedFilter" class="filter-field">
                             <option value="">Todos</option>
                             <option value="true" {% if request.GET.recommended == 'true' %}selected{% endif %}>Apenas Recomendados</option>
@@ -576,7 +571,7 @@
                         {% csrf_token %}
                         
                         <div class="mb-3" style="text-align: left;">
-                            <label class="form-label" style="text-align: left; display: block;">Título *</label>
+                            <label class="form-label" style="text-align: left; display: block;">Título </label>
                             <input type="text" name="title" class="form-control" required maxlength="50" 
                                    placeholder="Ex: Resumo de Revolução Francesa" id="titleInput"
                                    style="text-align: left;">
@@ -593,7 +588,7 @@
                         </div>
 
                         <div class="mb-3" style="text-align: left;">
-                            <label class="form-label" style="text-align: left; display: block;">Matéria *</label>
+                            <label class="form-label" style="text-align: left; display: block;">Matéria </label>
                             <select name="subject" class="form-select" id="subjectSelect" required style="text-align: left;">
                                 <option value="">Selecione uma matéria</option>
                                 {% for subject in subjects %}
@@ -603,26 +598,26 @@
                         </div>
 
                         <div class="mb-3" style="text-align: left;">
-                            <label class="form-label" style="text-align: left; display: block;">Tipo de Conteúdo *</label>
+                            <label class="form-label" style="text-align: left; display: block;">Tipo de Conteúdo </label>
                             <select name="file_type" id="fileTypeSelect" class="form-select" required style="text-align: left;">
                                 <option value="">Selecione...</option>
-                                <option value="PDF">📄 PDF</option>
-                                <option value="DOC">📝 Documento Word</option>
-                                <option value="PPT">📊 Slides</option>
-                                <option value="LINK">🔗 Link Externo</option>
+                                <option value="PDF"> PDF</option>
+                                <option value="DOC"> Documento Word</option>
+                                <option value="PPT"> Slides</option>
+                                <option value="LINK"> Link Externo</option>
                             </select>
                         </div>
 
                         <!-- CAMPO DE ARQUIVO (APARECE CONFORME TIPO) -->
                         <div class="mb-3" id="fileInput" style="display: none;">
-                            <label class="form-label">Arquivo *</label>
+                            <label class="form-label">Arquivo </label>
                             <input type="file" name="file" class="form-control" id="fileUpload">
                             <small class="text-muted" id="fileHint">Máximo 10MB</small>
                         </div>
 
                         <!-- CAMPO DE LINK (APARECE PARA TIPO LINK) -->
                         <div class="mb-3" id="linkInput" style="display: none;">
-                            <label class="form-label">Link *</label>
+                            <label class="form-label">Link </label>
                             <input type="url" name="link" class="form-control" placeholder="https://exemplo.com">
                         </div>
 
