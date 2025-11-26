@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <title>Acesso Restrito - Matérias</title>
+    <link rel="stylesheet" href="{% static 'study/style.css' %}">
+</head>
+<body>
+
+    <div class="nav">
+        <a href="/study/" class="nav-btn">🏠 Home</a>
+        <a href="/accounts/login/" class="nav-btn">🔐 Login</a>
+    </div>
+
+    <div class="container" style="max-width:800px; margin: 40px auto;">
+      <div class="card" style="padding:30px; border-radius:12px;">
+        <h2>Acesso restrito</h2>
+        <p style="color: #333; font-size:1.05rem;">
+          Você precisa estar logado para acessar a aba matérias.
+        </p>
+        <a href="{% url 'accounts:login' %}" class="nav-btn" style="margin-top:20px; display:inline-block;">
+            Fazer Login
+        </a>
+      </div>
+    </div>
+
+</body>
+</html>

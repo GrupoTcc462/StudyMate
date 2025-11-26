@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matérias - StudyMate</title>
+    <link rel="stylesheet" href="{% static 'study/style.css' %}">
+</head>
+<body>
+    <div class="container">
+        <!-- HEADER -->
+        <div class="header">
+            <img src="{% static 'study/img/logoStudyMate.png' %}" height="144px" width="293" alt="StudyMate Logo">
+            <p>Portal do Estudante - Sua plataforma de estudos</p>
+            
+            <!-- NAVIGATION -->
+            <div class="nav">
+                <a href="{% url 'study:home' %}" class="nav-btn">🏠 Home</a>
+                <a href="{% url 'materias:home' %}" class="nav-btn active">📚 Matérias</a>
+                <a href="{% url 'chat:lista' %}" class="nav-btn">💬 Chat</a>
+                <a href="{% url 'notes:list' %}" class="nav-btn">📝 Notes</a>
+                <button class="nav-btn" onclick="showSection('horarios')">🕐 Horários</button>
+                
+                {% if user.is_authenticated %}
+                    <a href="{% url 'perfil:perfil' %}" class="nav-btn">👤 Perfil</a>
+                {% else %}
+                    <a href="{% url 'accounts:login' %}" class="nav-btn">🔐 Login</a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- CONTENT -->
+        <div class="content">
+            <h2>📚 Matérias Disponíveis</h2>
+            <p style="text-align: center; color: var(--text-light); margin-bottom: 30px;">
+                Selecione uma matéria para acessar conteúdos, vídeo-aulas, PDFs e materiais de estudo
+            </p>
+
+            {% if materias %}
+                <div class="grid">
+                    {% for materia in materias %}
+                        <div class="card">
+                            <h3>{{ materia.name }}</h3>
+                            {% if materia.description %}
+                                <p style="color: var(--text-light); margin: 10px 0; font-size: 0.95rem;">
+                                    {{ materia.description|truncatewords:15 }}
+                                </p>
+                            {% endif %}
+                            <a href="{% url 'materias:detail' materia.slug %}" 
+                               style="display: inline-block; margin-top: 15px; background: var(--primary); color: white; padding: 12px 25px; border-radius: 50px; text-decoration: none; font-weight: 600; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(178, 34, 34, 0.3);">
+                                Acessar Matéria →
+                            </a>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="card" style="text-align: center; padding: 40px;">
+                    <h3>📭 Nenhuma matéria cadastrada</h3>
+                    <p style="color: var(--text-light); margin-top: 15px;">
+                        As matérias serão adicionadas em breve. Entre em contato com a administração.
+                    </p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- FOOTER -->
+        <footer>
+            <p><strong>Endereço:</strong> Av. Paulo Lacerda Quartim Barbosa, 630 - Santa Bárbara, Itapira - SP, 13977-175</p>
+            <p><strong>Telefone:</strong> (19) 3843-1171</p>
+            <br>
+            <p>&copy; 2024 ETEC João Maria Stevanatto. Todos os direitos reservados.</p>
+        </footer>
+    </div>
+</body>
+</html>

@@ -15,6 +15,7 @@ urlpatterns = [
     path('perfil/', include('perfil.urls', namespace='perfil')),
     path('atividades/', include('atividades.urls', namespace='atividades')),
     path('chat/', include('chat.urls', namespace='chat')),
+    path('materias/', include('materias.urls', namespace='materias')),
 ]
 
 if settings.DEBUG:
