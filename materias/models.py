@@ -3,42 +3,43 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
+
 class Subject(models.Model):
-    """Matéria (ex: Matemática)"""
-    name = models.CharField(max_length=120, unique=True)
+    """Matéria (ex: Matemática, História)"""
+    name = models.CharField(max_length=120, unique=True, verbose_name='Nome')
     slug = models.SlugField(max_length=140, unique=True)
-    description = models.TextField(blank=True)
+    description = models.TextField(blank=True, verbose_name='Descrição')
+    icone = models.CharField(max_length=10, blank=True, verbose_name='Ícone (emoji)', 
+                              help_text='Ex: 📐, 📚, 🧪')
 
     class Meta:
         ordering = ['name']
+        verbose_name = 'Matéria'
+        verbose_name_plural = 'Matérias'
 
     def __str__(self):
         return self.name
 
 
-class Content(models.Model):
-    CONTENT_TYPES = [
-        ('map', 'Mapa Mental'),
-        ('res', 'Resumo'),
-        ('vid', 'Vídeoaula'),
-        ('exe', 'Lista de Exercícios'),
-        ('doc', 'PDF/Doc'),
-        ('other', 'Outro'),
-    ]
-
-    subject = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name='contents')
-    content_type = models.CharField(max_length=10, choices=CONTENT_TYPES)
-    title = models.CharField(max_length=250)
-    description = models.TextField(blank=True)
-    external_url = models.URLField(blank=True, help_text="Link do vídeo/external resource (opcional)")
-    file = models.FileField(upload_to='materias/files/%Y/%m/', blank=True, null=True)
-    thumbnail = models.ImageField(upload_to='materias/thumbs/%Y/%m/', blank=True, null=True)
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    recommended = models.BooleanField(default=False)
+class LinkExterno(models.Model):
+    """
+    Links para sites educacionais externos
+    Admins cadastram até 5 links por matéria
+    """
+    materia = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name='links_externos')
+    nome_site = models.CharField(max_length=100, verbose_name='Nome do Site')
+    url = models.URLField(verbose_name='URL Completo')
+    descricao = models.CharField(max_length=200, blank=True, verbose_name='Descrição')
+    ordem = models.IntegerField(default=0, verbose_name='Ordem de Exibição')
+    adicionado_por = models.ForeignKey('accounts.User', on_delete=models.SET_NULL, null=True)
+    adicionado_em = models.DateTimeField(auto_now_add=True)
+    atualizado_em = models.DateTimeField(auto_now=True)
+    ativo = models.BooleanField(default=True, verbose_name='Ativo')
 
     class Meta:
-        ordering = ['-recommended', '-created_at']
+        ordering = ['materia', 'ordem', 'nome_site']
+        verbose_name = 'Link Externo'
+        verbose_name_plural = 'Links Externos'
 
     def __str__(self):
-        return f"{self.title} ({self.get_content_type_display()})"
+        return f"{self.materia.name} - {self.nome_site}"

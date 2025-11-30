@@ -24,7 +24,7 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: var(--background);
             min-height: 100vh;
-            color: #2c2c2c;
+            color: var(--text);
             line-height: 1.6;
         }
 
@@ -399,164 +399,192 @@
                 width: 100%;
             }
         }
+
+        .container1 {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        footer {
+            background: rgb(178, 34, 34);
+            color: white;
+            border-radius: 20px;
+            padding: 40px;
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        footer p {
+            margin-bottom: 10px;
+        }
+        
     </style>
 </head>
 <body>
-    <div class="header">
-        <img src="{% static 'study/img/logoStudyMate.png' %}" height="144px" width="293" alt="StudyMate Logo">
-        <h4>Portal do Estudante - Sua plataforma de estudos</h4>
-        
-        <!-- NAVBAR CORRIGIDA -->
-        <div class="nav">
-            <a href="{% url 'study:home' %}">🏠 Home</a>
-            <a href="{% url 'materias:home' %}" class="nav-btn">📚 Matérias</a>
-            <a href="{% url 'atividades:lista' %}">💬 Chat</a>
-            <a href="{% url 'notes:list' %}" class="active">📝 Notes</a>
-            <a href="{% url 'study:home' %}#horarios">🕐 Horários</a>
+    <div class="container1">
+        <div class="header">
+            <img src="{% static 'study/img/logoStudyMate.png' %}" height="144px" width="293" alt="StudyMate Logo">
+            <h4>Adicione as suas anotações</h4>
+            
+            <!-- NAVBAR CORRIGIDA -->
+            <div class="nav">
+                <a href="{% url 'study:home' %}">🏠 Home</a>
+                <a href="{% url 'materias:home' %}" class="nav-btn">📚 Matérias</a>
+                <a href="{% url 'chat:lista' %}">💬 Chat</a>
+                <a href="{% url 'notes:list' %}" class="active">📝 Notes</a>
+                <a href="{% url 'study:home' %}#horarios">🕐 Horários</a>
 
-            {% if user.is_authenticated %}
-                <a href="{% url 'perfil:perfil' %}">👤 Perfil</a>
-            {% else %}
-                <a href="{% url 'accounts:login' %}">🔐 Login</a>
-            {% endif %}
-        </div>
-    </div>
-
-    <div class="container">
-        {% if user.is_authenticated %}
-        <div class="create-note-section">
-            <button class="btn-create-note" data-bs-toggle="modal" data-bs-target="#createNoteModal">
-                Criar Novo Note
-            </button>
-        </div>
-        {% endif %}
-
-        <div class="filters-section">
-            <form method="get" id="filterForm">
-                <div class="filter-row">
-                    <div class="filter-box">
-                        <label>📚 Matéria</label>
-                        <select name="subject" id="subjectFilter" class="filter-field">
-                            <option value="">Todas as matérias</option>
-                            {% for subject in subjects %}
-                                <option value="{{ subject }}" {% if subject == current_subject %}selected{% endif %}>
-                                    {{ subject }}
-                                </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-
-                    <div class="filter-box">
-                        <label> Tipo de Conteúdo</label>
-                        <select name="file_type" id="typeFilter" class="filter-field">
-                            <option value="">Todos os tipos</option>
-                            {% for code, name in file_types %}
-                                <option value="{{ code }}" {% if code == current_file_type %}selected{% endif %}>
-                                    {{ name }}
-                                </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-
-                    <div class="filter-box">
-                        <label> Ordenar por</label>
-                        <select name="order" id="orderFilter" class="filter-field">
-                            <option value="recent" {% if current_order == 'recent' %}selected{% endif %}>Mais Recentes</option>
-                            <option value="likes" {% if current_order == 'likes' %}selected{% endif %}>Mais Curtidos</option>
-                            <option value="views" {% if current_order == 'views' %}selected{% endif %}>Mais Visualizados</option>
-                            <option value="downloads" {% if current_order == 'downloads' %}selected{% endif %}>Mais Baixados</option>
-                        </select>
-                    </div>
-
-                    <div class="filter-box">
-                        <label> Recomendados</label>
-                        <select name="recommended" id="recommendedFilter" class="filter-field">
-                            <option value="">Todos</option>
-                            <option value="true" {% if request.GET.recommended == 'true' %}selected{% endif %}>Apenas Recomendados</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="filter-actions" id="filterActions">
-                    <button type="submit" class="btn-filter" id="btnFiltrar">🔍 Filtrar</button>
-                    <a href="{% url 'notes:list' %}" class="btn-clear" id="btnLimpar">❌ Limpar Filtros</a>
-                </div>
-            </form>
-        </div>
-
-        <div class="notes-grid">
-            {% for note in page_obj %}
-                <div class="note-card">
-                    <div class="note-header">
-                        <div>
-                            <span class="note-author">{{ note.author.username }}</span>
-                            {% if note.author.user_type == 'professor' or note.author.is_staff %}
-                                <span class="badge-professor">Professor</span>
-                            {% endif %}
-                            {% if note.is_recommended %}
-                                <span class="badge-recommended">Recomendado</span>
-                            {% endif %}
-                        </div>
-                        <span class="note-date">{{ note.created_at|date:"d/m/Y" }}</span>
-                    </div>
-
-                    <h3 class="note-title">{{ note.title }}</h3>
-
-                    <p class="note-description">
-                        {% if note.description %}
-                            {{ note.description }}
-                        {% else %}
-                            <em>Sem descrição</em>
-                        {% endif %}
-                    </p>
-
-                    <div class="note-badges">
-                        {% if note.subject %}
-                            <span class="badge-subject">{{ note.subject }}</span>
-                        {% endif %}
-                        <span class="badge-type">{{ note.get_file_type_display }}</span>
-                    </div>
-
-                    <div class="note-metrics">
-                        <span title="Visualizações">👁️ {{ note.views }}</span>
-                        <span title="Curtidas">❤️ {{ note.likes }}</span>
-                        <span title="Downloads">⬇️ {{ note.downloads }}</span>
-                    </div>
-
-                    <a href="{% url 'notes:detail' note.pk %}" class="btn-open-note">
-                        Abrir Note
-                    </a>
-                </div>
-            {% empty %}
-                <div style="grid-column: 1/-1; text-align: center; padding: 60px 20px; background: white; border-radius: 15px;">
-                    <div style="font-size: 4rem; margin-bottom: 20px;">😕</div>
-                    <h3 style="color: #6c757d; margin-bottom: 10px;">Nenhum note encontrado</h3>
-                    <p style="color: #adb5bd;">Tente ajustar os filtros ou limpar a busca</p>
-                </div>
-            {% endfor %}
-        </div>
-
-        {% if page_obj.has_other_pages %}
-            <div style="margin-top: 40px; display: flex; justify-content: center; gap: 10px;">
-                {% if page_obj.has_previous %}
-                    <a href="?page={{ page_obj.previous_page_number }}&subject={{ current_subject }}&file_type={{ current_file_type }}&order={{ current_order }}" style="background: white; color: var(--primary); padding: 10px 18px; border-radius: 8px; text-decoration: none; font-weight: 600;">« Anterior</a>
-                {% endif %}
-
-                {% for num in page_obj.paginator.page_range %}
-                    {% if page_obj.number == num %}
-                        <span style="background: var(--primary); color: white; padding: 10px 18px; border-radius: 8px; font-weight: 600;">{{ num }}</span>
-                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                        <a href="?page={{ num }}&subject={{ current_subject }}&file_type={{ current_file_type }}&order={{ current_order }}" style="background: white; color: var(--primary); padding: 10px 18px; border-radius: 8px; text-decoration: none; font-weight: 600;">{{ num }}</a>
-                    {% endif %}
-                {% endfor %}
-
-                {% if page_obj.has_next %}
-                    <a href="?page={{ page_obj.next_page_number }}&subject={{ current_subject }}&file_type={{ current_file_type }}&order={{ current_order }}" style="background: white; color: var(--primary); padding: 10px 18px; border-radius: 8px; text-decoration: none; font-weight: 600;">Próximo »</a>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'perfil:perfil' %}">👤 Perfil</a>
+                {% else %}
+                    <a href="{% url 'accounts:login' %}">🔐 Login</a>
                 {% endif %}
             </div>
-        {% endif %}
-    </div>
+        </div>
 
+        <div class="container">
+            {% if user.is_authenticated %}
+            <div class="create-note-section">
+                <button class="btn-create-note" data-bs-toggle="modal" data-bs-target="#createNoteModal">
+                    Criar Novo Note
+                </button>
+            </div>
+            {% endif %}
+
+            <div class="filters-section">
+                <form method="get" id="filterForm">
+                    <div class="filter-row">
+                        <div class="filter-box">
+                            <label>📚 Matéria</label>
+                            <select name="subject" id="subjectFilter" class="filter-field">
+                                <option value="">Todas as matérias</option>
+                                {% for subject in subjects %}
+                                    <option value="{{ subject }}" {% if subject == current_subject %}selected{% endif %}>
+                                        {{ subject }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="filter-box">
+                            <label> Tipo de Conteúdo</label>
+                            <select name="file_type" id="typeFilter" class="filter-field">
+                                <option value="">Todos os tipos</option>
+                                {% for code, name in file_types %}
+                                    <option value="{{ code }}" {% if code == current_file_type %}selected{% endif %}>
+                                        {{ name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="filter-box">
+                            <label> Ordenar por</label>
+                            <select name="order" id="orderFilter" class="filter-field">
+                                <option value="recent" {% if current_order == 'recent' %}selected{% endif %}>Mais Recentes</option>
+                                <option value="likes" {% if current_order == 'likes' %}selected{% endif %}>Mais Curtidos</option>
+                                <option value="views" {% if current_order == 'views' %}selected{% endif %}>Mais Visualizados</option>
+                                <option value="downloads" {% if current_order == 'downloads' %}selected{% endif %}>Mais Baixados</option>
+                            </select>
+                        </div>
+
+                        <div class="filter-box">
+                            <label> Recomendados</label>
+                            <select name="recommended" id="recommendedFilter" class="filter-field">
+                                <option value="">Todos</option>
+                                <option value="true" {% if request.GET.recommended == 'true' %}selected{% endif %}>Apenas Recomendados</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="filter-actions" id="filterActions">
+                        <button type="submit" class="btn-filter" id="btnFiltrar">🔍 Filtrar</button>
+                        <a href="{% url 'notes:list' %}" class="btn-clear" id="btnLimpar">❌ Limpar Filtros</a>
+                    </div>
+                </form>
+            </div>
+
+            <div class="notes-grid">
+                {% for note in page_obj %}
+                    <div class="note-card">
+                        <div class="note-header">
+                            <div>
+                                <span class="note-author">{{ note.author.username }}</span>
+                                {% if note.author.user_type == 'professor' or note.author.is_staff %}
+                                    <span class="badge-professor">Professor</span>
+                                {% endif %}
+                                {% if note.is_recommended %}
+                                    <span class="badge-recommended">Recomendado</span>
+                                {% endif %}
+                            </div>
+                            <span class="note-date">{{ note.created_at|date:"d/m/Y" }}</span>
+                        </div>
+
+                        <h3 class="note-title">{{ note.title }}</h3>
+
+                        <p class="note-description">
+                            {% if note.description %}
+                                {{ note.description }}
+                            {% else %}
+                                <em>Sem descrição</em>
+                            {% endif %}
+                        </p>
+
+                        <div class="note-badges">
+                            {% if note.subject %}
+                                <span class="badge-subject">{{ note.subject }}</span>
+                            {% endif %}
+                            <span class="badge-type">{{ note.get_file_type_display }}</span>
+                        </div>
+
+                        <div class="note-metrics">
+                            <span title="Visualizações">👁️ {{ note.views }}</span>
+                            <span title="Curtidas">❤️ {{ note.likes }}</span>
+                            <span title="Downloads">⬇️ {{ note.downloads }}</span>
+                        </div>
+
+                        <a href="{% url 'notes:detail' note.pk %}" class="btn-open-note">
+                            Abrir Note
+                        </a>
+                    </div>
+                {% empty %}
+                    <div style="grid-column: 1/-1; text-align: center; padding: 60px 20px; background: white; border-radius: 15px;">
+                        <div style="font-size: 4rem; margin-bottom: 20px;">😕</div>
+                        <h3 style="color: #6c757d; margin-bottom: 10px;">Nenhum note encontrado</h3>
+                        <p style="color: #adb5bd;">Tente ajustar os filtros ou limpar a busca</p>
+                    </div>
+                {% endfor %}
+            </div>
+
+            {% if page_obj.has_other_pages %}
+                <div style="margin-top: 40px; display: flex; justify-content: center; gap: 10px;">
+                    {% if page_obj.has_previous %}
+                        <a href="?page={{ page_obj.previous_page_number }}&subject={{ current_subject }}&file_type={{ current_file_type }}&order={{ current_order }}" style="background: white; color: var(--primary); padding: 10px 18px; border-radius: 8px; text-decoration: none; font-weight: 600;">« Anterior</a>
+                    {% endif %}
+
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                            <span style="background: var(--primary); color: white; padding: 10px 18px; border-radius: 8px; font-weight: 600;">{{ num }}</span>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <a href="?page={{ num }}&subject={{ current_subject }}&file_type={{ current_file_type }}&order={{ current_order }}" style="background: white; color: var(--primary); padding: 10px 18px; border-radius: 8px; text-decoration: none; font-weight: 600;">{{ num }}</a>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}&subject={{ current_subject }}&file_type={{ current_file_type }}&order={{ current_order }}" style="background: white; color: var(--primary); padding: 10px 18px; border-radius: 8px; text-decoration: none; font-weight: 600;">Próximo »</a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+
+        <footer>
+                <p><strong>Endereço:</strong> Av. Paulo Lacerda Quartim Barbosa, 630 - Santa Bárbara, Itapira - SP, 13977-175</p>
+                <p><strong>Telefone:</strong> (19) 3843-1171</p>
+                <br>
+                <p>&copy; 2025 ETEC João Maria Stevanatto. Todos os direitos reservados.</p>
+            </footer>
+    </div>
     <!-- MODAL CRIAR NOTE -->
     {% if user.is_authenticated %}
     <div class="modal fade" id="createNoteModal" tabindex="-1">

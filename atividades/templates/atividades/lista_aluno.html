@@ -405,151 +405,180 @@
                 font-size: 0.9rem;
             }
         }
+
+        .container1 {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        footer {
+            background: rgb(178, 34, 34);
+            color: white;
+            border-radius: 20px;
+            padding: 40px;
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        footer p {
+            margin-bottom: 10px;
+        }
+
     </style>
 </head>
 <body>
-    <div class="header">
-        <img src="{% static 'study/img/logoStudyMate.png' %}" height="144px" width="293">
-        <h4>Atividades Acadêmicas</h4>
-        
-        <!-- NAVBAR CORRIGIDA - TODAS AS CORES VERMELHAS -->
-        <div class="nav">
-            <a href="{% url 'study:home' %}">🏠 Home</a>
-            <a href="{% url 'study:home' %}#materias">📚 Matérias</a>
-            <a href="{% url 'atividades:lista' %}" class="active">📋 Atividades</a>
-            <a href="{% url 'notes:list' %}">📝 Notes</a>
-            <a href="{% url 'study:home' %}#horarios">🕐 Horários</a>
+    <div class="container1">
+        <div class="header">
+            <img src="{% static 'study/img/logoStudyMate.png' %}" height="144px" width="293">
+            <h4>Atividades Acadêmicas</h4>
+            
+            <!-- NAVBAR CORRIGIDA - TODAS AS CORES VERMELHAS -->
+            <div class="nav">
+                <a href="{% url 'study:home' %}">🏠 Home</a>
+                <a href="{% url 'materias:home' %}" class="nav-btn">📚 Matérias</a>
+                <a href="{% url 'atividades:lista' %}" class="active">📋 Atividades</a>
+                <a href="{% url 'notes:list' %}">📝 Notes</a>
+                <a href="{% url 'study:home' %}#horarios">🕐 Horários</a>
 
-            {% if user.is_authenticated %}
-                <a href="{% url 'perfil:perfil' %}">👤 Perfil</a>
-            {% else %}
-                <a href="{% url 'accounts:login' %}">🔐 Login</a>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'perfil:perfil' %}">👤 Perfil</a>
+                {% else %}
+                    <a href="{% url 'accounts:login' %}">🔐 Login</a>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="container">
+            <!-- BOTÃO IR PARA CHAT -->
+            <div class="section-nav">
+                <a href="{% url 'chat:lista' %}" class="btn-section">
+                    💬 Ir para Chat
+                </a>
+            </div>
+
+            <!-- BOTÃO CRIAR ATIVIDADE (APENAS PROFESSORES) -->
+            {% if user.user_type == 'professor' or user.is_staff %}
+                {% if not atividades_anotadas %}
+                    <div class="create-first-activity">
+                        <h3>📚 Nenhuma atividade criada ainda</h3>
+                        <button class="btn-create-first" data-bs-toggle="modal" data-bs-target="#criarAtividadeModal">
+                            ✨ Criar minha primeira atividade
+                        </button>
+                    </div>
+                {% else %}
+                    <div style="text-align: center; margin-bottom: 25px;">
+                        <button class="btn-create-first" data-bs-toggle="modal" data-bs-target="#criarAtividadeModal">
+                            ➕ Criar nova atividade
+                        </button>
+                    </div>
+                {% endif %}
             {% endif %}
-        </div>
-    </div>
 
-    <div class="container">
-        <!-- BOTÃO IR PARA CHAT -->
-        <div class="section-nav">
-            <a href="{% url 'chat:lista' %}" class="btn-section">
-                💬 Ir para Chat
-            </a>
-        </div>
+            <!-- FILTROS COM LEGENDAS -->
+            <div class="filters-section">
+                <h4>🔍 Filtros</h4>
+                <form method="get">
+                    <div class="filter-row">
+                        <div class="filter-group">
+                            <label>Tipo da atividade</label>
+                            <select name="tipo" class="form-select">
+                                <option value="">Todos</option>
+                                <option value="ATIVIDADE" {% if filtro_tipo == 'ATIVIDADE' %}selected{% endif %}>Atividade/Tarefa</option>
+                                <option value="AVISO_PROVA" {% if filtro_tipo == 'AVISO_PROVA' %}selected{% endif %}>Aviso de Prova</option>
+                                <option value="AVISO_SIMPLES" {% if filtro_tipo == 'AVISO_SIMPLES' %}selected{% endif %}>Aviso Simples</option>
+                            </select>
+                        </div>
 
-        <!-- BOTÃO CRIAR ATIVIDADE (APENAS PROFESSORES) -->
-        {% if user.user_type == 'professor' or user.is_staff %}
-            {% if not atividades_anotadas %}
-                <div class="create-first-activity">
-                    <h3>📚 Nenhuma atividade criada ainda</h3>
-                    <button class="btn-create-first" data-bs-toggle="modal" data-bs-target="#criarAtividadeModal">
-                        ✨ Criar minha primeira atividade
-                    </button>
-                </div>
-            {% else %}
-                <div style="text-align: center; margin-bottom: 25px;">
-                    <button class="btn-create-first" data-bs-toggle="modal" data-bs-target="#criarAtividadeModal">
-                        ➕ Criar nova atividade
-                    </button>
-                </div>
-            {% endif %}
-        {% endif %}
+                        <div class="filter-group">
+                            <label>Status</label>
+                            <select name="status" class="form-select">
+                                <option value="">Todos</option>
+                                <option value="pendentes" {% if filtro_status == 'pendentes' %}selected{% endif %}>Pendentes</option>
+                                <option value="enviadas" {% if filtro_status == 'enviadas' %}selected{% endif %}>Enviados</option>
+                                <option value="abertas" {% if filtro_status == 'abertas' %}selected{% endif %}>Abertos</option>
+                            </select>
+                        </div>
 
-        <!-- FILTROS COM LEGENDAS -->
-        <div class="filters-section">
-            <h4>🔍 Filtros</h4>
-            <form method="get">
-                <div class="filter-row">
-                    <div class="filter-group">
-                        <label>Tipo da atividade</label>
-                        <select name="tipo" class="form-select">
-                            <option value="">Todos</option>
-                            <option value="ATIVIDADE" {% if filtro_tipo == 'ATIVIDADE' %}selected{% endif %}>Atividade/Tarefa</option>
-                            <option value="AVISO_PROVA" {% if filtro_tipo == 'AVISO_PROVA' %}selected{% endif %}>Aviso de Prova</option>
-                            <option value="AVISO_SIMPLES" {% if filtro_tipo == 'AVISO_SIMPLES' %}selected{% endif %}>Aviso Simples</option>
-                        </select>
+                        <div class="filter-group">
+                            <label>Ordenação</label>
+                            <select name="order" class="form-select">
+                                <option value="recent">Mais recentes</option>
+                                <option value="views">Mais visualizados</option>
+                                <option value="deadline">Em prazo curto</option>
+                                <option value="saved">Salvos</option>
+                            </select>
+                        </div>
                     </div>
 
-                    <div class="filter-group">
-                        <label>Status</label>
-                        <select name="status" class="form-select">
-                            <option value="">Todos</option>
-                            <option value="pendentes" {% if filtro_status == 'pendentes' %}selected{% endif %}>Pendentes</option>
-                            <option value="enviadas" {% if filtro_status == 'enviadas' %}selected{% endif %}>Enviados</option>
-                            <option value="abertas" {% if filtro_status == 'abertas' %}selected{% endif %}>Abertos</option>
-                        </select>
+                    <div class="filter-actions">
+                        <button type="submit" class="btn-filter">🔍 Filtrar</button>
+                        <a href="{% url 'atividades:lista' %}" class="btn-clear">❌ Limpar filtros</a>
                     </div>
+                </form>
+            </div>
 
-                    <div class="filter-group">
-                        <label>Ordenação</label>
-                        <select name="order" class="form-select">
-                            <option value="recent">Mais recentes</option>
-                            <option value="views">Mais visualizados</option>
-                            <option value="deadline">Em prazo curto</option>
-                            <option value="saved">Salvos</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="filter-actions">
-                    <button type="submit" class="btn-filter">🔍 Filtrar</button>
-                    <a href="{% url 'atividades:lista' %}" class="btn-clear">❌ Limpar filtros</a>
-                </div>
-            </form>
-        </div>
-
-        <!-- LISTA DE ATIVIDADES -->
-        {% for item in atividades_anotadas %}
-            <div class="atividade-card">
-                <div class="atividade-header">
-                    <div>
-                        <h3 class="atividade-titulo">
+            <!-- LISTA DE ATIVIDADES -->
+            {% for item in atividades_anotadas %}
+                <div class="atividade-card">
+                    <div class="atividade-header">
+                        <div>
+                            <h3 class="atividade-titulo">
+                                {% if not item.visualizou %}
+                                    🔴
+                                {% elif item.envio %}
+                                    🟢
+                                {% else %}
+                                    🟠
+                                {% endif %}
+                                {{ item.atividade.titulo }}
+                            </h3>
+                            <span class="badge {% if item.atividade.tipo == 'ATIVIDADE' %}badge-atividade{% elif item.atividade.tipo == 'AVISO_PROVA' %}badge-prova{% else %}badge-aviso{% endif %}">
+                                {{ item.atividade.get_tipo_display }}
+                            </span>
+                        </div>
+                        <div>
                             {% if not item.visualizou %}
-                                🔴
+                                <span class="status-badge status-nao-vista">Não Vista</span>
                             {% elif item.envio %}
-                                🟢
+                                <span class="status-badge status-enviada">Enviada</span>
                             {% else %}
-                                🟠
+                                <span class="status-badge status-vista">Vista</span>
                             {% endif %}
-                            {{ item.atividade.titulo }}
-                        </h3>
-                        <span class="badge {% if item.atividade.tipo == 'ATIVIDADE' %}badge-atividade{% elif item.atividade.tipo == 'AVISO_PROVA' %}badge-prova{% else %}badge-aviso{% endif %}">
-                            {{ item.atividade.get_tipo_display }}
-                        </span>
+                        </div>
                     </div>
-                    <div>
-                        {% if not item.visualizou %}
-                            <span class="status-badge status-nao-vista">Não Vista</span>
-                        {% elif item.envio %}
-                            <span class="status-badge status-enviada">Enviada</span>
-                        {% else %}
-                            <span class="status-badge status-vista">Vista</span>
+
+                    <div class="atividade-info">
+                        <p><strong>Professor(a):</strong> {{ item.atividade.professor.username }}</p>
+                        <p><strong>Destinado:</strong> {{ item.atividade.get_anos_destino_display }}</p>
+                        {% if item.atividade.prazo_entrega %}
+                            <p><strong>📅 Prazo:</strong> {{ item.atividade.prazo_entrega|date:"d/m/Y 'às' H:i" }}</p>
                         {% endif %}
                     </div>
-                </div>
 
-                <div class="atividade-info">
-                    <p><strong>Professor(a):</strong> {{ item.atividade.professor.username }}</p>
-                    <p><strong>Destinado:</strong> {{ item.atividade.get_anos_destino_display }}</p>
-                    {% if item.atividade.prazo_entrega %}
-                        <p><strong>📅 Prazo:</strong> {{ item.atividade.prazo_entrega|date:"d/m/Y 'às' H:i" }}</p>
-                    {% endif %}
+                    <div>
+                        <a href="{% url 'atividades:detalhe' item.atividade.pk %}" class="btn-acao btn-ver">Ver Atividade</a>
+                        
+                        <button class="btn-acao btn-salvar {% if item.salvou %}salva{% endif %}" 
+                                onclick="salvarAtividade({{ item.atividade.pk }}, this)">
+                            {% if item.salvou %}★ Salva{% else %}☆ Salvar{% endif %}
+                        </button>
+                    </div>
                 </div>
+            {% empty %}
+                <div style="text-align: center; padding: 60px; background: white; border-radius: 15px;">
+                    <h3 style="color: #6c757d;">Nenhuma atividade encontrada</h3>
+                    <p>Não há atividades disponíveis no momento.</p>
+                </div>
+            {% endfor %}
+        </div>
 
-                <div>
-                    <a href="{% url 'atividades:detalhe' item.atividade.pk %}" class="btn-acao btn-ver">Ver Atividade</a>
-                    
-                    <button class="btn-acao btn-salvar {% if item.salvou %}salva{% endif %}" 
-                            onclick="salvarAtividade({{ item.atividade.pk }}, this)">
-                        {% if item.salvou %}★ Salva{% else %}☆ Salvar{% endif %}
-                    </button>
-                </div>
-            </div>
-        {% empty %}
-            <div style="text-align: center; padding: 60px; background: white; border-radius: 15px;">
-                <h3 style="color: #6c757d;">Nenhuma atividade encontrada</h3>
-                <p>Não há atividades disponíveis no momento.</p>
-            </div>
-        {% endfor %}
+        <footer>
+            <p><strong>Endereço:</strong> Av. Paulo Lacerda Quartim Barbosa, 630 - Santa Bárbara, Itapira - SP, 13977-175</p>
+            <p><strong>Telefone:</strong> (19) 3843-1171</p>
+            <br>
+            <p>&copy; 2025 ETEC João Maria Stevanatto. Todos os direitos reservados.</p>
+        </footer>
     </div>
 
     <!-- MODAL DE CRIAÇÃO -->

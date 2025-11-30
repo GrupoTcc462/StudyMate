@@ -256,107 +256,136 @@
                 justify-content: space-between;
             }
         }
+
+        .container1 {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        footer {
+            background: rgb(178, 34, 34);
+            color: white;
+            border-radius: 20px;
+            padding: 40px;
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        footer p {
+            margin-bottom: 10px;
+        }
+
     </style>
 </head>
 <body>
-    <div class="header">
-        <img src="{% static 'study/img/logoStudyMate.png' %}" height="144px" width="293">
-        <h4>Chat Interativo</h4>
-        
-        <div class="nav">
-            <a href="{% url 'study:home' %}">🏠 Home</a>
-            <a href="{% url 'materias:home' %}" class="nav-btn">📚 Matérias</a>
-            <a href="{% url 'chat:lista' %}" class="active">💬 Chat</a>
-            <a href="{% url 'notes:list' %}">📝 Notes</a>
-            <a href="{% url 'study:home' %}#horarios">🕐 Horários</a>
+    <div class="container1">
+        <div class="header">
+            <img src="{% static 'study/img/logoStudyMate.png' %}" height="144px" width="293">
+            <h4>Chat Interativo</h4>
+            
+            <div class="nav">
+                <a href="{% url 'study:home' %}">🏠 Home</a>
+                <a href="{% url 'materias:home' %}" class="nav-btn">📚 Matérias</a>
+                <a href="{% url 'chat:lista' %}" class="active">💬 Chat</a>
+                <a href="{% url 'notes:list' %}">📝 Notes</a>
+                <a href="{% url 'study:home' %}#horarios">🕐 Horários</a>
 
-            {% if user.is_authenticated %}
-                <a href="{% url 'perfil:perfil' %}">👤 Perfil</a>
-            {% else %}
-                <a href="{% url 'accounts:login' %}">🔐 Login</a>
-            {% endif %}
-        </div>
-    </div>
-
-    <div class="container">
-        <!-- NAVEGAÇÃO CHAT <-> ATIVIDADES -->
-        <div class="section-nav">
-            <a href="{% url 'atividades:lista' %}" class="btn-section">
-                📋 Ir para Atividades
-            </a>
-        </div>
-
-        <!-- BARRA DE AÇÕES -->
-        <div class="actions-bar">
-            <div class="filter-group">
-                <button class="btn-filter {% if not filtro_atual %}active{% endif %}" 
-                        onclick="window.location.href='{% url 'chat:lista' %}'">
-                    Todos
-                </button>
-                <button class="btn-filter {% if filtro_atual == 'nao_lidos' %}active{% endif %}" 
-                        onclick="window.location.href='{% url 'chat:lista' %}?filtro=nao_lidos'">
-                    Não lidos
-                </button>
-            </div>
-
-            <div class="action-group">
-                <button class="btn-action btn-new" onclick="window.location.href='{% url 'chat:novo' %}'">
-                    ➕ Nova conversa
-                </button>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'perfil:perfil' %}">👤 Perfil</a>
+                {% else %}
+                    <a href="{% url 'accounts:login' %}">🔐 Login</a>
+                {% endif %}
             </div>
         </div>
 
-        <!-- LISTA DE CHATS -->
-        <div class="chats-list" id="chatsList">
-            {% for item in chats_data %}
-                <div class="chat-card" onclick="openChat({{ item.chat.id }})" data-chat-id="{{ item.chat.id }}">
-                    <div class="chat-avatar">
-                        {{ item.outro_usuario.username|slice:":1"|upper }}
-                    </div>
-                    
-                    <div class="chat-info">
-                        <div class="chat-header">
-                            <span class="chat-name">{{ item.outro_usuario.username }}</span>
-                            {% if item.ultima_mensagem %}
-                                <span class="chat-time">{{ item.ultima_mensagem.data_envio|date:"d/m H:i" }}</span>
-                            {% endif %}
+        <div class="container">
+            <!-- NAVEGAÇÃO CHAT <-> ATIVIDADES -->
+            <div class="section-nav">
+                <a href="{% url 'atividades:lista' %}" class="btn-section">
+                    📋 Ir para Atividades
+                </a>
+            </div>
+
+            <!-- BARRA DE AÇÕES -->
+            <div class="actions-bar">
+                <div class="filter-group">
+                    <button class="btn-filter {% if not filtro_atual %}active{% endif %}" 
+                            onclick="window.location.href='{% url 'chat:lista' %}'">
+                        Todos
+                    </button>
+                    <button class="btn-filter {% if filtro_atual == 'nao_lidos' %}active{% endif %}" 
+                            onclick="window.location.href='{% url 'chat:lista' %}?filtro=nao_lidos'">
+                        Não lidos
+                    </button>
+                </div>
+
+                <div class="action-group">
+                    <button class="btn-action btn-new" onclick="window.location.href='{% url 'chat:novo' %}'">
+                        ➕ Nova conversa
+                    </button>
+                </div>
+            </div>
+
+            <!-- LISTA DE CHATS -->
+            <div class="chats-list" id="chatsList">
+                {% for item in chats_data %}
+                    <div class="chat-card" onclick="openChat({{ item.chat.id }})" data-chat-id="{{ item.chat.id }}">
+                        <div class="chat-avatar">
+                            {{ item.outro_usuario.username|slice:":1"|upper }}
                         </div>
                         
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <div class="chat-preview">
+                        <div class="chat-info">
+                            <div class="chat-header">
+                                <span class="chat-name">{{ item.outro_usuario.username }}</span>
                                 {% if item.ultima_mensagem %}
-                                    {{ item.ultima_mensagem.mensagem|truncatewords:8 }}
-                                {% else %}
-                                    Nenhuma mensagem ainda
+                                    <span class="chat-time">{{ item.ultima_mensagem.data_envio|date:"d/m H:i" }}</span>
                                 {% endif %}
                             </div>
                             
-                            {% if item.nao_lidas > 0 %}
-                                <span class="badge-unread">{{ item.nao_lidas }}</span>
-                            {% endif %}
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div class="chat-preview">
+                                    {% if item.ultima_mensagem %}
+                                        {{ item.ultima_mensagem.mensagem|truncatewords:8 }}
+                                    {% else %}
+                                        Nenhuma mensagem ainda
+                                    {% endif %}
+                                </div>
+                                
+                                {% if item.nao_lidas > 0 %}
+                                    <span class="badge-unread">{{ item.nao_lidas }}</span>
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
-                </div>
-            {% empty %}
-                <div class="empty-state">
-                    <div style="font-size: 4rem; margin-bottom: 20px;">💬</div>
-                    <h3>Nenhuma conversa ainda</h3>
-                    <p>Clique em "Nova conversa" para começar a conversar!</p>
-                </div>
-            {% endfor %}
+                {% empty %}
+                    <div class="empty-state">
+                        <div style="font-size: 4rem; margin-bottom: 20px;">💬</div>
+                        <h3>Nenhuma conversa ainda</h3>
+                        <p>Clique em "Nova conversa" para começar a conversar!</p>
+                    </div>
+                {% endfor %}
+            </div>
         </div>
+
+        <footer>
+            <p><strong>Endereço:</strong> Av. Paulo Lacerda Quartim Barbosa, 630 - Santa Bárbara, Itapira - SP, 13977-175</p>
+            <p><strong>Telefone:</strong> (19) 3843-1171</p>
+            <br>
+            <p>&copy; 2025 ETEC João Maria Stevanatto. Todos os direitos reservados.</p>
+        </footer>
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <script>
+            function openChat(chatId) {
+                window.location.href = `/chat/${chatId}/`;
+            }
+
+            // Recarregar automaticamente a cada 30 segundos para novas mensagens
+            setInterval(() => {
+                location.reload();
+            }, 30000);
+        </script>
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        function openChat(chatId) {
-            window.location.href = `/chat/${chatId}/`;
-        }
-
-        // Recarregar automaticamente a cada 30 segundos para novas mensagens
-        setInterval(() => {
-            location.reload();
-        }, 30000);
-    </script>
 </body>
 </html>
