@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'atividades',
     'chat',
     'materias',
+    'horarios',
 ]
 
 MIDDLEWARE = [

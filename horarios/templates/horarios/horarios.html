@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horários - StudyMate</title>
+    {% load static %}
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: rgb(178, 34, 34);
+            --primary-dark: rgb(222, 30, 53);
+            --background: rgb(43, 45, 66);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--background);
+            min-height: 100vh;
+            color: #2c2c2c;
+        }
+
+        .header {
+            background: rgb(237, 242, 244);
+            border-radius: 20px;
+            padding: 30px;
+            margin: 20px auto;
+            max-width: 1200px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .nav {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 25px;
+        }
+
+        .nav a {
+            background: var(--primary);
+            color: white;
+            text-decoration: none;
+            padding: 15px 25px;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(178, 34, 34, 0.3);
+        }
+
+        .nav a:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            color: white;
+        }
+
+        .nav a.active {
+            background: var(--primary-dark);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .content-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+            margin-bottom: 30px;
+        }
+
+        .page-title {
+            text-align: center;
+            color: var(--primary);
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 30px;
+        }
+
+        .import-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 2px dashed var(--primary);
+        }
+
+        .import-section h3 {
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+
+        .btn-import {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-import:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .horario-display {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .horario-display img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .horario-info {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .horario-info p {
+            margin: 8px 0;
+            color: #495057;
+        }
+
+        .btn-download {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-download:hover {
+            background: #218838;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .btn-historico {
+            background: #17a2b8;
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 20px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 15px;
+        }
+
+        .btn-historico:hover {
+            background: #138496;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6c757d;
+        }
+
+        .empty-state .icon {
+            font-size: 5rem;
+            margin-bottom: 20px;
+        }
+
+        .alert-custom {
+            border-left: 4px solid;
+            border-radius: 8px;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            border-color: #28a745;
+            color: #155724;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            border-color: #dc3545;
+            color: #721c24;
+        }
+
+        .modal-content {
+            border-radius: 15px;
+            border: none;
+        }
+
+        .modal-header {
+            background: var(--primary);
+            color: white;
+            border-radius: 15px 15px 0 0;
+        }
+
+        footer {
+            background: var(--primary);
+            color: white;
+            border-radius: 20px;
+            padding: 40px;
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        footer p {
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .content-card {
+                padding: 25px;
+            }
+
+            .import-section {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <img src="{% static 'study/img/logoStudyMate.png' %}" height="144px" width="293" alt="StudyMate Logo">
+        <h4>Horários das Turmas</h4>
+        
+        <div class="nav">
+            <a href="{% url 'study:home' %}">🏠 Home</a>
+            <a href="{% url 'materias:home' %}">📚 Matérias</a>
+            <a href="{% url 'chat:lista' %}">💬 Chat</a>
+            <a href="{% url 'notes:list' %}">📝 Notes</a>
+            <a href="{% url 'horarios:home' %}" class="active">🕐 Horários</a>
+
+            {% if user.is_authenticated %}
+                <a href="{% url 'perfil:perfil' %}">👤 Perfil</a>
+            {% else %}
+                <a href="{% url 'accounts:login' %}">🔐 Login</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- MENSAGENS -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert-custom {% if message.tags == 'success' %}alert-success{% else %}alert-error{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="content-card">
+            <h1 class="page-title">📅 Horários</h1>
+
+            <!-- SEÇÃO DE IMPORTAÇÃO (APENAS PROFESSOR/ADMIN) -->
+            {% if is_professor_or_admin %}
+                <div class="import-section">
+                    <h3>📤 Importar Horário</h3>
+                    <p style="color: #6c757d; margin-bottom: 20px;">
+                        Envie uma imagem (.jpg, .png) ou planilha Excel (.xlsx) com o horário atualizado.
+                        Máximo 5MB.
+                    </p>
+                    
+                    <form method="POST" enctype="multipart/form-data" id="importForm">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            {{ form.arquivo }}
+                            <small class="text-muted d-block mt-2">
+                                Formatos aceitos: JPG, PNG, XLSX, XLS (máx 5MB)
+                            </small>
+                        </div>
+
+                        <button type="submit" class="btn-import" id="btnImport">
+                            📤 Importar Horário
+                        </button>
+                    </form>
+                </div>
+            {% endif %}
+
+            <!-- EXIBIÇÃO DO HORÁRIO ATIVO -->
+            {% if horario_ativo %}
+                <div class="horario-display">
+                    <h3 style="margin-bottom: 20px;">📋 Horário Atual</h3>
+
+                    {% if horario_ativo.tipo == 'IMAGEM' %}
+                        <img src="{{ horario_ativo.arquivo.url }}" alt="Horário">
+                    {% elif horario_ativo.tipo == 'EXCEL' %}
+                        <div style="background: #e9ecef; padding: 40px; border-radius: 15px;">
+                            <div style="font-size: 3rem; margin-bottom: 15px;">📊</div>
+                            <p style="font-size: 1.1rem; color: #495057;">
+                                Planilha Excel disponível para download
+                            </p>
+                        </div>
+                    {% endif %}
+
+                    <!-- INFORMAÇÕES DO HORÁRIO -->
+                    <div class="horario-info">
+                        <p><strong>🔹 Criado por:</strong> {{ horario_ativo.importado_por.username }}</p>
+                        <p><strong>🔹 Data:</strong> {{ horario_ativo.data_importacao|date:"d/m/Y H:i" }}</p>
+                        <p><strong>🔹 Tipo:</strong> {{ horario_ativo.get_tipo_display }}</p>
+                    </div>
+
+                    <!-- BOTÃO DOWNLOAD -->
+                    <a href="{% url 'horarios:baixar' horario_ativo.id %}" class="btn-download">
+                        📥 Baixar Horário
+                    </a>
+
+                    <!-- BOTÃO VER HISTÓRICO (PROFESSOR/ADMIN) -->
+                    {% if is_professor_or_admin and historico.count > 1 %}
+                        <button class="btn-historico" data-bs-toggle="modal" data-bs-target="#historicoModal">
+                            📜 Ver versões anteriores ({{ historico.count|add:"-1" }})
+                        </button>
+                    {% endif %}
+                </div>
+            {% else %}
+                <!-- ESTADO VAZIO -->
+                <div class="empty-state">
+                    <div class="icon">❗</div>
+                    <h3>Nenhum horário cadastrado</h3>
+                    <p>
+                        {% if is_professor_or_admin %}
+                            Use o formulário acima para importar o horário.
+                        {% else %}
+                            Os professores ainda não enviaram o horário.
+                        {% endif %}
+                    </p>
+                </div>
+            {% endif %}
+        </div>
+
+        <footer>
+            <p><strong>Endereço:</strong> Av. Paulo Lacerda Quartim Barbosa, 630 - Santa Bárbara, Itapira - SP, 13977-175</p>
+            <p><strong>Telefone:</strong> (19) 3843-1171</p>
+            <br>
+            <p>&copy; 2025 ETEC João Maria Stevanatto. Todos os direitos reservados.</p>
+        </footer>
+    </div>
+
+    <!-- MODAL HISTÓRICO DE VERSÕES -->
+    {% if is_professor_or_admin and historico.count > 1 %}
+    <div class="modal fade" id="historicoModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">📜 Histórico de Versões</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Versão</th>
+                                <th>Data/Hora</th>
+                                <th>Importado por</th>
+                                <th>Tipo</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in historico %}
+                                <tr>
+                                    <td>
+                                        {% if item.ativo %}
+                                            <span style="color: #28a745; font-weight: 600;">✅ Atual</span>
+                                        {% else %}
+                                            Versão {{ forloop.counter }}
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ item.data_importacao|date:"d/m/Y H:i" }}</td>
+                                    <td>{{ item.importado_por.username }}</td>
+                                    <td>{{ item.get_tipo_display }}</td>
+                                    <td>
+                                        <a href="{% url 'horarios:baixar' item.id %}" 
+                                           class="btn btn-sm btn-primary">
+                                            📥 Baixar
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Validação antes de enviar
+        const importForm = document.getElementById('importForm');
+        const btnImport = document.getElementById('btnImport');
+
+        if (importForm) {
+            importForm.addEventListener('submit', function(e) {
+                const fileInput = document.getElementById('arquivoInput');
+                
+                if (!fileInput.files.length) {
+                    e.preventDefault();
+                    alert('❌ Selecione um arquivo antes de enviar.');
+                    return false;
+                }
+
+                const file = fileInput.files[0];
+                const maxSize = 5 * 1024 * 1024; // 5MB
+
+                if (file.size > maxSize) {
+                    e.preventDefault();
+                    alert('❌ Arquivo muito grande. Máximo 5MB.');
+                    return false;
+                }
+
+                // Desabilitar botão e mostrar loading
+                btnImport.disabled = true;
+                btnImport.textContent = '⏳ Enviando...';
+            });
+        }
+    </script>
+</body>
+</html>

@@ -16,6 +16,7 @@ urlpatterns = [
     path('atividades/', include('atividades.urls', namespace='atividades')),
     path('chat/', include('chat.urls', namespace='chat')),
     path('materias/', include('materias.urls', namespace='materias')),
+    path('horarios/', include('horarios.urls', namespace='horarios')),
 ]
 
 if settings.DEBUG:
