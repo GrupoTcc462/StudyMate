@@ -115,32 +115,33 @@ def conversa(request, chat_id):
 @login_required
 def nova_conversa(request):
     """
-    CORRIGIDO - Busca usuários e cria nova conversa
+    CORRIGIDO - Busca usuários SEM MÍNIMO de caracteres
     """
     # GET com AJAX - Buscar usuários
     if request.method == 'GET':
         query = request.GET.get('q', '').strip()
         
         # Se for requisição AJAX de busca
-        if query and len(query) >= 3:
-            usuarios = User.objects.filter(
-                Q(username__icontains=query) | Q(email__icontains=query)
-            ).exclude(id=request.user.id)[:10]
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            # SEM MÍNIMO - buscar TODOS se query vazia
+            if not query:
+                usuarios = User.objects.exclude(id=request.user.id).order_by('username')
+            else:
+                usuarios = User.objects.filter(
+                    Q(username__icontains=query) | Q(email__icontains=query)
+                ).exclude(id=request.user.id).order_by('username')
             
             resultados = [{
                 'id': u.id,
                 'username': u.username,
                 'email': u.email,
                 'user_type': u.get_user_type_display()
-            } for u in usuarios]
+            } for u in usuarios[:50]]  # Limitar a 50 para performance
             
             return JsonResponse({'resultados': resultados})
         
-        # Se não houver query, renderizar página
-        if not query:
-            return render(request, 'chat/nova_conversa.html')
-        
-        return JsonResponse({'resultados': []})
+        # Se não for AJAX, renderizar página
+        return render(request, 'chat/nova_conversa.html')
     
     # POST - Criar novo chat
     if request.method == 'POST':
@@ -156,7 +157,7 @@ def nova_conversa(request):
             messages.error(request, 'Usuário não encontrado.')
             return redirect('chat:nova')
         
-        # CORRIGIDO - Evitar conversa duplicada (bidirecional)
+        # Evitar conversa duplicada (bidirecional)
         chat = Chat.objects.filter(
             Q(remetente=request.user, destinatario=destinatario) |
             Q(remetente=destinatario, destinatario=request.user)

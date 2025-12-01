@@ -35,7 +35,7 @@
             height: calc(100vh - 40px);
         }
 
-        /* CABEÇALHO DO CHAT */
+        /* CABEÇALHO ESTILO TELEGRAM */
         .chat-header {
             background: var(--primary);
             color: white;
@@ -84,7 +84,7 @@
             opacity: 0.9;
         }
 
-        /* ÁREA DE MENSAGENS */
+        /* ÁREA DE MENSAGENS ESTILO TELEGRAM */
         .messages-area {
             flex: 1;
             padding: 20px;
@@ -92,10 +92,10 @@
             background: #f5f5f5;
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 8px;
         }
 
-        /* ESTILO TELEGRAM */
+        /* BALÕES ESTILO TELEGRAM */
         .message-bubble {
             max-width: 60%;
             padding: 12px 16px;
@@ -103,6 +103,8 @@
             word-wrap: break-word;
             box-shadow: 0 1px 2px rgba(0,0,0,0.1);
             position: relative;
+            white-space: pre-wrap;
+            word-break: break-word;
         }
 
         .message-received {
@@ -317,7 +319,7 @@
                 
                 <input type="file" id="fileInput" name="anexo" style="display: none;" 
                        accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.zip"
-                       onchange="showAttachment()">
+                       onchange="handleAttachment()">
                 
                 <button type="button" class="btn-attach" onclick="document.getElementById('fileInput').click()">
                     📎
@@ -334,8 +336,7 @@
                               id="messageInput"
                               placeholder="Digite sua mensagem..."
                               rows="1"
-                              maxlength="1000"
-                              required></textarea>
+                              maxlength="1000"></textarea>
                 </div>
                 
                 <button type="submit" class="btn-send" id="btnSend">
@@ -347,56 +348,99 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Auto-resize textarea
+        const chatId = {{ chat.id }};
         const messageInput = document.getElementById('messageInput');
-        
-        messageInput.addEventListener('input', function() {
-            this.style.height = 'auto';
-            this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+        const fileInput = document.getElementById('fileInput');
+        const DRAFT_KEY = `chat_draft_${chatId}`;
+        const ATTACHMENT_KEY = `chat_attachment_${chatId}`;
+
+        // ========================================
+        // RESTAURAR RASCUNHO AO CARREGAR
+        // ========================================
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedDraft = localStorage.getItem(DRAFT_KEY);
+            if (savedDraft) {
+                messageInput.value = savedDraft;
+                checkSendButton();
+            }
+
+            // Scroll para última mensagem
+            const messagesArea = document.getElementById('messagesArea');
+            messagesArea.scrollTop = messagesArea.scrollHeight;
         });
 
-        // Auto-scroll para última mensagem
-        const messagesArea = document.getElementById('messagesArea');
-        messagesArea.scrollTop = messagesArea.scrollHeight;
+        // ========================================
+        // SALVAR RASCUNHO AUTOMATICAMENTE
+        // ========================================
+        messageInput.addEventListener('input', function() {
+            localStorage.setItem(DRAFT_KEY, this.value);
+            autoResize(this);
+            checkSendButton();
+        });
 
-        // Mostrar anexo selecionado
-        function showAttachment() {
-            const fileInput = document.getElementById('fileInput');
-            const preview = document.getElementById('attachmentPreview');
-            const name = document.getElementById('attachmentName');
-            
-            if (fileInput.files.length > 0) {
-                name.textContent = fileInput.files[0].name;
+        // ========================================
+        // AUTO-RESIZE TEXTAREA
+        // ========================================
+        function autoResize(textarea) {
+            textarea.style.height = 'auto';
+            textarea.style.height = Math.min(textarea.scrollHeight, 100) + 'px';
+        }
+
+        // ========================================
+        // MANTER ANEXO ANTES DE ENVIAR
+        // ========================================
+        function handleAttachment() {
+            const file = fileInput.files[0];
+            if (file) {
+                const preview = document.getElementById('attachmentPreview');
+                const name = document.getElementById('attachmentName');
+                
+                name.textContent = file.name;
                 preview.style.display = 'flex';
+                
+                checkSendButton();
             }
         }
 
-        // Remover anexo
         function removeAttachment() {
-            const fileInput = document.getElementById('fileInput');
-            const preview = document.getElementById('attachmentPreview');
-            
             fileInput.value = '';
-            preview.style.display = 'none';
+            document.getElementById('attachmentPreview').style.display = 'none';
+            checkSendButton();
         }
 
-        // Desabilitar botão enviar se mensagem vazia
-        messageInput.addEventListener('input', function() {
-            const btnSend = document.getElementById('btnSend');
-            btnSend.disabled = this.value.trim().length === 0;
+        // ========================================
+        // HABILITAR ENVIO SE HOUVER TEXTO OU ANEXO
+        // ========================================
+        function checkSendButton() {
+            const hasText = messageInput.value.trim().length > 0;
+            const hasFile = fileInput.files.length > 0;
+            
+            document.getElementById('btnSend').disabled = !(hasText || hasFile);
+        }
+
+        // ========================================
+        // LIMPAR RASCUNHO APÓS ENVIO
+        // ========================================
+        document.getElementById('messageForm').addEventListener('submit', function(e) {
+            localStorage.removeItem(DRAFT_KEY);
         });
 
-        // Enviar com Enter (Shift+Enter para quebra de linha)
+        // ========================================
+        // ENVIAR COM ENTER (SHIFT+ENTER = QUEBRA)
+        // ========================================
         messageInput.addEventListener('keydown', function(e) {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
-                if (this.value.trim().length > 0) {
+                const hasContent = this.value.trim().length > 0 || fileInput.files.length > 0;
+                if (hasContent) {
                     document.getElementById('messageForm').submit();
                 }
             }
         });
 
-        // Recarregar mensagens a cada 10 segundos
+        // ========================================
+        // RECARREGAR MENSAGENS A CADA 10 SEGUNDOS
+        // ========================================
         setInterval(() => {
             location.reload();
         }, 10000);

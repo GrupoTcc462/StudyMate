@@ -21,7 +21,17 @@ def validate_file_extension(file):
     if ext not in allowed:
         raise ValidationError(f'Extensão {ext} não permitida. Use: {", ".join(allowed)}')
 
-
+class Materia(models.Model):
+    """Model para matérias acadêmicas"""
+    nome = models.CharField(max_length=100, unique=True)
+    
+    class Meta:
+        verbose_name = 'Matéria'
+        verbose_name_plural = 'Matérias'
+        ordering = ['nome']
+    
+    def __str__(self):
+        return self.nome
 class Note(models.Model):
     """Modelo principal para Notes/Materiais compartilhados"""
     
