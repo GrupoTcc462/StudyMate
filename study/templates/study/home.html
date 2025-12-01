@@ -208,56 +208,100 @@
         </div>
 
         <footer>
-            <p><strong>Endereço:</strong> <a href="https://maps.app.goo.gl/SiyYscHrR5VfG6Hm8" target="_blank" style="color: white; text-decoration: underline;">Av. Paulo Lacerda Quartim Barbosa, 630 - Santa Bárbara, Itapira - SP, 13977-175</a></p>
-            <p><strong>Telefone:</strong> <span onclick="copyPhone()" style="cursor: pointer; text-decoration: underline;">(19) 3843-1171</span></p>
+            <p><strong>Endereço:</strong> Av. Paulo Lacerda Quartim Barbosa, 630 - Santa Bárbara, Itapira - SP, 13977-175</p>
+            <p><strong>Telefone:</strong> (19) 3843-1171</p>
             <br>
-            <p><a href="https://www.etecitapira.com.br/" target="_blank" style="color: white; text-decoration: none;">&copy; 2025 ETEC João Maria Stevanatto. Todos os direitos reservados.</a></p>
+            <p>&copy; 2025 ETEC João Maria Stevanatto. Todos os direitos reservados.</p>
         </footer>
     </div>
 
     <script>
-            function copyPhone() {
-                const phone = "(19) 3843-1171";
-                navigator.clipboard.writeText(phone).then(() => {
-                    showToast("📱 Telefone copiado!");
+        // Navegação entre seções
+        function showSection(sectionId) {
+            const sections = document.querySelectorAll('.section');
+            sections.forEach(section => section.classList.remove('active'));
+            
+            const navBtns = document.querySelectorAll('.nav-btn');
+            navBtns.forEach(btn => btn.classList.remove('active'));
+            
+            document.getElementById(sectionId).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function openSubject(subject) {
+            alert(`Abrindo conteúdo de ${subject}. Em breve, materiais completos estarão disponíveis!`);
+        }
+
+        function changeSchedule() {
+            const selectedClass = document.getElementById('scheduleClass').value;
+            const scheduleBody = document.getElementById('scheduleBody');
+            
+            const schedules = {
+                '1info': [
+                    ['07:30 - 08:20', 'Matemática', 'Português', 'Algoritmos', 'Física', 'Inglês'],
+                    ['08:20 - 09:10', 'Matemática', 'Português', 'Algoritmos', 'Física', 'Inglês'],
+                    ['09:30 - 10:20', 'História', 'Química', 'Hardware', 'Geografia', 'Ed. Física'],
+                    ['10:20 - 11:10', 'História', 'Química', 'Hardware', 'Geografia', 'Ed. Física'],
+                    ['11:10 - 12:00', 'Biologia', 'Sociologia', 'Informática', 'Filosofia', 'Arte']
+                ],
+                '2info': [
+                    ['07:30 - 08:20', 'Programação', 'Matemática', 'BD', 'Redes', 'Português'],
+                    ['08:20 - 09:10', 'Programação', 'Matemática', 'BD', 'Redes', 'Português'],
+                    ['09:30 - 10:20', 'Sistemas Op.', 'Física', 'Web Design', 'História', 'Inglês'],
+                    ['10:20 - 11:10', 'Sistemas Op.', 'Física', 'Web Design', 'História', 'Inglês'],
+                    ['11:10 - 12:00', 'Geografia', 'Química', 'Projeto', 'Ed. Física', 'Filosofia']
+                ],
+                '3info': [
+                    ['07:30 - 08:20', 'TCC', 'Programação', 'BD Avançado', 'Gestão', 'Português'],
+                    ['08:20 - 09:10', 'TCC', 'Programação', 'BD Avançado', 'Gestão', 'Português'],
+                    ['09:30 - 10:20', 'Redes Av.', 'Matemática', 'Seg. Info', 'Empreend.', 'Inglês'],
+                    ['10:20 - 11:10', 'Redes Av.', 'Matemática', 'Seg. Info', 'Empreend.', 'Inglês'],
+                    ['11:10 - 12:00', 'Estágio', 'Física', 'Projeto', 'Ética', 'Ed. Física']
+                ],
+                '1adm': [
+                    ['07:30 - 08:20', 'Administração', 'Português', 'Matemática', 'História', 'Inglês'],
+                    ['08:20 - 09:10', 'Administração', 'Português', 'Matemática', 'História', 'Inglês'],
+                    ['09:30 - 10:20', 'Economia', 'Geografia', 'Física', 'Química', 'Ed. Física'],
+                    ['10:20 - 11:10', 'Economia', 'Geografia', 'Física', 'Química', 'Ed. Física'],
+                    ['11:10 - 12:00', 'Sociologia', 'Filosofia', 'Biologia', 'Arte', 'Informática']
+                ],
+                '2adm': [
+                    ['07:30 - 08:20', 'Marketing', 'Matemática', 'RH', 'Contabilidade', 'Português'],
+                    ['08:20 - 09:10', 'Marketing', 'Matemática', 'RH', 'Contabilidade', 'Português'],
+                    ['09:30 - 10:20', 'Direito', 'História', 'Geografia', 'Física', 'Inglês'],
+                    ['10:20 - 11:10', 'Direito', 'História', 'Geografia', 'Física', 'Inglês'],
+                    ['11:10 - 12:00', 'Projeto', 'Química', 'Filosofia', 'Ed. Física', 'Informática']
+                ],
+                '3adm': [
+                    ['07:30 - 08:20', 'TCC', 'Empreend.', 'Gestão', 'Estatística', 'Português'],
+                    ['08:20 - 09:10', 'TCC', 'Empreend.', 'Gestão', 'Estatística', 'Português'],
+                    ['09:30 - 10:20', 'Estágio', 'Finanças', 'Direito Emp.', 'Economia', 'Inglês'],
+                    ['10:20 - 11:10', 'Estágio', 'Finanças', 'Direito Emp.', 'Economia', 'Inglês'],
+                    ['11:10 - 12:00', 'Ética', 'Liderança', 'Projeto', 'Ed. Física', 'Filosofia']
+                ]
+            };
+            
+            const currentSchedule = schedules[selectedClass] || schedules['1info'];
+            
+            scheduleBody.innerHTML = '';
+            currentSchedule.forEach(row => {
+                const tr = document.createElement('tr');
+                row.forEach(cell => {
+                    const td = document.createElement('td');
+                    td.textContent = cell;
+                    tr.appendChild(td);
                 });
-            }
+                scheduleBody.appendChild(tr);
+            });
+        }
 
-            function showToast(message) {
-                const toast = document.createElement('div');
-                toast.style.cssText = `
-                    position: fixed;
-                    bottom: 30px;
-                    right: 30px;
-                    background: white;
-                    color: #2c2c2c;
-                    padding: 15px 25px;
-                    border-radius: 10px;
-                    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-                    z-index: 9999;
-                    animation: slideUp 0.3s ease;
-                `;
-                toast.textContent = message;
-                document.body.appendChild(toast);
-                
-                setTimeout(() => {
-                    toast.style.animation = 'slideOut 0.3s ease';
-                    setTimeout(() => toast.remove(), 300);
-                }, 2000);
-            }
-        </script>
-
-        <style>
-            @keyframes slideUp {
-                from { transform: translateY(100px); opacity: 0; }
-                to { transform: translateY(0); opacity: 1; }
-            }
-            @keyframes slideOut {
-                from { transform: translateY(0); opacity: 1; }
-                to { transform: translateY(100px); opacity: 0; }
-            }
-        </style>
-
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.card');
+            cards.forEach((card, index) => {
+                card.style.animationDelay = `${index * 0.1}s`;
+            });
+        });
+    </script>
 
     <script src="{% static 'study/js/script.js' %}"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.4.3/dist/js/bootstrap.bundle.min.js"></script> 
