@@ -27,15 +27,12 @@ def is_aluno(user):
 @login_required
 def lista_atividades(request):
     """
-    Lista de atividades - CORRIGIDO: PROCESSA CRIAÇÃO VIA MODAL
+    Lista de atividades - FILTRO CORRIGIDO
     """
-    # Se for professor, processar criação ou exibir suas atividades
     if is_professor(request.user):
-        # PROCESSAR CRIAÇÃO DE ATIVIDADE VIA MODAL (POST)
         if request.method == 'POST':
             return processar_criacao_atividade(request)
         
-        # Exibir lista com modal
         atividades = Atividade.objects.filter(professor=request.user).order_by('-criado_em')
         
         atividades_anotadas = []
@@ -55,22 +52,23 @@ def lista_atividades(request):
         
         return render(request, 'atividades/lista_aluno.html', context)
     
-    # Se não for aluno nem professor, erro
     if not is_aluno(request.user):
         messages.error(request, 'Acesso restrito.')
         return redirect('study:home')
     
-    # Buscar atividades destinadas ao usuário
+    # BUSCAR ATIVIDADES
     atividades = Atividade.objects.all().order_by('-criado_em')
     
-    # Filtros
+    # FILTROS CORRIGIDOS
     filtro_tipo = request.GET.get('tipo', '')
     filtro_status = request.GET.get('status', '')
+    filtro_order = request.GET.get('order', 'recent')
     
+    # Aplicar filtro de tipo
     if filtro_tipo:
         atividades = atividades.filter(tipo=filtro_tipo)
     
-    # Separar atividades por status
+    # Aplicar filtro de status
     if filtro_status == 'abertas':
         atividades = atividades.exclude(
             envios__aluno=request.user
@@ -86,7 +84,25 @@ def lista_atividades(request):
             prazo_entrega__isnull=False
         )
     
-    # Anotar status de cada atividade para o aluno
+    # Aplicar ordenação
+    order_map = {
+        'recent': '-criado_em',
+        'views': '-visualizacoes',
+        'deadline': 'prazo_entrega',
+    }
+    
+    if filtro_order in order_map:
+        if filtro_order == 'saved':
+            # Ordenar por atividades salvas
+            atividades_salvas_ids = AtividadeSalva.objects.filter(
+                aluno=request.user
+            ).values_list('atividade_id', flat=True)
+            
+            atividades = atividades.filter(id__in=atividades_salvas_ids)
+        else:
+            atividades = atividades.order_by(order_map[filtro_order])
+    
+    # Anotar status de cada atividade
     atividades_anotadas = []
     for atividade in atividades:
         visualizou = AtividadeVisualizacao.objects.filter(
@@ -122,16 +138,13 @@ def lista_atividades(request):
 
 def processar_criacao_atividade(request):
     """
-    FUNÇÃO CORRIGIDA - Processa criação de atividade via modal
+    Processa criação de atividade via modal - CORRIGIDO
     """
     try:
-        # Capturar dados do POST
         titulo = request.POST.get('titulo', '').strip()
         descricao = request.POST.get('descricao', '').strip()
         tipo = request.POST.get('tipo', '')
         
-        # CORRIGIDO: Capturar checkboxes
-        # Quando checkbox está marcado, vem como 'on' no POST
         ano_1 = 'ano_1' in request.POST
         ano_2 = 'ano_2' in request.POST
         ano_3 = 'ano_3' in request.POST
@@ -140,25 +153,7 @@ def processar_criacao_atividade(request):
         prazo_entrega = request.POST.get('prazo_entrega', '').strip()
         anexo = request.FILES.get('anexo')
         
-        # DEBUG - Ver o que está chegando
-        print(f"=== DEBUG CRIAÇÃO ATIVIDADE ===")
-        print(f"Título: {titulo}")
-        print(f"Descrição: {descricao}")
-        print(f"Tipo: {tipo}")
-        print(f"Ano 1: {ano_1}")
-        print(f"Ano 2: {ano_2}")
-        print(f"Ano 3: {ano_3}")
-        print(f"Todos: {todos}")
-        print(f"Prazo: {prazo_entrega}")
-        print(f"Anexo: {anexo}")
-        print(f"POST completo: {request.POST}")
-        print(f"===========================")
-        
-        # ========================================
-        # VALIDAÇÕES 
-        # ========================================
-        
-        # 1. VALIDAR TÍTULO (50 CARACTERES, APENAS LETRAS E ESPAÇOS)
+        # VALIDAÇÕES
         if not titulo:
             messages.error(request, '❌ O título é obrigatório.')
             return redirect('atividades:lista')
@@ -169,25 +164,22 @@ def processar_criacao_atividade(request):
         
         titulo_regex = r'^[A-Za-zÀ-ÿÇç\s]+$'
         if not re.match(titulo_regex, titulo):
-            messages.error(request, '❌ Título contém caracteres não permitidos. Use apenas letras e espaços.')
+            messages.error(request, '❌ Título contém caracteres não permitidos.')
             return redirect('atividades:lista')
         
-        # 2. VALIDAR DESCRIÇÃO
         if not descricao:
             messages.error(request, '❌ A descrição é obrigatória.')
             return redirect('atividades:lista')
         
-        # 3. VALIDAR PÚBLICO-ALVO
         if not any([ano_1, ano_2, ano_3, todos]):
-            messages.error(request, '❌ Selecione pelo menos um ano ou "Todos".')
+            messages.error(request, '❌ Selecione pelo menos um ano.')
             return redirect('atividades:lista')
         
-        # 4. VALIDAR TIPO
         if tipo not in ['ATIVIDADE', 'AVISO_PROVA', 'AVISO_SIMPLES']:
-            messages.error(request, '❌ Selecione o tipo de atividade.')
+            messages.error(request, '❌ Tipo de atividade inválido.')
             return redirect('atividades:lista')
         
-        # 5. CRIAR ATIVIDADE
+        # CRIAR ATIVIDADE
         atividade = Atividade(
             professor=request.user,
             titulo=titulo,
@@ -199,47 +191,37 @@ def processar_criacao_atividade(request):
             todos=todos
         )
         
-        # 6. VALIDAR E DEFINIR PRAZO (MÍNIMO 30 MINUTOS)
+        # PRAZO
         if prazo_entrega:
             from django.utils.dateparse import parse_datetime
             prazo_dt = parse_datetime(prazo_entrega)
             
             if prazo_dt:
-                # Tornar timezone-aware
                 if timezone.is_naive(prazo_dt):
                     prazo_dt = timezone.make_aware(prazo_dt)
                 
                 limite_minimo = timezone.now() + timedelta(minutes=30)
                 
                 if prazo_dt < limite_minimo:
-                    messages.error(request, '❌ O prazo deve ser no mínimo 30 minutos após agora.')
+                    messages.error(request, '❌ Prazo deve ser no mínimo 30 minutos.')
                     return redirect('atividades:lista')
                 
                 atividade.prazo_entrega = prazo_dt
         
-        # 7. ANEXO
         if anexo:
             atividade.anexo = anexo
         
-        # 8. DESABILITAR ENVIO PARA AVISOS
         if tipo in ['AVISO_PROVA', 'AVISO_SIMPLES']:
             atividade.permite_envio = False
         
-        # 9. SALVAR NO BANCO DE DADOS
         atividade.save()
         
-        print(f"✅ Atividade salva com ID: {atividade.id}")
-        
-        # 10. MENSAGEM DE SUCESSO
         anos_destino = atividade.get_anos_destino_display()
-        messages.success(request, f'✅ Atividade "{titulo}" criada com sucesso para: {anos_destino}.')
+        messages.success(request, f'✅ Atividade "{titulo}" criada para: {anos_destino}.')
         
         return redirect('atividades:lista')
         
     except Exception as e:
-        print(f"❌ ERRO AO CRIAR ATIVIDADE: {str(e)}")
-        import traceback
-        traceback.print_exc()
         messages.error(request, f'❌ Erro ao criar atividade: {str(e)}')
         return redirect('atividades:lista')
 
@@ -247,18 +229,19 @@ def processar_criacao_atividade(request):
 @login_required
 def detalhe_atividade(request, pk):
     """
-    Detalhe de atividade para aluno - CORRIGIDO: SEM BLOQUEIO DE ACESSO
+    Detalhe de atividade - CORRIGIDO: TRATA ERRO ModeloNãoExiste
     """
-    atividade = get_object_or_404(Atividade, pk=pk)
+    try:
+        atividade = get_object_or_404(Atividade, pk=pk)
+    except Atividade.DoesNotExist:
+        messages.error(request, '❌ Atividade não encontrada. Pode ter sido excluída.')
+        return redirect('atividades:lista')
     
-    # Verificar se tem acesso
     tem_acesso = False
     
-    # Se for professor criador
     if atividade.professor == request.user:
         tem_acesso = True
     
-    # Se for aluno e a atividade é destinada para ele
     if request.user.user_type == 'aluno':
         tem_acesso = True
     
@@ -266,7 +249,7 @@ def detalhe_atividade(request, pk):
         messages.error(request, 'Você não tem acesso a esta atividade.')
         return redirect('atividades:lista')
     
-    # Registrar visualização (única) - APENAS PARA ALUNOS
+    # Registrar visualização
     if request.user.user_type == 'aluno':
         visualizacao, created = AtividadeVisualizacao.objects.get_or_create(
             atividade=atividade,
@@ -282,13 +265,11 @@ def detalhe_atividade(request, pk):
             
             atividade.refresh_from_db()
     
-    # Verificar se já enviou
     envio = AtividadeEnvio.objects.filter(
         atividade=atividade,
         aluno=request.user
     ).first()
     
-    # Verificar se salvou
     salvou = AtividadeSalva.objects.filter(
         atividade=atividade,
         aluno=request.user
@@ -355,7 +336,7 @@ def enviar_atividade(request, pk):
 @require_POST
 def salvar_atividade(request, pk):
     """
-    Salvar atividade para acesso rápido
+    Salvar atividade - CORRIGIDO
     """
     if not is_aluno(request.user):
         return JsonResponse({'success': False, 'error': 'Acesso negado'}, status=403)
@@ -412,15 +393,13 @@ def baixar_anexo(request, pk):
 @login_required
 def gerar_ics(request, pk):
     """
-    Gerar arquivo .ics para agendamento (CORRIGIDO CONFORME RELATÓRIO)
+    Gerar arquivo .ics para agendamento
     """
     atividade = get_object_or_404(Atividade, pk=pk)
     
     if not atividade.prazo_entrega:
         messages.error(request, 'Esta atividade não possui prazo.')
         return redirect('atividades:detalhe', pk=pk)
-    
-    from datetime import timedelta
     
     dtstart = atividade.prazo_entrega.strftime('%Y%m%dT%H%M%S')
     dtend = (atividade.prazo_entrega + timedelta(hours=1)).strftime('%Y%m%dT%H%M%S')
@@ -446,9 +425,7 @@ END:VCALENDAR"""
     return response
 
 
-# ========================================
 # VIEWS PARA PROFESSORES
-# ========================================
 
 @login_required
 @user_passes_test(is_professor)
@@ -477,7 +454,7 @@ def painel_professor(request):
 @user_passes_test(is_professor)
 def criar_atividade(request):
     """
-    Criação de atividade por professor (PÁGINA SEPARADA - MANTIDA PARA COMPATIBILIDADE)
+    Criação de atividade por professor
     """
     if request.method == 'POST':
         return processar_criacao_atividade(request)

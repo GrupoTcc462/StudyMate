@@ -17,7 +17,6 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: var(--background);
             min-height: 100vh;
-            color: #2c2c2c;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -166,6 +165,13 @@
             padding: 20px;
             color: #6c757d;
         }
+
+        .hint-text {
+            text-align: center;
+            color: #6c757d;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
     </style>
 </head>
 <body>
@@ -173,6 +179,10 @@
         <div class="search-header">
             <h2>Nova Conversa</h2>
             <p>Busque um professor ou aluno para iniciar uma conversa</p>
+        </div>
+
+        <div class="hint-text">
+            💡 Digite para buscar ou veja todos os usuários abaixo
         </div>
 
         <div class="search-box">
@@ -185,9 +195,11 @@
         </div>
 
         <div class="results-list" id="resultsList">
-            <div class="empty-results">
-                <div style="font-size: 3rem; margin-bottom: 15px;">👥</div>
-                <p>Digite pelo menos 3 caracteres para buscar usuários</p>
+            <div class="loading">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Carregando...</span>
+                </div>
+                <p>Carregando usuários...</p>
             </div>
         </div>
 
@@ -196,110 +208,104 @@
         </button>
     </div>
 
-   
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    const searchInput = document.getElementById('searchInput');
-    const resultsList = document.getElementById('resultsList');
-    const csrfToken = '{{ csrf_token }}';
-    let searchTimeout;
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const searchInput = document.getElementById('searchInput');
+        const resultsList = document.getElementById('resultsList');
+        const csrfToken = '{{ csrf_token }}';
+        let searchTimeout;
 
-    searchInput.addEventListener('input', function() {
-        clearTimeout(searchTimeout);
-        
-        const query = this.value.trim();
-        
-        if (query.length < 3) {
+        // CARREGAR TODOS OS USUÁRIOS AO ABRIR A PÁGINA
+        window.addEventListener('DOMContentLoaded', function() {
+            searchUsers('');
+        });
+
+        // BUSCA EM TEMPO REAL (SEM LIMITE MÍNIMO)
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            
+            const query = this.value.trim();
+            
             resultsList.innerHTML = `
-                <div class="empty-results">
-                    <div style="font-size: 3rem; margin-bottom: 15px;">👥</div>
-                    <p>Digite pelo menos 3 caracteres para buscar usuários</p>
+                <div class="loading">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Carregando...</span>
+                    </div>
+                    <p>Buscando...</p>
                 </div>
             `;
-            return;
-        }
-        
-        resultsList.innerHTML = `
-            <div class="loading">
-                <div class="spinner-border text-primary" role="status">
-                    <span class="visually-hidden">Carregando...</span>
-                </div>
-                <p>Buscando...</p>
-            </div>
-        `;
-        
-        searchTimeout = setTimeout(() => {
-            searchUsers(query);
-        }, 500);
-    });
+            
+            searchTimeout = setTimeout(() => {
+                searchUsers(query);
+            }, 300);
+        });
 
-    async function searchUsers(query) {
-        try {
-            const response = await fetch(`/chat/novo/?q=${encodeURIComponent(query)}`, {
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
+        async function searchUsers(query) {
+            try {
+                const response = await fetch(`/chat/novo/?q=${encodeURIComponent(query)}`, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.resultados.length === 0) {
+                    resultsList.innerHTML = `
+                        <div class="empty-results">
+                            <div style="font-size: 3rem; margin-bottom: 15px;">😕</div>
+                            <p>Nenhum usuário encontrado</p>
+                        </div>
+                    `;
+                    return;
                 }
-            });
-            
-            const data = await response.json();
-            
-            if (data.resultados.length === 0) {
+                
+                resultsList.innerHTML = data.resultados.map(user => `
+                    <div class="user-result" onclick="startChat(${user.id})">
+                        <div class="user-avatar">
+                            ${user.username.charAt(0).toUpperCase()}
+                        </div>
+                        <div class="user-info">
+                            <div class="user-name">${user.username}</div>
+                            <div class="user-type">${user.user_type} • ${user.email}</div>
+                        </div>
+                        <button class="btn-chat" onclick="event.stopPropagation(); startChat(${user.id})">
+                            Conversar
+                        </button>
+                    </div>
+                `).join('');
+                
+            } catch (error) {
+                console.error('Erro:', error);
                 resultsList.innerHTML = `
                     <div class="empty-results">
-                        <div style="font-size: 3rem; margin-bottom: 15px;">😕</div>
-                        <p>Nenhum usuário encontrado</p>
+                        <div style="font-size: 3rem; margin-bottom: 15px;">❌</div>
+                        <p>Erro ao buscar usuários. Tente novamente.</p>
                     </div>
                 `;
-                return;
             }
-            
-            resultsList.innerHTML = data.resultados.map(user => `
-                <div class="user-result" onclick="startChat(${user.id})">
-                    <div class="user-avatar">
-                        ${user.username.charAt(0).toUpperCase()}
-                    </div>
-                    <div class="user-info">
-                        <div class="user-name">${user.username}</div>
-                        <div class="user-type">${user.user_type} • ${user.email}</div>
-                    </div>
-                    <button class="btn-chat" onclick="event.stopPropagation(); startChat(${user.id})">
-                        Conversar
-                    </button>
-                </div>
-            `).join('');
-            
-        } catch (error) {
-            console.error('Erro:', error);
-            resultsList.innerHTML = `
-                <div class="empty-results">
-                    <div style="font-size: 3rem; margin-bottom: 15px;">❌</div>
-                    <p>Erro ao buscar usuários. Tente novamente.</p>
-                </div>
-            `;
         }
-    }
 
-    async function startChat(userId) {
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = '/chat/novo/';
-        
-        const csrfInput = document.createElement('input');
-        csrfInput.type = 'hidden';
-        csrfInput.name = 'csrfmiddlewaretoken';
-        csrfInput.value = csrfToken;
-        
-        const userInput = document.createElement('input');
-        userInput.type = 'hidden';
-        userInput.name = 'destinatario_id';
-        userInput.value = userId;
-        
-        form.appendChild(csrfInput);
-        form.appendChild(userInput);
-        document.body.appendChild(form);
-        form.submit();
-    }
-</script>
+        async function startChat(userId) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/chat/novo/';
+            
+            const csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = 'csrfmiddlewaretoken';
+            csrfInput.value = csrfToken;
+            
+            const userInput = document.createElement('input');
+            userInput.type = 'hidden';
+            userInput.name = 'destinatario_id';
+            userInput.value = userId;
+            
+            form.appendChild(csrfInput);
+            form.appendChild(userInput);
+            document.body.appendChild(form);
+            form.submit();
+        }
     </script>
 </body>
 </html>
