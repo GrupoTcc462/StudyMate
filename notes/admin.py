@@ -1,27 +1,12 @@
 from django.contrib import admin
-from .models import Note, Comment, NoteLike, NoteView, NoteRecommendation, Materia
-
-
-# ========================================
-# ADMIN PARA MATERIA
-# ========================================
-@admin.register(Materia)
-class MateriaAdmin(admin.ModelAdmin):
-    list_display = ('nome', 'criado_em', 'total_notes')
-    search_fields = ('nome',)
-    readonly_fields = ('criado_em',)
-    
-    def total_notes(self, obj):
-        """Quantidade de notes nesta matéria"""
-        return obj.notes.count()
-    total_notes.short_description = 'Total de Notes'
+from .models import Note, Comment, NoteLike, NoteView, NoteRecommendation
 
 
 @admin.register(Note)
 class NoteAdmin(admin.ModelAdmin):
     list_display = ('title', 'author', 'file_type', 'subject', 'is_recommended', 'views', 'likes', 'downloads', 'created_at')
     list_filter = ('file_type', 'subject', 'is_recommended', 'created_at', 'author__user_type')
-    search_fields = ('title', 'description', 'author__username', 'subject__nome')
+    search_fields = ('title', 'description', 'author__username', 'subject')
     readonly_fields = ('views', 'likes', 'downloads', 'created_at')
     list_editable = ('is_recommended',)
     date_hierarchy = 'created_at'
