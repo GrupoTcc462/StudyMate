@@ -455,20 +455,21 @@
             <div class="filters-section">
                 <form method="get" id="filterForm">
                     <div class="filter-row">
+                        <!-- 🔥 FILTRO DE MATÉRIA CORRIGIDO: ENVIA ID -->
                         <div class="filter-box">
                             <label>📚 Matéria</label>
                             <select name="subject" id="subjectFilter" class="filter-field">
                                 <option value="">Todas as matérias</option>
-                                {% for subject in subjects %}
-                                    <option value="{{ subject }}" {% if subject == current_subject %}selected{% endif %}>
-                                        {{ subject }}
+                                {% for m in materias %}
+                                    <option value="{{ m.id }}" {% if m.id|stringformat:"s" == current_subject|stringformat:"s" %}selected{% endif %}>
+                                        {{ m.nome }}
                                     </option>
                                 {% endfor %}
                             </select>
                         </div>
 
                         <div class="filter-box">
-                            <label> Tipo de Conteúdo</label>
+                            <label>📄 Tipo de Conteúdo</label>
                             <select name="file_type" id="typeFilter" class="filter-field">
                                 <option value="">Todos os tipos</option>
                                 {% for code, name in file_types %}
@@ -480,7 +481,7 @@
                         </div>
 
                         <div class="filter-box">
-                            <label> Ordenar por</label>
+                            <label>🔀 Ordenar por</label>
                             <select name="order" id="orderFilter" class="filter-field">
                                 <option value="recent" {% if current_order == 'recent' %}selected{% endif %}>Mais Recentes</option>
                                 <option value="likes" {% if current_order == 'likes' %}selected{% endif %}>Mais Curtidos</option>
@@ -490,7 +491,7 @@
                         </div>
 
                         <div class="filter-box">
-                            <label> Recomendados</label>
+                            <label>⭐ Recomendados</label>
                             <select name="recommended" id="recommendedFilter" class="filter-field">
                                 <option value="">Todos</option>
                                 <option value="true" {% if request.GET.recommended == 'true' %}selected{% endif %}>Apenas Recomendados</option>
@@ -531,14 +532,34 @@
                             {% endif %}
                         </p>
 
-                        <div class="note-badges">
-                            {% if note.subject_new %}
-                                <span class="badge-subject">{{ note.subject_new.nome }}</span>
-                            {% else %}
-                                <span class="badge-subject" style="opacity: 0.5;">Sem matéria</span>
-                            {% endif %}
-                            <span class="badge-type">{{ note.get_file_type_display }}</span>
-                        </div>
+                        {% if page_obj.has_other_pages %}
+                            <div style="margin-top: 40px; display: flex; justify-content: center; gap: 10px;">
+                                {% if page_obj.has_previous %}
+                                    <a href="?page={{ page_obj.previous_page_number }}&subject={{ current_subject }}&file_type={{ current_file_type }}&order={{ current_order }}&recommended={{ request.GET.recommended }}" 
+                                    style="background: white; color: var(--primary); padding: 10px 18px; border-radius: 8px; text-decoration: none; font-weight: 600;">
+                                        « Anterior
+                                    </a>
+                                {% endif %}
+
+                                {% for num in page_obj.paginator.page_range %}
+                                    {% if page_obj.number == num %}
+                                        <span style="background: var(--primary); color: white; padding: 10px 18px; border-radius: 8px; font-weight: 600;">{{ num }}</span>
+                                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                        <a href="?page={{ num }}&subject={{ current_subject }}&file_type={{ current_file_type }}&order={{ current_order }}&recommended={{ request.GET.recommended }}" 
+                                        style="background: white; color: var(--primary); padding: 10px 18px; border-radius: 8px; text-decoration: none; font-weight: 600;">
+                                            {{ num }}
+                                        </a>
+                                    {% endif %}
+                                {% endfor %}
+
+                                {% if page_obj.has_next %}
+                                    <a href="?page={{ page_obj.next_page_number }}&subject={{ current_subject }}&file_type={{ current_file_type }}&order={{ current_order }}&recommended={{ request.GET.recommended }}" 
+                                    style="background: white; color: var(--primary); padding: 10px 18px; border-radius: 8px; text-decoration: none; font-weight: 600;">
+                                        Próximo »
+                                    </a>
+                                {% endif %}
+                            </div>
+                        {% endif %}
 
                         <div class="note-metrics">
                             <span title="Visualizações">👁️ {{ note.views }}</span>
@@ -618,11 +639,11 @@
                         </div>
 
                         <div class="mb-3" style="text-align: left;">
-                            <label class="form-label" style="text-align: left; display: block;">Matéria </label>
+                            <label class="form-label" style="text-align: left; display: block;">Matéria *</label>
                             <select name="subject" class="form-select" id="subjectSelect" required style="text-align: left;">
                                 <option value="">Selecione uma matéria</option>
-                                {% for subject in subjects %}
-                                    <option value="{{ subject }}">{{ subject }}</option>
+                                {% for m in materias %}
+                                    <option value="{{ m.id }}">{{ m.nome }}</option>
                                 {% endfor %}
                             </select>
                         </div>

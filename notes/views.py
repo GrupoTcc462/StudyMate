@@ -13,79 +13,59 @@ import json
 
 
 def notes_list(request):
-    """Lista de notes com filtros e paginação - CORRIGIDA"""
-    
-    # ========================================
-    # QUERY BASE - SEMPRE MOSTRA TODOS OS NOTES
-    # ========================================
+    """Lista de notes com filtros e paginação"""
+
+    # Carrega notas com prefetch e select corretos
     qs = Note.objects.select_related('author', 'subject_new').prefetch_related('comments')
-    
-    # Filtros opcionais
+
+    # Filtros
     subject = request.GET.get('subject', '')
     file_type = request.GET.get('file_type', '')
     order = request.GET.get('order', 'recent')
     recommended = request.GET.get('recommended', '')
-    
-    # ========================================
-    # APLICAR FILTROS (se houver)
-    # ========================================
+
+    # FILTRO POR MATÉRIA (usando subject_new_id)
     if subject:
-        qs = qs.filter(subject_new__nome__iexact=subject)
-    
+        qs = qs.filter(subject_new_id=subject)
+
+    # FILTRO POR TIPO DE ARQUIVO
     if file_type:
         qs = qs.filter(file_type=file_type)
-    
+
+    # FILTRO POR RECOMENDADOS
     if recommended == 'true':
         qs = qs.filter(is_recommended=True)
-    
-    # ========================================
+
     # ORDENAÇÃO
-    # ========================================
     ordering_map = {
         'recent': '-created_at',
         'likes': '-likes',
         'views': '-views',
         'downloads': '-downloads'
     }
-    
-    order_field = ordering_map.get(order, '-created_at')
-    qs = qs.order_by(order_field)
-    
-    # ========================================
-    # DEBUG: Verificar quantos notes existem
-    # ========================================
-    total_notes = qs.count()
-    print(f"[DEBUG] Total de notes na query: {total_notes}")
-    
-    # ========================================
+    qs = qs.order_by(ordering_map.get(order, '-created_at'))
+
     # PAGINAÇÃO
-    # ========================================
     paginator = Paginator(qs, 12)
     page_number = request.GET.get('page', 1)
     page_obj = paginator.get_page(page_number)
-    
-    print(f"[DEBUG] Notes na página atual: {page_obj.object_list.count()}")
-    
-    # ========================================
-    # LISTA DE MATÉRIAS PARA FILTRO E MODAL
-    # ========================================
-    subjects_list = Materia.objects.all().order_by('nome')
-    
-    # ========================================
-    # CONTEXTO
-    # ========================================
+
+    # LISTA DE MATÉRIAS (a nova tabela)
+    materias = Materia.objects.all().order_by('nome')
+
     context = {
         'page_obj': page_obj,
-        'subjects': subjects_list,
-        'materias': subjects_list,  # Para o modal
+        'materias': materias,
+        'file_types': Note.FILE_TYPES,
         'current_subject': subject,
         'current_file_type': file_type,
         'current_order': order,
-        'file_types': Note.FILE_TYPES,
-        'total_notes': total_notes,  # Para debug
     }
-    
+
     return render(request, 'notes/notes_list.html', context)
+
+        
+ 
 
 
 def note_detail(request, pk):
@@ -184,7 +164,7 @@ def note_create(request):
         title = request.POST.get('title', '').strip()
         description = request.POST.get('description', '').strip()
         file_type = request.POST.get('file_type', '')
-        subject_id = request.POST.get('subject', '').strip()
+        subject_id = request.POST.get('subject', '').strip()  # ✅ Agora recebe ID
         file = request.FILES.get('file')
         link = request.POST.get('link', '').strip()
         
@@ -217,15 +197,21 @@ def note_create(request):
             messages.error(request, 'Tipo de conteúdo inválido.')
             return redirect('notes:list')
         
-        # Validação da matéria
+        # ========================================
+        # 🔥 CORREÇÃO CRÍTICA: BUSCAR MATÉRIA POR ID
+        # ========================================
         materia = None
         if subject_id:
             try:
+                subject_id = int(subject_id)  # ✅ Converter para inteiro
                 materia = Materia.objects.get(id=subject_id)
-                print(f"[DEBUG] Matéria selecionada: {materia.nome}")
-            except (Materia.DoesNotExist, ValueError):
+                print(f"[DEBUG] ✅ Matéria encontrada: {materia.nome} (ID: {materia.id})")
+            except (Materia.DoesNotExist, ValueError) as e:
+                print(f"[DEBUG] ❌ Erro ao buscar matéria: {e}")
                 messages.error(request, 'Matéria inválida.')
                 return redirect('notes:list')
+        else:
+            print("[DEBUG] ⚠️ Nenhuma matéria fornecida")
         
         # Criar objeto Note
         note = Note(
@@ -233,8 +219,9 @@ def note_create(request):
             title=title,
             description=description,
             file_type=file_type,
-            subject_new=materia
+            subject_new=materia  # ✅ Atribuir a matéria corretamente
         )
+        
         
         # Validação por tipo de conteúdo
         if file_type == 'LINK':
@@ -303,18 +290,21 @@ def note_create(request):
         note.full_clean()
         note.save()
         
-        print(f"[DEBUG] Note criado com sucesso! ID: {note.pk}, Título: {note.title}")
+        print(f"[DEBUG] ✅ Note criado com sucesso!")
+        print(f"[DEBUG] ID: {note.pk}")
+        print(f"[DEBUG] Título: {note.title}")
         print(f"[DEBUG] Matéria: {note.subject_new.nome if note.subject_new else 'Nenhuma'}")
+        print(f"[DEBUG] subject_new ID: {note.subject_new.id if note.subject_new else 'None'}")
         
         messages.success(request, f'Note "{title}" criado com sucesso!')
         
         # ========================================
-        # REDIRECIONAR PARA A LISTA (sem filtros)
+        # REDIRECIONAR PARA A LISTA
         # ========================================
         return redirect('notes:list')
         
     except Exception as e:
-        print(f"[ERRO] Ao criar note: {str(e)}")
+        print(f"[ERRO] ❌ Ao criar note: {str(e)}")
         import traceback
         traceback.print_exc()
         messages.error(request, f'Erro ao criar note: {str(e)}')
