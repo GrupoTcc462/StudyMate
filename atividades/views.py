@@ -407,39 +407,7 @@ def baixar_anexo(request, pk):
     return response
 
 
-@login_required
-def gerar_ics(request, pk):
-    """
-    Gerar arquivo .ics para agendamento
-    """
-    atividade = get_object_or_404(Atividade, pk=pk)
-    
-    if not atividade.prazo_entrega:
-        messages.error(request, 'Esta atividade não possui prazo.')
-        return redirect('atividades:detalhe', pk=pk)
-    
-    dtstart = atividade.prazo_entrega.strftime('%Y%m%dT%H%M%S')
-    dtend = (atividade.prazo_entrega + timedelta(hours=1)).strftime('%Y%m%dT%H%M%S')
-    
-    ics_content = f"""BEGIN:VCALENDAR
-VERSION:2.0
-PRODID:-//StudyMate//Atividades//PT
-BEGIN:VEVENT
-UID:{atividade.pk}@studymate.com
-DTSTAMP:{timezone.now().strftime('%Y%m%dT%H%M%SZ')}
-DTSTART:{dtstart}
-DTEND:{dtend}
-SUMMARY:{atividade.titulo}
-DESCRIPTION:{atividade.descricao or 'Atividade acadêmica'}
-LOCATION:ETEC João Maria Stevanatto
-STATUS:CONFIRMED
-END:VEVENT
-END:VCALENDAR"""
-    
-    response = HttpResponse(ics_content, content_type='text/calendar')
-    response['Content-Disposition'] = f'attachment; filename="{atividade.titulo}.ics"'
-    
-    return response
+# Função gerar_ics() REMOVIDA - Agora usa Google Calendar direto no template
 
 
 # VIEWS PARA PROFESSORES

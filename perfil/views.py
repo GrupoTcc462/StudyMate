@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST, require_http_methods
-from django.db.models import Sum
+from django.db.models import Sum, Count
 from django.utils import timezone
 from django.contrib.auth import authenticate
 import json
@@ -23,22 +23,38 @@ def perfil_view(request):
     # Atualizar streak quando acessar perfil
     perfil.update_streak()
     
-    # Estatísticas de notes
+    # ========================================
+    # ESTATÍSTICAS BÁSICAS
+    # ========================================
+    
+    # Notes criados pelo usuário
     notes_count = Note.objects.filter(author=user).count()
+    
+    # Curtidas dadas pelo usuário
     likes_count = NoteLike.objects.filter(user=user).count()
     
-    # Downloads: somar todos os downloads dos notes do usuário
+    # Downloads totais recebidos nos notes do usuário
     downloads_count = Note.objects.filter(author=user).aggregate(
         total=Sum('downloads')
     )['total'] or 0
     
-    # Se for professor: contar notes recomendados
+    # Recomendações (professores)
     recommended_notes_count = 0
     if user.user_type == 'professor' or user.is_staff:
         recommended_notes_count = NoteRecommendation.objects.filter(teacher=user).count()
     
+    # ========================================
+    # TEXTO DA OFENSIVA (CORRIGIDO)
+    # ========================================
+    dias_ofensiva = perfil.streak_count
+    if dias_ofensiva == 1:
+        texto_ofensiva = "1 dia seguido"
+    else:
+        texto_ofensiva = f"{dias_ofensiva} dias seguidos"
+    
     context = {
         'streak_count': perfil.streak_count,
+        'texto_ofensiva': texto_ofensiva,
         'streak_progress': perfil.streak_progress(),
         'notes_count': notes_count,
         'likes_count': likes_count,
@@ -47,6 +63,81 @@ def perfil_view(request):
     }
     
     return render(request, 'perfil/perfil.html', context)
+
+
+@login_required
+@require_http_methods(["GET"])
+def popup_data(request, tipo):
+    """
+    Retorna dados atualizados para os popups em tempo real
+    """
+    user = request.user
+    items = []
+    
+    try:
+        if tipo == 'notes-criados':
+            notes = Note.objects.filter(author=user).select_related('subject_new').order_by('-created_at')
+            
+            for note in notes:
+                items.append({
+                    'id': note.pk,
+                    'title': note.title,
+                    'subject': note.subject_new.nome if note.subject_new else 'Sem matéria',
+                    'file_type': note.get_file_type_display(),
+                    'created_at': note.created_at.strftime('%d/%m/%Y'),
+                    'url': f'/notes/{note.pk}/'
+                })
+        
+        elif tipo == 'curtidas-recebidas':
+            notes = Note.objects.filter(author=user).order_by('-likes', '-views', '-downloads')
+            
+            for note in notes:
+                items.append({
+                    'id': note.pk,
+                    'title': note.title,
+                    'created_at': note.created_at.strftime('%d/%m/%Y'),
+                    'likes': note.likes,
+                    'views': note.views,
+                    'downloads': note.downloads,
+                    'comments_count': note.comments.count(),
+                    'url': f'/notes/{note.pk}/'
+                })
+        
+        elif tipo == 'downloads':
+            # Sistema de rastreamento ainda não implementado
+            pass
+        
+        elif tipo == 'recomendacoes':
+            if user.user_type == 'professor' or user.is_staff:
+                recomendacoes = NoteRecommendation.objects.filter(
+                    teacher=user
+                ).select_related('note', 'note__subject_new').order_by('-recommended_at')
+                
+                for rec in recomendacoes:
+                    try:
+                        items.append({
+                            'id': rec.note.pk,
+                            'title': rec.note.title,
+                            'views': rec.note.views,
+                            'likes': rec.note.likes,
+                            'downloads': rec.note.downloads,
+                            'recommended_at': rec.recommended_at.strftime('%d/%m/%Y às %H:%M'),
+                            'url': f'/notes/{rec.note.pk}/'
+                        })
+                    except:
+                        # Note foi deletado
+                        pass
+        
+        return JsonResponse({
+            'success': True,
+            'items': items
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)
 
 
 @login_required

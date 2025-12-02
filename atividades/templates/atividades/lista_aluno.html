@@ -340,7 +340,7 @@
         }
 
         .btn-create-first {
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            background: #28a745;
             color: white;
             padding: 15px 35px;
             border-radius: 50px;
@@ -348,13 +348,13 @@
             font-size: 1.1rem;
             font-weight: 600;
             cursor: pointer;
-            box-shadow: 0 5px 20px rgba(40, 167, 69, 0.4);
+           
             transition: all 0.3s ease;
         }
 
         .btn-create-first:hover {
             transform: translateY(-3px);
-            box-shadow: 0 7px 25px rgba(40, 167, 69, 0.5);
+            
         }
 
         footer {
@@ -396,7 +396,7 @@
             <!-- BOTÃO IR PARA CHAT -->
             <div class="section-nav">
                 <a href="{% url 'chat:lista' %}" class="btn-section">
-                    💬 Ir para Chat
+                     Ir para Chat
                 </a>
             </div>
 
@@ -406,13 +406,13 @@
                     <div class="create-first-activity">
                         <h3>📚 Nenhuma atividade criada ainda</h3>
                         <button class="btn-create-first" data-bs-toggle="modal" data-bs-target="#criarAtividadeModal">
-                            ✨ Criar minha primeira atividade
+                             Criar minha primeira atividade
                         </button>
                     </div>
                 {% else %}
                     <div style="text-align: center; margin-bottom: 25px;">
                         <button class="btn-create-first" data-bs-toggle="modal" data-bs-target="#criarAtividadeModal">
-                            ➕ Criar nova atividade
+                             Criar nova atividade
                         </button>
                     </div>
                 {% endif %}

@@ -346,7 +346,6 @@
                 </div>
             {% endif %}
 
-            <!-- INFORMAÇÕES COM DATAS CORRIGIDAS -->
             <div class="info-section">
                 <div class="info-item">
                     <span class="info-label">📚 Destinado para:</span>
@@ -385,8 +384,10 @@
                 {% endif %}
                 
                 {% if atividade.prazo_entrega %}
-                    <a href="{% url 'atividades:gerar_ics' atividade.pk %}" class="btn-action btn-agendar">
-                        📅 Agendar no Calendário
+                    <a target="_blank"
+                       href="https://calendar.google.com/calendar/render?action=TEMPLATE&text={{ atividade.titulo|urlencode }}&details={{ atividade.descricao|default:'Atividade acadêmica'|urlencode }}&dates={{ atividade.prazo_entrega|date:'Ymd' }}T{{ atividade.prazo_entrega|date:'His' }}Z/{{ atividade.prazo_entrega|date:'Ymd' }}T{{ atividade.prazo_entrega|date:'His' }}Z&location=ETEC João Maria Stevanatto"
+                       class="btn-action btn-agendar">
+                        📅 Agendar no Google Calendar
                     </a>
                 {% endif %}
                 

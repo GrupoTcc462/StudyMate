@@ -116,7 +116,7 @@ class Mensagem(models.Model):
         palavras_proibidas = [
             'faca', 'facada', 'matar', 'morrer', 'droga', 'cocaina',
             'maconha', 'crack', 'merda', 'porra', 'caralho', 'puta',
-            'viado', 'bicha', 'otario', 'idiota', 'burro', 'imbecil'
+            'viado', 'bicha', 'otario', 'idiota', 'burro', 'imbecil', 'burro', 'Burro',
         ]
         
         mensagem_limpa = self.mensagem
