@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <title>Login</title>
     {% load static %}
+    <!-- BOOTSTRAP ICONS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 </head>
 
 <style> 
@@ -139,6 +141,28 @@
 
     .form-group input.success {
         border-color: #28a745;
+    }
+
+    /* WRAPPER PARA CAMPO DE SENHA COM ÍCONE */
+    .password-wrapper {
+        position: relative;
+    }
+
+    .toggle-password {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        border: none;
+        background: none;
+        cursor: pointer;
+        font-size: 1.2rem;
+        color: #6c757d;
+        transition: color 0.3s ease;
+    }
+
+    .toggle-password:hover {
+        color: #003366;
     }
 
     .error-message {
@@ -328,7 +352,12 @@
 
                 <div class="form-group">
                     <label for="password">Senha:</label>
-                    <input type="password" id="password" name="password" required>
+                    <div class="password-wrapper">
+                        <input type="password" id="password" name="password" required>
+                        <button type="button" class="toggle-password" data-target="password">
+                            <i class="bi bi-eye-fill"></i>
+                        </button>
+                    </div>
                 </div>
 
                 <button type="submit" class="btn-login" id="btnLogin">Entrar</button>
@@ -421,6 +450,24 @@
                 credentialInput.focus();
                 return false;
             }
+        });
+
+        // ========================================
+        // TOGGLE PASSWORD (ÍCONES TRADICIONAIS)
+        // ========================================
+        document.querySelectorAll(".toggle-password").forEach(button => {
+            button.addEventListener("click", () => {
+                const input = document.getElementById(button.dataset.target);
+                const icon = button.querySelector("i");
+
+                if (input.type === "password") {
+                    input.type = "text";
+                    icon.classList.replace("bi-eye-fill", "bi-eye-slash-fill");
+                } else {
+                    input.type = "password";
+                    icon.classList.replace("bi-eye-slash-fill", "bi-eye-fill");
+                }
+            });
         });
     </script>
 </body>
