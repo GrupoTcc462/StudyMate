@@ -85,7 +85,7 @@
         }
 
         .btn-create-note {
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            background: #28a745;  /* Vermelho sólido */
             color: white;
             border: none;
             padding: 15px 35px;
@@ -93,13 +93,13 @@
             font-size: 1.1rem;
             font-weight: 600;
             cursor: pointer;
-            box-shadow: 0 5px 20px rgba(40, 167, 69, 0.4);
             transition: all 0.3s ease;
+            display: inline-block;
         }
 
         .btn-create-note:hover {
+            background: #218838;  /* Tom mais escuro no hover */
             transform: translateY(-3px);
-            box-shadow: 0 7px 25px rgba(40, 167, 69, 0.5);
         }
 
         .filters-section {
@@ -532,8 +532,10 @@
                         </p>
 
                         <div class="note-badges">
-                            {% if note.subject %}
-                                <span class="badge-subject">{{ note.subject }}</span>
+                            {% if note.subject_new %}
+                                <span class="badge-subject">{{ note.subject_new.nome }}</span>
+                            {% else %}
+                                <span class="badge-subject" style="opacity: 0.5;">Sem matéria</span>
                             {% endif %}
                             <span class="badge-type">{{ note.get_file_type_display }}</span>
                         </div>

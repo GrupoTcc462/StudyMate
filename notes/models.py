@@ -22,6 +22,25 @@ def validate_file_extension(file):
         raise ValidationError(f'Extensão {ext} não permitida. Use: {", ".join(allowed)}')
 
 
+# ========================================
+# NOVO MODEL: MATÉRIA (EXCLUSIVO PARA NOTES)
+# ========================================
+class Materia(models.Model):
+    """
+    Model de matérias EXCLUSIVO para o sistema de Notes.
+    NÃO compartilha dados com o app 'materias/'.
+    """
+    nome = models.CharField(max_length=100, unique=True, verbose_name='Nome da Matéria')
+    
+    class Meta:
+        verbose_name = 'Matéria (Notes)'
+        verbose_name_plural = 'Matérias (Notes)'
+        ordering = ['nome']
+    
+    def __str__(self):
+        return self.nome
+
+
 class Note(models.Model):
     """Modelo principal para Notes/Materiais compartilhados"""
     
@@ -30,12 +49,11 @@ class Note(models.Model):
         ('PDF', 'PDF'),
         ('PPT', 'Apresentação'),
         ('LINK', 'Link Externo'),
-        # 'TXT' foi REMOVIDO conforme relatório
     ]
 
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notes', verbose_name='Autor')
-    title = models.CharField(max_length=50, verbose_name='Título')  # Limite reduzido para 50
-    description = models.TextField(max_length=400, blank=True, verbose_name='Descrição')  # Limite 400
+    title = models.CharField(max_length=50, verbose_name='Título')
+    description = models.TextField(max_length=400, blank=True, verbose_name='Descrição')
     file_type = models.CharField(max_length=10, choices=FILE_TYPES, verbose_name='Tipo')
     file = models.FileField(
         upload_to='notes_files/', 
@@ -45,7 +63,19 @@ class Note(models.Model):
         verbose_name='Arquivo'
     )
     link = models.URLField(null=True, blank=True, verbose_name='Link')
-    subject = models.CharField(max_length=60, null=True, blank=True, verbose_name='Matéria')
+    
+    # ========================================
+    # CAMPO ALTERADO: Agora usa ForeignKey para Materia
+    # ========================================
+    subject_new = models.ForeignKey(
+        Materia, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True,
+        verbose_name='Matéria',
+        related_name='notes'
+    )
+    
     is_recommended = models.BooleanField(default=False, verbose_name='Recomendado')
     created_at = models.DateTimeField(default=timezone.now, verbose_name='Criado em')
 
@@ -60,7 +90,7 @@ class Note(models.Model):
         verbose_name_plural = 'Notes'
         indexes = [
             models.Index(fields=['-likes', '-views']),
-            models.Index(fields=['subject']),
+            models.Index(fields=['subject_new']),
             models.Index(fields=['-created_at']),
         ]
 
@@ -121,16 +151,13 @@ class NoteLike(models.Model):
 
 
 class NoteView(models.Model):
-    """
-    NOVO MODELO - Controle de visualizações únicas por usuário.
-    Cada usuário só pode visualizar um note UMA VEZ (mesmo atualizando a página).
-    """
+    """Controle de visualizações únicas por usuário"""
     note = models.ForeignKey(Note, on_delete=models.CASCADE, related_name='note_views', verbose_name='Note')
     user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Usuário')
     viewed_at = models.DateTimeField(auto_now_add=True, verbose_name='Visualizado em')
 
     class Meta:
-        unique_together = ('note', 'user')  # Garante unicidade
+        unique_together = ('note', 'user')
         verbose_name = 'Visualização'
         verbose_name_plural = 'Visualizações'
         indexes = [
@@ -143,10 +170,7 @@ class NoteView(models.Model):
 
 
 class NoteRecommendation(models.Model):
-    """
-    NOVO MODELO - Sistema de recomendações manuais por professores.
-    Permite rastrear QUEM recomendou o note (com prioridade por matéria).
-    """
+    """Sistema de recomendações manuais por professores"""
     note = models.ForeignKey(Note, on_delete=models.CASCADE, related_name='recommendations', verbose_name='Note')
     teacher = models.ForeignKey(User, on_delete=models.CASCADE, limit_choices_to={'user_type': 'professor'}, verbose_name='Professor')
     recommended_at = models.DateTimeField(auto_now_add=True, verbose_name='Recomendado em')

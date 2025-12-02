@@ -5,24 +5,32 @@ from django.core.paginator import Paginator
 from django.db.models import F, Q
 from django.views.decorators.http import require_POST
 from django.contrib import messages
-from .models import Note, Comment, NoteLike, NoteView, NoteRecommendation
+from .models import Materia, Note, Comment, NoteLike, NoteView, NoteRecommendation
 import mimetypes
 import os
 import re
+import json
 
 
 def notes_list(request):
-    """Lista de notes com filtros e paginação"""
-    qs = Note.objects.select_related('author').prefetch_related('comments')
+    """Lista de notes com filtros e paginação - CORRIGIDA"""
     
-    # Filtros
+    # ========================================
+    # QUERY BASE - SEMPRE MOSTRA TODOS OS NOTES
+    # ========================================
+    qs = Note.objects.select_related('author', 'subject_new').prefetch_related('comments')
+    
+    # Filtros opcionais
     subject = request.GET.get('subject', '')
     file_type = request.GET.get('file_type', '')
     order = request.GET.get('order', 'recent')
     recommended = request.GET.get('recommended', '')
     
+    # ========================================
+    # APLICAR FILTROS (se houver)
+    # ========================================
     if subject:
-        qs = qs.filter(subject__iexact=subject)
+        qs = qs.filter(subject_new__nome__iexact=subject)
     
     if file_type:
         qs = qs.filter(file_type=file_type)
@@ -30,100 +38,93 @@ def notes_list(request):
     if recommended == 'true':
         qs = qs.filter(is_recommended=True)
     
-    # Ordenação
+    # ========================================
+    # ORDENAÇÃO
+    # ========================================
     ordering_map = {
         'recent': '-created_at',
         'likes': '-likes',
         'views': '-views',
         'downloads': '-downloads'
     }
-    qs = qs.order_by(ordering_map.get(order, '-created_at'))
     
-    # Paginação
+    order_field = ordering_map.get(order, '-created_at')
+    qs = qs.order_by(order_field)
+    
+    # ========================================
+    # DEBUG: Verificar quantos notes existem
+    # ========================================
+    total_notes = qs.count()
+    print(f"[DEBUG] Total de notes na query: {total_notes}")
+    
+    # ========================================
+    # PAGINAÇÃO
+    # ========================================
     paginator = Paginator(qs, 12)
     page_number = request.GET.get('page', 1)
     page_obj = paginator.get_page(page_number)
     
-    # Lista de matérias únicas para o filtro
-    subjects = Note.objects.values_list('subject', flat=True).distinct().order_by('subject')
-    subjects = [s for s in subjects if s]
+    print(f"[DEBUG] Notes na página atual: {page_obj.object_list.count()}")
     
+    # ========================================
+    # LISTA DE MATÉRIAS PARA FILTRO E MODAL
+    # ========================================
+    subjects_list = Materia.objects.all().order_by('nome')
+    
+    # ========================================
+    # CONTEXTO
+    # ========================================
     context = {
         'page_obj': page_obj,
-        'subjects': subjects,
+        'subjects': subjects_list,
+        'materias': subjects_list,  # Para o modal
         'current_subject': subject,
         'current_file_type': file_type,
         'current_order': order,
         'file_types': Note.FILE_TYPES,
+        'total_notes': total_notes,  # Para debug
     }
     
     return render(request, 'notes/notes_list.html', context)
 
 
 def note_detail(request, pk):
-    """
-    Detalhe de um note com incremento ÚNICO de views por usuário logado.
-    Usuários não logados NÃO contam visualização.
-    """
-    note = get_object_or_404(Note.objects.select_related('author'), pk=pk)
+    """Detalhe de um note com incremento ÚNICO de views por usuário logado"""
+    note = get_object_or_404(Note.objects.select_related('author', 'subject_new'), pk=pk)
     
-    # ========================================
-    # CONTROLE DE VISUALIZAÇÕES (APENAS USUÁRIOS LOGADOS)
-    # ========================================
+    # Controle de visualizações
     if request.user.is_authenticated:
-        # Criar visualização apenas se NÃO existir
         view_created = NoteView.objects.get_or_create(note=note, user=request.user)
         
-        # Se foi criado agora (primeira vez), incrementar contador
-        if view_created[1]:  # [1] é o boolean 'created'
+        if view_created[1]:
             Note.objects.filter(pk=pk).update(views=F('views') + 1)
             note.refresh_from_db(fields=['views'])
     
-    # Verificar se usuário já curtiu
     user_liked = False
     if request.user.is_authenticated:
         user_liked = NoteLike.objects.filter(note=note, user=request.user).exists()
     
-    # ========================================
-    # PROCESSAR COMENTÁRIO (APENAS LOGADOS)
-    # ========================================
+    # Processar comentário
     if request.method == 'POST' and request.user.is_authenticated:
         text = request.POST.get('text', '').strip()
         
-        # Validar caracteres permitidos e tamanho
         if text and len(text) <= 400 and validate_text_content(text):
             Comment.objects.create(note=note, author=request.user, text=text)
             messages.success(request, 'Comentário adicionado com sucesso!')
             return redirect('notes:detail', pk=pk)
         else:
-            messages.error(request, 'Comentário inválido. Use apenas letras, espaços e pontuação básica (máx 400 caracteres)')
+            messages.error(request, 'Comentário inválido.')
     
-    # ========================================
-    # SISTEMA DE RECOMENDAÇÕES
-    # ========================================
-    # Buscar recomendações de professores
+    # Sistema de recomendações
     recommendations = NoteRecommendation.objects.filter(note=note).select_related('teacher')
     
-    # Determinar qual recomendação exibir (prioridade: mesma matéria)
     primary_recommendation = None
     other_recommendations_count = 0
     
     if recommendations.exists():
-        # Filtrar professores da mesma matéria do note (se houver matéria)
-        if note.subject:
-            same_subject_recs = [r for r in recommendations if hasattr(r.teacher, 'teacher_subjects') and note.subject in r.teacher.teacher_subjects]
-            
-            if same_subject_recs:
-                primary_recommendation = same_subject_recs[0]
-                other_recommendations_count = len(recommendations) - 1
-            else:
-                primary_recommendation = recommendations[0]
-                other_recommendations_count = len(recommendations) - 1
-        else:
-            primary_recommendation = recommendations[0]
-            other_recommendations_count = len(recommendations) - 1
+        primary_recommendation = recommendations[0]
+        other_recommendations_count = len(recommendations) - 1
     
-    # Verificar recomendação automática (se não houver manual)
     auto_recommend_reason = None
     if note.is_recommended and not recommendations.exists():
         if note.downloads >= 20:
@@ -133,10 +134,8 @@ def note_detail(request, pk):
         elif note.views >= 50:
             auto_recommend_reason = "views"
     
-    # Verificar se autor é professor
     is_author_teacher = note.author.user_type == 'professor' or note.author.is_staff
     
-    # Verificar se usuário atual pode recomendar
     can_recommend = request.user.is_authenticated and (request.user.user_type == 'professor' or request.user.is_staff)
     user_has_recommended = False
     if can_recommend:
@@ -161,68 +160,72 @@ def note_detail(request, pk):
 
 
 def validate_text_content(text):
-    """
-    Valida se o texto contém APENAS caracteres permitidos:
-    - Letras (maiúsculas, minúsculas, acentuadas, cedilha)
-    - Espaços
-    - Pontuação básica (. , ! ? ; : - ( ) ' ")
-    """
+    """Valida se o texto contém APENAS caracteres permitidos"""
     pattern = r'^[a-zA-ZàáâãäåèéêëìíîïòóôõöùúûüýÿçÀÁÂÃÄÅÈÉÊËÌÍÎÏÒÓÔÕÖÙÚÛÜÝŸÇ\s.,!?;:\-()\'\"]+$'
     return bool(re.match(pattern, text))
 
 
 @login_required
-@require_POST
 def note_create(request):
-    """Criação de note com TODAS as validações do relatório"""
+    """Criação de note - CORRIGIDO COM DEBUG"""
+    if request.method != 'POST':
+        return redirect('notes:list')
+    
     try:
+        # ========================================
+        # LOG DE DEBUG
+        # ========================================
+        print("=" * 50)
+        print("DEBUG NOTE CREATE")
+        print(f"POST data: {request.POST}")
+        print(f"FILES: {request.FILES}")
+        print("=" * 50)
+        
         title = request.POST.get('title', '').strip()
         description = request.POST.get('description', '').strip()
         file_type = request.POST.get('file_type', '')
-        subject = request.POST.get('subject', '').strip()
+        subject_id = request.POST.get('subject', '').strip()
         file = request.FILES.get('file')
         link = request.POST.get('link', '').strip()
         
-        # ========================================
-        # VALIDAÇÃO DO TÍTULO (50 caracteres, APENAS letras e espaços)
-        # ========================================
-        if not title or len(title) > 50:
-            return JsonResponse({
-                'success': False, 
-                'error': 'Título inválido (máx 50 caracteres)'
-            }, status=400)
+        # Validação do título
+        if not title:
+            messages.error(request, 'Título é obrigatório.')
+            return redirect('notes:list')
         
-        # Regex: APENAS letras (com acentos) e espaços
+        if len(title) > 50:
+            messages.error(request, 'Título muito longo (máximo 50 caracteres).')
+            return redirect('notes:list')
+        
         title_regex = r'^[A-Za-zÀ-ÿÇç\s]+$'
         if not re.match(title_regex, title):
-            return JsonResponse({
-                'success': False, 
-                'error': 'Título contém caracteres não permitidos. Use apenas letras e espaços.'
-            }, status=400)
+            messages.error(request, 'Título contém caracteres não permitidos. Use apenas letras e espaços.')
+            return redirect('notes:list')
         
-        # ========================================
-        # VALIDAÇÃO DA DESCRIÇÃO (400 caracteres)
-        # ========================================
+        # Validação da descrição
         if description and len(description) > 400:
-            return JsonResponse({
-                'success': False, 
-                'error': 'Descrição muito longa (máx 400 caracteres)'
-            }, status=400)
+            messages.error(request, 'Descrição muito longa (máximo 400 caracteres).')
+            return redirect('notes:list')
         
         if description and not validate_text_content(description):
-            return JsonResponse({
-                'success': False, 
-                'error': 'Descrição contém caracteres não permitidos.'
-            }, status=400)
+            messages.error(request, 'Descrição contém caracteres não permitidos.')
+            return redirect('notes:list')
         
-        # ========================================
-        # VALIDAÇÃO DO TIPO DE CONTEÚDO
-        # ========================================
-        if file_type not in dict(Note.FILE_TYPES):
-            return JsonResponse({
-                'success': False, 
-                'error': 'Tipo de conteúdo inválido'
-            }, status=400)
+        # Validação do tipo de conteúdo
+        valid_types = [code for code, _ in Note.FILE_TYPES]
+        if file_type not in valid_types:
+            messages.error(request, 'Tipo de conteúdo inválido.')
+            return redirect('notes:list')
+        
+        # Validação da matéria
+        materia = None
+        if subject_id:
+            try:
+                materia = Materia.objects.get(id=subject_id)
+                print(f"[DEBUG] Matéria selecionada: {materia.nome}")
+            except (Materia.DoesNotExist, ValueError):
+                messages.error(request, 'Matéria inválida.')
+                return redirect('notes:list')
         
         # Criar objeto Note
         note = Note(
@@ -230,87 +233,92 @@ def note_create(request):
             title=title,
             description=description,
             file_type=file_type,
-            subject=subject if subject else None
+            subject_new=materia
         )
         
-        # ========================================
-        # VALIDAÇÃO DE CONTEÚDO POR TIPO
-        # ========================================
+        # Validação por tipo de conteúdo
         if file_type == 'LINK':
             if not link:
-                return JsonResponse({
-                    'success': False, 
-                    'error': 'Link obrigatório para tipo Link Externo'
-                }, status=400)
+                messages.error(request, 'Link é obrigatório para tipo Link Externo.')
+                return redirect('notes:list')
             
             url_pattern = r'^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$'
             if not re.match(url_pattern, link):
-                return JsonResponse({
-                    'success': False, 
-                    'error': 'Link inválido. Use um URL completo (ex: https://exemplo.com)'
-                }, status=400)
+                messages.error(request, 'Link inválido. Use um URL completo (ex: https://exemplo.com).')
+                return redirect('notes:list')
             
             note.link = link
         
         elif file_type == 'DOC':
-            # WORD: permitir upload OU criação online
             if not file:
-                return JsonResponse({
-                    'success': False, 
-                    'error': 'Arquivo obrigatório para tipo Word'
-                }, status=400)
+                messages.error(request, 'Arquivo é obrigatório para tipo Word.')
+                return redirect('notes:list')
             
             file_ext = os.path.splitext(file.name)[1].lower()
             if file_ext not in ['.doc', '.docx']:
-                return JsonResponse({
-                    'success': False, 
-                    'error': 'Formato inválido. Use .doc ou .docx'
-                }, status=400)
+                messages.error(request, 'Formato inválido. Use .doc ou .docx.')
+                return redirect('notes:list')
+            
+            if file.size > 10 * 1024 * 1024:
+                messages.error(request, 'Arquivo muito grande (máximo 10MB).')
+                return redirect('notes:list')
             
             note.file = file
         
-        else:
-            # Outros tipos (PDF, PPT): precisam de arquivo
+        elif file_type == 'PDF':
             if not file:
-                return JsonResponse({
-                    'success': False, 
-                    'error': 'Arquivo obrigatório para este tipo de conteúdo'
-                }, status=400)
-            
-            allowed_extensions = {
-                'PDF': ['.pdf'],
-                'PPT': ['.ppt', '.pptx']
-            }
+                messages.error(request, 'Arquivo é obrigatório para tipo PDF.')
+                return redirect('notes:list')
             
             file_ext = os.path.splitext(file.name)[1].lower()
-            expected_exts = allowed_extensions.get(file_type, [])
+            if file_ext != '.pdf':
+                messages.error(request, 'Formato inválido. Use .pdf.')
+                return redirect('notes:list')
             
-            if file_ext not in expected_exts:
-                return JsonResponse({
-                    'success': False, 
-                    'error': f'Formato não suportado. Use: {", ".join(expected_exts)}'
-                }, status=400)
+            if file.size > 10 * 1024 * 1024:
+                messages.error(request, 'Arquivo muito grande (máximo 10MB).')
+                return redirect('notes:list')
             
             note.file = file
         
-        # Validar modelo completo
+        elif file_type == 'PPT':
+            if not file:
+                messages.error(request, 'Arquivo é obrigatório para tipo Apresentação.')
+                return redirect('notes:list')
+            
+            file_ext = os.path.splitext(file.name)[1].lower()
+            if file_ext not in ['.ppt', '.pptx']:
+                messages.error(request, 'Formato inválido. Use .ppt ou .pptx.')
+                return redirect('notes:list')
+            
+            if file.size > 10 * 1024 * 1024:
+                messages.error(request, 'Arquivo muito grande (máximo 10MB).')
+                return redirect('notes:list')
+            
+            note.file = file
+        
+        # ========================================
+        # SALVAR NOTE
+        # ========================================
         note.full_clean()
         note.save()
         
-        return JsonResponse({
-            'success': True,
-            'note': {
-                'id': note.pk,
-                'title': note.title,
-                'url': f'/notes/{note.pk}/'
-            }
-        })
+        print(f"[DEBUG] Note criado com sucesso! ID: {note.pk}, Título: {note.title}")
+        print(f"[DEBUG] Matéria: {note.subject_new.nome if note.subject_new else 'Nenhuma'}")
+        
+        messages.success(request, f'Note "{title}" criado com sucesso!')
+        
+        # ========================================
+        # REDIRECIONAR PARA A LISTA (sem filtros)
+        # ========================================
+        return redirect('notes:list')
         
     except Exception as e:
-        return JsonResponse({
-            'success': False, 
-            'error': f'Erro ao criar note: {str(e)}'
-        }, status=400)
+        print(f"[ERRO] Ao criar note: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        messages.error(request, f'Erro ao criar note: {str(e)}')
+        return redirect('notes:list')
 
 
 @login_required
@@ -331,7 +339,6 @@ def like_note(request, pk):
         note.refresh_from_db(fields=['likes'])
         liked = False
     
-    # Verificar recomendação automática
     note.check_auto_recommend()
     
     return JsonResponse({
@@ -349,11 +356,9 @@ def download_note(request, pk):
     if not note.file:
         raise Http404('Arquivo não encontrado')
     
-    # Incrementar downloads
     Note.objects.filter(pk=pk).update(downloads=F('downloads') + 1)
     note.refresh_from_db(fields=['downloads'])
     
-    # Verificar recomendação automática
     note.check_auto_recommend()
     
     file_path = note.file.path
@@ -407,9 +412,7 @@ def add_comment(request, pk):
 @login_required
 @require_POST
 def toggle_recommend(request, pk):
-    """
-    NOVA VIEW - Professores podem recomendar/remover recomendação de notes.
-    """
+    """Professores podem recomendar/remover recomendação de notes"""
     if not (request.user.user_type == 'professor' or request.user.is_staff):
         return JsonResponse({
             'success': False,
@@ -418,14 +421,11 @@ def toggle_recommend(request, pk):
     
     note = get_object_or_404(Note, pk=pk)
     
-    # Verificar se já recomendou
     recommendation = NoteRecommendation.objects.filter(note=note, teacher=request.user).first()
     
     if recommendation:
-        # Remover recomendação
         recommendation.delete()
         
-        # Se não houver mais recomendações manuais, desmarcar is_recommended
         if not NoteRecommendation.objects.filter(note=note).exists():
             note.is_recommended = False
             note.save(update_fields=['is_recommended'])
@@ -436,7 +436,6 @@ def toggle_recommend(request, pk):
             'message': 'Recomendação removida'
         })
     else:
-        # Adicionar recomendação
         NoteRecommendation.objects.create(note=note, teacher=request.user)
         note.is_recommended = True
         note.save(update_fields=['is_recommended'])

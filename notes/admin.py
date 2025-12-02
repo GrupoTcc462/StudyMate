@@ -1,19 +1,35 @@
 from django.contrib import admin
-from .models import Note, Comment, NoteLike, NoteView, NoteRecommendation
+from .models import Materia, Note, Comment, NoteLike, NoteView, NoteRecommendation
+
+
+# ========================================
+# NOVO ADMIN: MATÉRIAS DO NOTES
+# ========================================
+@admin.register(Materia)
+class MateriaAdmin(admin.ModelAdmin):
+    """Admin para cadastro de matérias exclusivas do Notes"""
+    list_display = ('id', 'nome', 'total_notes')
+    search_fields = ('nome',)
+    ordering = ('nome',)
+    
+    def total_notes(self, obj):
+        """Conta quantos notes usam essa matéria"""
+        return obj.notes.count()
+    total_notes.short_description = 'Total de Notes'
 
 
 @admin.register(Note)
 class NoteAdmin(admin.ModelAdmin):
-    list_display = ('title', 'author', 'file_type', 'subject', 'is_recommended', 'views', 'likes', 'downloads', 'created_at')
-    list_filter = ('file_type', 'subject', 'is_recommended', 'created_at', 'author__user_type')
-    search_fields = ('title', 'description', 'author__username', 'subject')
+    list_display = ('title', 'author', 'file_type', 'get_subject', 'is_recommended', 'views', 'likes', 'downloads', 'created_at')
+    list_filter = ('file_type', 'subject_new', 'is_recommended', 'created_at', 'author__user_type')
+    search_fields = ('title', 'description', 'author__username', 'subject_new__nome')
     readonly_fields = ('views', 'likes', 'downloads', 'created_at')
     list_editable = ('is_recommended',)
     date_hierarchy = 'created_at'
     
     fieldsets = (
         ('Informações Básicas', {
-            'fields': ('author', 'title', 'description', 'subject')
+            'fields': ('author', 'title', 'description', 'subject_new')
         }),
         ('Conteúdo', {
             'fields': ('file_type', 'file', 'link')
@@ -29,6 +45,11 @@ class NoteAdmin(admin.ModelAdmin):
     )
     
     actions = ['mark_as_recommended', 'unmark_as_recommended']
+    
+    def get_subject(self, obj):
+        """Exibe o nome da matéria"""
+        return obj.subject_new.nome if obj.subject_new else '—'
+    get_subject.short_description = 'Matéria'
     
     def mark_as_recommended(self, request, queryset):
         """Ação para marcar notes como recomendados"""
