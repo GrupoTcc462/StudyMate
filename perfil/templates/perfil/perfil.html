@@ -675,165 +675,952 @@
     </div>
     {% endif %}
 
+<!-- MODAL DE EDIÇÃO DE PERFIL -->
+<div class="modal fade" id="editarPerfilModal" tabindex="-1" aria-labelledby="editarPerfilModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editarPerfilModalLabel">✏️ Editar Perfil</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editarPerfilForm" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <!-- FOTO DE PERFIL -->
+                    <div class="mb-4">
+                        <label class="form-label">Foto de Perfil</label>
+                        <div class="d-flex align-items-center gap-3">
+                            <div id="previewAvatarEdit" style="width: 80px; height: 80px; border-radius: 50%; overflow: hidden; background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem; font-weight: 700;">
+                                {% if user.perfil.photo %}
+                                    <img src="{{ user.perfil.photo.url }}" alt="Preview" style="width: 100%; height: 100%; object-fit: cover;">
+                                {% else %}
+                                    {{ user.username|slice:":1"|upper }}
+                                {% endif %}
+                            </div>
+                            <div class="flex-grow-1">
+                                <input type="file" class="form-control" id="photoInput" name="photo" accept="image/*">
+                                <small class="text-muted">PNG, JPG ou JPEG (máx. 5MB)</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- NOME -->
+                    <div class="mb-3">
+                        <label for="nameInput" class="form-label">Nome Completo</label>
+                        <input type="text" class="form-control" id="nameInput" name="name" value="{{ user.username }}" pattern="[A-Za-zÀ-ÿÇç\s]+" title="Apenas letras e espaços" required>
+                        <small class="text-muted">Apenas letras e espaços</small>
+                        <div class="valid-feedback" id="name-success"></div>
+                        <div class="invalid-feedback" id="name-error"></div>
+                    </div>
+
+                    <!-- E-MAIL -->
+                    <div class="mb-3">
+                        <label for="emailInput" class="form-label">E-mail</label>
+                        <input type="email" class="form-control" id="emailInput" name="email" value="{{ user.email }}" required>
+                        <small class="text-muted">Deve ser um e-mail válido (ex: @etec.sp.gov.br, @gmail.com)</small>
+                        <div class="valid-feedback" id="email-success"></div>
+                        <div class="invalid-feedback" id="email-error"></div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <!-- ALTERAÇÃO DE SENHA -->
+                    <div class="mb-3">
+                        <label class="form-label">Deseja alterar a senha?</label>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="changePasswordToggle">
+                            <label class="form-check-label" for="changePasswordToggle">
+                                Sim, quero alterar minha senha
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- CAMPOS DE SENHA (OCULTOS INICIALMENTE) -->
+                    <div id="passwordFields" style="display: none;">
+                        <!-- SENHA ATUAL -->
+                        <div class="mb-3">
+                            <label for="currentPasswordInput" class="form-label">Senha Atual</label>
+                            <div class="password-wrapper">
+                                <input type="password" class="form-control password-input" id="currentPasswordInput" name="current_password" autocomplete="current-password">
+                                <button type="button" class="toggle-password-icon" data-target="currentPasswordInput">
+                                    <i class="bi bi-eye-fill"></i>
+                                </button>
+                            </div>
+                            <div class="valid-feedback" id="current-password-success"></div>
+                            <div class="invalid-feedback" id="current-password-error"></div>
+                        </div>
+
+                        <!-- NOVA SENHA -->
+                        <div class="mb-3">
+                            <label for="newPasswordInput" class="form-label">Nova Senha</label>
+                            <div class="password-wrapper">
+                                <input type="password" class="form-control password-input" id="newPasswordInput" name="new_password" autocomplete="new-password">
+                                <button type="button" class="toggle-password-icon" data-target="newPasswordInput">
+                                    <i class="bi bi-eye-fill"></i>
+                                </button>
+                            </div>
+                            <small class="text-muted">
+                                Mínimo 8 caracteres, incluindo maiúsculas, minúsculas, números e caracteres especiais
+                            </small>
+                            
+                            <!-- FORÇA DA SENHA -->
+                            <div id="passwordStrength" style="margin-top: 10px;"></div>
+                            
+                            <!-- REQUISITOS -->
+                            <div class="password-requirements" style="margin-top: 10px;">
+                                <div class="requirement" id="req-length">
+                                    <span>○</span> Mínimo 8 caracteres
+                                </div>
+                                <div class="requirement" id="req-upper">
+                                    <span>○</span> Uma letra maiúscula
+                                </div>
+                                <div class="requirement" id="req-lower">
+                                    <span>○</span> Uma letra minúscula
+                                </div>
+                                <div class="requirement" id="req-number">
+                                    <span>○</span> Um número
+                                </div>
+                                <div class="requirement" id="req-special">
+                                    <span>○</span> Um caractere especial (@$!%*#?&)
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- CONFIRMAR SENHA -->
+                        <div class="mb-3">
+                            <label for="confirmPasswordInput" class="form-label">Confirmar Nova Senha</label>
+                            <div class="password-wrapper">
+                                <input type="password" class="form-control password-input" id="confirmPasswordInput" name="new_password_confirm" autocomplete="new-password">
+                                <button type="button" class="toggle-password-icon" data-target="confirmPasswordInput">
+                                    <i class="bi bi-eye-fill"></i>
+                                </button>
+                            </div>
+                            <div class="valid-feedback" id="confirm-password-success"></div>
+                            <div class="invalid-feedback" id="confirm-password-error"></div>
+                        </div>
+                    </div>
+
+                    <!-- MENSAGEM DE ERRO/SUCESSO -->
+                    <div id="editProfileMessage" style="display: none;"></div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="saveProfileBtn" style="background: var(--primary); border: none;">
+                    💾 Salvar Alterações
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- BOOTSTRAP ICONS (SE NÃO ESTIVER NO HEAD) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+<!-- ESTILOS DO MODAL -->
+<style>
+.modal-header {
+    background: var(--primary);
+    color: white;
+    border-radius: 15px 15px 0 0;
+}
+
+.btn-close-white {
+    filter: brightness(0) invert(1);
+}
+
+.form-label {
+    font-weight: 600;
+    color: #2c2c2c;
+    margin-bottom: 8px;
+}
+
+.form-control {
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    padding: 12px;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 0.2rem rgba(178, 34, 34, 0.1);
+}
+
+/* VALIDAÇÃO VISUAL */
+.form-control.is-valid {
+    border-color: #28a745;
+}
+
+.form-control.is-invalid {
+    border-color: #dc3545;
+}
+
+/* VALIDAÇÃO VISUAL PARA CAMPOS NORMAIS (SEM ÍCONE) */
+.form-control.is-valid:not(.password-input) {
+    padding-right: calc(1.5em + 0.75rem);
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%2328a745' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right calc(0.375em + 0.1875rem) center;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+}
+
+.form-control.is-invalid:not(.password-input) {
+    padding-right: calc(1.5em + 0.75rem);
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right calc(0.375em + 0.1875rem) center;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+}
+
+/* CAMPOS DE SENHA COM ÍCONE - AJUSTE PARA NÃO SOBREPOR */
+.password-wrapper .form-control {
+    padding-right: 45px; /* Espaço para o ícone de olho */
+}
+
+/* Quando tem validação, adicionar padding extra */
+.password-wrapper .form-control.is-valid,
+.password-wrapper .form-control.is-invalid {
+    padding-right: 75px; /* Espaço para AMBOS os ícones */
+}
+
+.valid-feedback, .invalid-feedback {
+    display: block;
+    margin-top: 5px;
+    font-size: 0.875rem;
+}
+
+/* WRAPPER DE SENHA COM ÍCONE BOOTSTRAP */
+.password-wrapper {
+    position: relative;
+}
+
+.toggle-password-icon {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: 1.2rem;
+    color: #6c757d;
+    transition: all 0.3s ease;
+    padding: 5px;
+    z-index: 5;
+}
+
+.toggle-password-icon:hover {
+    color: var(--primary);
+}
+
+/* Mover ícone para esquerda quando houver validação */
+.password-wrapper .form-control.is-valid ~ .toggle-password-icon,
+.password-wrapper .form-control.is-invalid ~ .toggle-password-icon {
+    right: 40px; /* Move para esquerda para dar espaço ao ícone de validação */
+}
+
+/* Ícone de validação nos campos de senha */
+.password-wrapper .form-control.is-valid::after,
+.password-wrapper .form-control.is-invalid::after {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+/* Ajustar posição do ícone de validação via background */
+.password-wrapper .form-control.is-valid {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%2328a745' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 20px 20px;
+}
+
+.password-wrapper .form-control.is-invalid {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 20px 20px;
+}
+
+/* FORÇA DA SENHA */
+.password-requirements {
+    font-size: 0.85rem;
+    color: #6c757d;
+}
+
+.requirement {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin: 3px 0;
+}
+
+.requirement.met {
+    color: #28a745;
+}
+
+.requirement.met span {
+    color: #28a745;
+}
+
+#passwordStrength {
+    display: none;
+}
+
+#passwordStrength.show {
+    display: block;
+}
+
+.modal-content {
+    border-radius: 15px;
+    border: none;
+}
+
+.modal-footer {
+    border-top: 1px solid #e9ecef;
+}
+</style>
+
+<!-- JAVASCRIPT DO MODAL -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const changePasswordToggle = document.getElementById('changePasswordToggle');
+    const passwordFields = document.getElementById('passwordFields');
+    const photoInput = document.getElementById('photoInput');
+    const previewAvatarEdit = document.getElementById('previewAvatarEdit');
+    const saveProfileBtn = document.getElementById('saveProfileBtn');
+    
+    const nameInput = document.getElementById('nameInput');
+    const emailInput = document.getElementById('emailInput');
+    const currentPasswordInput = document.getElementById('currentPasswordInput');
+    const newPasswordInput = document.getElementById('newPasswordInput');
+    const confirmPasswordInput = document.getElementById('confirmPasswordInput');
+    
+    const editProfileMessage = document.getElementById('editProfileMessage');
+
+    // ========================================
+    // TOGGLE CAMPOS DE SENHA
+    // ========================================
+    if (changePasswordToggle) {
+        changePasswordToggle.addEventListener('change', function() {
+            passwordFields.style.display = this.checked ? 'block' : 'none';
+            
+            if (!this.checked) {
+                currentPasswordInput.value = '';
+                newPasswordInput.value = '';
+                confirmPasswordInput.value = '';
+                currentPasswordInput.classList.remove('is-valid', 'is-invalid');
+                newPasswordInput.classList.remove('is-valid', 'is-invalid');
+                confirmPasswordInput.classList.remove('is-valid', 'is-invalid');
+            }
+        });
+    }
+
+    // ========================================
+    // PREVIEW DA FOTO
+    // ========================================
+    if (photoInput) {
+        photoInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('Arquivo muito grande! Máximo 5MB.');
+                    this.value = '';
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    previewAvatarEdit.innerHTML = `<img src="${event.target.result}" style="width: 100%; height: 100%; object-fit: cover;">`;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+
+    // ========================================
+    // VALIDAÇÃO DE NOME (DISPONIBILIDADE)
+    // ========================================
+    let nameCheckTimeout;
+    nameInput.addEventListener('input', function() {
+        clearTimeout(nameCheckTimeout);
+        
+        const name = this.value.trim();
+        const nameError = document.getElementById('name-error');
+        const nameSuccess = document.getElementById('name-success');
+        
+        // Limpar validações
+        this.classList.remove('is-valid', 'is-invalid');
+        nameError.textContent = '';
+        nameSuccess.textContent = '';
+        
+        // Validar apenas letras e espaços
+        const regex = /^[A-Za-zÀ-ÿÇç\s]+$/;
+        if (name && !regex.test(name)) {
+            this.classList.add('is-invalid');
+            nameError.textContent = 'Apenas letras e espaços são permitidos.';
+            return;
+        }
+        
+        if (name.length < 3) {
+            return;
+        }
+        
+        // Verificar disponibilidade (debounce 500ms)
+        nameCheckTimeout = setTimeout(async () => {
+            try {
+                const response = await fetch('/perfil/check-username/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify({ 
+                        username: name,
+                        current_username: '{{ user.username }}'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.available) {
+                    nameInput.classList.remove('is-invalid');
+                    nameInput.classList.add('is-valid');
+                    nameSuccess.textContent = '✓ Nome disponível';
+                } else {
+                    nameInput.classList.remove('is-valid');
+                    nameInput.classList.add('is-invalid');
+                    nameError.textContent = '✗ Este nome já está sendo usado';
+                }
+            } catch (error) {
+                console.error('Erro ao verificar nome:', error);
+            }
+        }, 500);
+    });
+
+    // ========================================
+    // VALIDAÇÃO DE E-MAIL
+    // ========================================
+    let emailCheckTimeout;
+    emailInput.addEventListener('input', function() {
+        clearTimeout(emailCheckTimeout);
+        
+        const email = this.value.trim().toLowerCase();
+        const emailError = document.getElementById('email-error');
+        const emailSuccess = document.getElementById('email-success');
+        
+        this.classList.remove('is-valid', 'is-invalid');
+        emailError.textContent = '';
+        emailSuccess.textContent = '';
+        
+        if (!email) return;
+        
+        // Validar formato básico
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            this.classList.add('is-invalid');
+            emailError.textContent = 'E-mail inválido. Deve conter @ e um domínio válido.';
+            return;
+        }
+        
+        // Verificar domínio válido
+        const validDomains = ['@etec.sp.gov.br', '@gmail.com', '@hotmail.com', '@outlook.com', '@yahoo.com'];
+        const hasValidDomain = validDomains.some(domain => email.endsWith(domain));
+        
+        if (!hasValidDomain) {
+            this.classList.add('is-invalid');
+            emailError.textContent = 'Use um domínio válido (ex: @etec.sp.gov.br, @gmail.com)';
+            return;
+        }
+        
+        // Verificar disponibilidade
+        emailCheckTimeout = setTimeout(async () => {
+            try {
+                const response = await fetch('/perfil/check-email/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify({ 
+                        email: email,
+                        current_email: '{{ user.email }}'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.available) {
+                    emailInput.classList.remove('is-invalid');
+                    emailInput.classList.add('is-valid');
+                    emailSuccess.textContent = '✓ E-mail válido e disponível';
+                } else {
+                    emailInput.classList.remove('is-valid');
+                    emailInput.classList.add('is-invalid');
+                    emailError.textContent = '✗ Este e-mail já está em uso';
+                }
+            } catch (error) {
+                console.error('Erro ao verificar e-mail:', error);
+            }
+        }, 500);
+    });
+
+    // ========================================
+    // TOGGLE MOSTRAR/OCULTAR SENHA (BOOTSTRAP ICONS)
+    // ========================================
+    document.querySelectorAll('.toggle-password-icon').forEach(button => {
+        button.addEventListener('click', function() {
+            const targetId = this.getAttribute('data-target');
+            const input = document.getElementById(targetId);
+            const icon = this.querySelector('i');
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('bi-eye-fill');
+                icon.classList.add('bi-eye-slash-fill');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('bi-eye-slash-fill');
+                icon.classList.add('bi-eye-fill');
+            }
+        });
+    });
+
+    // ========================================
+    // VALIDAÇÃO SENHA ATUAL (TEMPO REAL)
+    // ========================================
+    let passwordCheckTimeout;
+    currentPasswordInput.addEventListener('input', function() {
+        clearTimeout(passwordCheckTimeout);
+        
+        const password = this.value;
+        const errorDiv = document.getElementById('current-password-error');
+        const successDiv = document.getElementById('current-password-success');
+        
+        this.classList.remove('is-valid', 'is-invalid');
+        errorDiv.textContent = '';
+        successDiv.textContent = '';
+        
+        if (!password) return;
+        
+        passwordCheckTimeout = setTimeout(async () => {
+            try {
+                const response = await fetch('/perfil/check_password/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify({ password: password })
+                });
+                
+                const data = await response.json();
+                
+                if (data.ok) {
+                    currentPasswordInput.classList.remove('is-invalid');
+                    currentPasswordInput.classList.add('is-valid');
+                    successDiv.textContent = '✓ Senha correta';
+                } else {
+                    currentPasswordInput.classList.remove('is-valid');
+                    currentPasswordInput.classList.add('is-invalid');
+                    errorDiv.textContent = '✗ Senha incorreta';
+                }
+            } catch (error) {
+                console.error('Erro ao verificar senha:', error);
+            }
+        }, 500);
+    });
+
+    // ========================================
+    // VALIDAÇÃO NOVA SENHA (FORÇA + REQUISITOS)
+    // ========================================
+    newPasswordInput.addEventListener('input', function() {
+        const password = this.value;
+        const strengthDiv = document.getElementById('passwordStrength');
+        
+        if (password.length === 0) {
+            strengthDiv.style.display = 'none';
+            return;
+        }
+        
+        strengthDiv.style.display = 'block';
+        
+        let score = 0;
+        const requirements = {
+            length: password.length >= 8,
+            upper: /[A-Z]/.test(password),
+            lower: /[a-z]/.test(password),
+            number: /\d/.test(password),
+            special: /[@$!%*#?&]/.test(password)
+        };
+        
+        // Atualizar requisitos visuais
+        Object.keys(requirements).forEach(key => {
+            const element = document.getElementById(`req-${key}`);
+            if (requirements[key]) {
+                element.classList.add('met');
+                element.querySelector('span').textContent = '✓';
+                score += 20;
+            } else {
+                element.classList.remove('met');
+                element.querySelector('span').textContent = '○';
+            }
+        });
+        
+        // Barra de força
+        let color, text;
+        if (score < 60) {
+            color = '#dc3545';
+            text = 'Fraca';
+        } else if (score < 100) {
+            color = '#ffc107';
+            text = 'Média';
+        } else {
+            color = '#28a745';
+            text = 'Forte';
+        }
+        
+        strengthDiv.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="flex: 1; height: 8px; background: #e9ecef; border-radius: 4px; overflow: hidden;">
+                    <div style="width: ${score}%; height: 100%; background: ${color}; transition: all 0.3s;"></div>
+                </div>
+                <span style="color: ${color}; font-weight: 600; min-width: 60px;">${text}</span>
+            </div>
+        `;
+        
+        checkPasswordMatch();
+    });
+
+    // ========================================
+    // VALIDAÇÃO CONFIRMAR SENHA
+    // ========================================
+    confirmPasswordInput.addEventListener('input', checkPasswordMatch);
+
+    function checkPasswordMatch() {
+        const newPass = newPasswordInput.value;
+        const confirmPass = confirmPasswordInput.value;
+        const errorDiv = document.getElementById('confirm-password-error');
+        const successDiv = document.getElementById('confirm-password-success');
+        
+        confirmPasswordInput.classList.remove('is-valid', 'is-invalid');
+        errorDiv.textContent = '';
+        successDiv.textContent = '';
+        
+        if (!confirmPass) return;
+        
+        if (newPass !== confirmPass) {
+            confirmPasswordInput.classList.add('is-invalid');
+            errorDiv.textContent = '✗ As senhas não conferem';
+        } else {
+            // Validar força
+            const isStrong = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*#?&]).{8,}$/.test(newPass);
+            
+            if (!isStrong) {
+                confirmPasswordInput.classList.add('is-invalid');
+                errorDiv.textContent = '✗ A senha não atende aos requisitos mínimos';
+            } else {
+                confirmPasswordInput.classList.add('is-valid');
+                successDiv.textContent = '✓ Senhas conferem';
+            }
+        }
+    }
+
+    // ========================================
+    // SALVAR ALTERAÇÕES
+    // ========================================
+    saveProfileBtn.addEventListener('click', async function() {
+        const formData = new FormData(document.getElementById('editarPerfilForm'));
+        
+        this.disabled = true;
+        this.innerHTML = '⏳ Salvando...';
+        editProfileMessage.style.display = 'none';
+
+        try {
+            const response = await fetch('/perfil/editar/', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                }
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                editProfileMessage.className = 'alert alert-success';
+                editProfileMessage.textContent = data.message;
+                editProfileMessage.style.display = 'block';
+
+                if (data.new_photo_url) {
+                    document.getElementById('profileAvatar').innerHTML = `<img src="${data.new_photo_url}" alt="Foto de perfil" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`;
+                }
+
+                setTimeout(() => {
+                    bootstrap.Modal.getInstance(document.getElementById('editarPerfilModal')).hide();
+                    location.reload();
+                }, 2000);
+
+            } else {
+                editProfileMessage.className = 'alert alert-danger';
+                editProfileMessage.textContent = data.error;
+                editProfileMessage.style.display = 'block';
+            }
+
+        } catch (error) {
+            console.error('Erro ao salvar perfil:', error);
+            editProfileMessage.className = 'alert alert-danger';
+            editProfileMessage.textContent = 'Erro ao salvar perfil. Tente novamente.';
+            editProfileMessage.style.display = 'block';
+        } finally {
+            this.disabled = false;
+            this.innerHTML = '💾 Salvar Alterações';
+        }
+    });
+
+    console.log('✅ Modal de edição de perfil carregado!');
+});
+</script>
     <!-- MODAL DE EDIÇÃO (mantido do código original, truncado por brevidade) -->
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
     <script>
-        const csrfToken = '{{ csrf_token }}';
+        // ========================================
+// FUNÇÕES DE POPUP - CORRIGIDO COM DOWNLOADS
+// ========================================
+const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
 
-        // ========================================
-        // FUNÇÕES DE POPUP - AGORA COM ATUALIZAÇÃO EM TEMPO REAL
-        // ========================================
-        async function abrirPopup(tipo) {
-            const overlay = document.getElementById(`popup-${tipo}`);
-            const content = document.getElementById(`popup-${tipo}-content`);
-        async function abrirPopup(tipo) {
-            const overlay = document.getElementById(`popup-${tipo}`);
-            const content = document.getElementById(`popup-${tipo}-content`);
-            
-            // Mostrar loading
-            content.innerHTML = `
-                <div style="text-align: center; padding: 40px;">
-                    <div style="font-size: 3rem; margin-bottom: 15px;">⏳</div>
-                    <p style="color: #6c757d;">Carregando dados...</p>
-                </div>
-            `;
-            
-            overlay.classList.add('active');
-            
-            // Buscar dados atualizados do servidor
-            try {
-                const response = await fetch(`/perfil/popup-data/${tipo}/`, {
-                    method: 'GET',
-                    headers: {
-                        'X-CSRFToken': csrfToken,
-                        'Content-Type': 'application/json'
-                    }
-                });
-                
-                if (!response.ok) {
-                    throw new Error('Erro ao carregar dados');
-                }
-                
-                const data = await response.json();
-                
-                let html = '';
-                
-                switch(tipo) {
-                    case 'notes-criados':
-                        if (data.items.length === 0) {
-                            html = `
-                                <div class="popup-empty">
-                                    <div style="font-size: 4rem; margin-bottom: 20px;">📝</div>
-                                    <h4 style="color: #6c757d; margin-bottom: 10px;">Nenhuma ação realizada deste tipo ainda</h4>
-                                    <p style="color: #adb5bd;">Você ainda não criou nenhum note. Comece criando seu primeiro note!</p>
-                                </div>
-                            `;
-                        } else {
-                            data.items.forEach(note => {
-                                html += `
-                                    <div class="popup-item">
-                                        <a href="${note.url}">
-                                            <strong>${note.title}</strong>
-                                            <small>${note.subject} — ${note.file_type} — Criado em ${note.created_at}</small>
-                                        </a>
-                                    </div>
-                                `;
-                            });
-                        }
-                        break;
-                    
-                    case 'curtidas-recebidas':
-                        if (data.items.length === 0) {
-                            html = `
-                                <div class="popup-empty">
-                                    <div style="font-size: 4rem; margin-bottom: 20px;">❤️</div>
-                                    <h4 style="color: #6c757d; margin-bottom: 10px;">Nenhuma ação realizada deste tipo ainda</h4>
-                                    <p style="color: #adb5bd;">Você ainda não recebeu curtidas. Compartilhe notes para receber curtidas!</p>
-                                </div>
-                            `;
-                        } else {
-                            data.items.forEach(note => {
-                                html += `
-                                    <div class="popup-item">
-                                        <a href="${note.url}">
-                                            <strong>${note.title}</strong>
-                                            <small>Criado em ${note.created_at}<br>
-                                            ❤️ ${note.likes} curtidas | 👁️ ${note.views} views | ⬇️ ${note.downloads} downloads | 💬 ${note.comments_count} comentários</small>
-                                        </a>
-                                    </div>
-                                `;
-                            });
-                        }
-                        break;
-                    
-                    case 'downloads':
-                        html = `
-                            <div class="popup-empty">
-                                <div style="font-size: 4rem; margin-bottom: 20px;">⬇️</div>
-                                <h4 style="color: #6c757d; margin-bottom: 10px;">Nenhuma ação realizada deste tipo ainda</h4>
-                                <p style="color: #adb5bd;">Você ainda não realizou nenhum download. Explore os notes e baixe conteúdos!</p>
+async function abrirPopup(tipo) {
+    const overlay = document.getElementById(`popup-${tipo}`);
+    const content = document.getElementById(`popup-${tipo}-content`);
+    
+    if (!overlay || !content) {
+        console.error(`Popup ${tipo} não encontrado!`);
+        return;
+    }
+    
+    // Mostrar loading
+    content.innerHTML = `
+        <div style="text-align: center; padding: 40px;">
+            <div style="font-size: 3rem; margin-bottom: 15px;">⏳</div>
+            <p style="color: #6c757d;">Carregando dados...</p>
+        </div>
+    `;
+    
+    overlay.classList.add('active');
+    
+    // Buscar dados atualizados do servidor
+    try {
+        const response = await fetch(`/perfil/popup-data/${tipo}/`, {
+            method: 'GET',
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error(`Erro HTTP ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        console.log(`[POPUP ${tipo}] Recebidos ${data.total} itens:`, data.items);
+        
+        let html = '';
+        
+        switch(tipo) {
+            // ========================================
+            // POPUP: NOTES CRIADOS
+            // ========================================
+            case 'notes-criados':
+                if (data.items.length === 0) {
+                    html = `
+                        <div class="popup-empty">
+                            <div style="font-size: 4rem; margin-bottom: 20px;">📝</div>
+                            <h4 style="color: #6c757d; margin-bottom: 10px;">Nenhum note criado ainda</h4>
+                            <p style="color: #adb5bd;">Você ainda não criou nenhum note. Comece criando seu primeiro note!</p>
+                        </div>
+                    `;
+                } else {
+                    data.items.forEach(note => {
+                        html += `
+                            <div class="popup-item">
+                                <a href="${note.url}">
+                                    <strong>${note.title}</strong><br>
+                                    <small>${note.subject} — ${note.file_type} — Criado em ${note.created_at}</small>
+                                </a>
                             </div>
                         `;
-                        break;
-                    
-                    case 'recomendacoes':
-                        if (data.items.length === 0) {
-                            html = `
-                                <div class="popup-empty">
-                                    <div style="font-size: 4rem; margin-bottom: 20px;">⭐</div>
-                                    <h4 style="color: #6c757d; margin-bottom: 10px;">Nenhuma ação realizada deste tipo ainda</h4>
-                                    <p style="color: #adb5bd;">Você ainda não recomendou nenhum note. Comece recomendando conteúdos de qualidade!</p>
+                    });
+                }
+                break;
+            
+            // ========================================
+            // POPUP: CURTIDAS RECEBIDAS
+            // ========================================
+            case 'curtidas-recebidas':
+                if (data.items.length === 0) {
+                    html = `
+                        <div class="popup-empty">
+                            <div style="font-size: 4rem; margin-bottom: 20px;">❤️</div>
+                            <h4 style="color: #6c757d; margin-bottom: 10px;">Nenhuma curtida recebida ainda</h4>
+                            <p style="color: #adb5bd;">Seus notes ainda não receberam curtidas. Compartilhe conteúdo de qualidade!</p>
+                        </div>
+                    `;
+                } else {
+                    data.items.forEach(note => {
+                        html += `
+                            <div class="popup-item">
+                                <a href="${note.url}">
+                                    <strong>${note.title}</strong><br>
+                                    <small>
+                                        Criado em ${note.created_at}<br>
+                                        ❤️ ${note.likes} curtidas | 👁️ ${note.views} views | ⬇️ ${note.downloads} downloads | 💬 ${note.comments_count} comentários
+                                    </small>
+                                </a>
+                            </div>
+                        `;
+                    });
+                }
+                break;
+            
+            // ========================================
+            // POPUP: DOWNLOADS (CORRIGIDO!)
+            // ========================================
+            case 'downloads':
+                if (data.items.length === 0) {
+                    html = `
+                        <div class="popup-empty">
+                            <div style="font-size: 4rem; margin-bottom: 20px;">⬇️</div>
+                            <h4 style="color: #6c757d; margin-bottom: 10px;">Nenhum download ainda</h4>
+                            <p style="color: #adb5bd;">Seus notes ainda não foram baixados. Continue compartilhando conteúdo!</p>
+                        </div>
+                    `;
+                } else {
+                    data.items.forEach(item => {
+                        html += `
+                            <div class="popup-item">
+                                <a href="${item.url}">
+                                    <strong>${item.title}</strong><br>
+                                    <small>
+                                        📁 ${item.tipo} — ${item.subject}<br>
+                                        ⬇️ ${item.downloads} downloads | ❤️ ${item.likes} curtidas | 👁️ ${item.views} views<br>
+                                        Criado em ${item.created_at}
+                                    </small>
+                                </a>
+                            </div>
+                        `;
+                    });
+                }
+                break;
+            
+            // ========================================
+            // POPUP: RECOMENDAÇÕES (APENAS PROFESSORES)
+            // ========================================
+            case 'recomendacoes':
+                if (data.items.length === 0) {
+                    html = `
+                        <div class="popup-empty">
+                            <div style="font-size: 4rem; margin-bottom: 20px;">⭐</div>
+                            <h4 style="color: #6c757d; margin-bottom: 10px;">Nenhuma recomendação ainda</h4>
+                            <p style="color: #adb5bd;">Você ainda não recomendou nenhum note. Comece recomendando conteúdos de qualidade!</p>
+                        </div>
+                    `;
+                } else {
+                    data.items.forEach(rec => {
+                        if (rec.deleted) {
+                            html += `
+                                <div class="popup-item" style="opacity: 0.5; cursor: not-allowed;">
+                                    <strong>${rec.title}</strong><br>
+                                    <small>
+                                        Este note foi removido<br>
+                                        Recomendado em ${rec.recommended_at}
+                                    </small>
                                 </div>
                             `;
                         } else {
-                            data.items.forEach(rec => {
-                                html += `
-                                    <div class="popup-item">
-                                        <a href="${rec.url}">
-                                            <strong>${rec.title}</strong>
-                                            <small>👁️ ${rec.views} views | ❤️ ${rec.likes} likes | ⬇️ ${rec.downloads} downloads<br>
-                                            Recomendado em ${rec.recommended_at}</small>
-                                        </a>
-                                    </div>
-                                `;
-                            });
+                            html += `
+                                <div class="popup-item">
+                                    <a href="${rec.url}">
+                                        <strong>${rec.title}</strong><br>
+                                        <small>
+                                            ${rec.subject}<br>
+                                            👁️ ${rec.views} views | ❤️ ${rec.likes} likes | ⬇️ ${rec.downloads} downloads<br>
+                                            Recomendado em ${rec.recommended_at}
+                                        </small>
+                                    </a>
+                                </div>
+                            `;
                         }
-                        break;
+                    });
                 }
-                
-                content.innerHTML = html;
-                
-            } catch (error) {
-                console.error('Erro ao carregar dados do popup:', error);
-                content.innerHTML = `
-                    <div class="popup-empty">
-                        <div style="font-size: 3rem; margin-bottom: 15px; color: #dc3545;">⚠️</div>
-                        <h4 style="color: #dc3545; margin-bottom: 10px;">Erro ao carregar dados</h4>
-                        <p style="color: #6c757d;">Tente novamente mais tarde.</p>
-                    </div>
-                `;
-            }
+                break;
         }
+        
+        content.innerHTML = html;
+        
+    } catch (error) {
+        console.error('[ERRO] ao carregar dados do popup:', error);
+        content.innerHTML = `
+            <div class="popup-empty">
+                <div style="font-size: 3rem; margin-bottom: 15px; color: #dc3545;">⚠️</div>
+                <h4 style="color: #dc3545; margin-bottom: 10px;">Erro ao carregar dados</h4>
+                <p style="color: #6c757d;">Não foi possível conectar ao servidor. Tente novamente mais tarde.</p>
+                <small style="color: #adb5bd; display: block; margin-top: 10px;">${error.message}</small>
+            </div>
+        `;
+    }
+}
 
-        function fecharPopup(tipo) {
-            const overlay = document.getElementById(`popup-${tipo}`);
+function fecharPopup(tipo) {
+    const overlay = document.getElementById(`popup-${tipo}`);
+    if (overlay) {
+        overlay.classList.remove('active');
+    }
+}
+
+// Fechar popup ao clicar fora
+document.querySelectorAll('.popup-overlay').forEach(overlay => {
+    overlay.addEventListener('click', function(e) {
+        if (e.target === this) {
+            this.classList.remove('active');
+        }
+    });
+});
+
+// Fechar popup com tecla ESC
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        document.querySelectorAll('.popup-overlay.active').forEach(overlay => {
             overlay.classList.remove('active');
-        }
-
-        // Fechar popup ao clicar fora
-        document.querySelectorAll('.popup-overlay').forEach(overlay => {
-            overlay.addEventListener('click', function(e) {
-                if (e.target === this) {
-                    this.classList.remove('active');
-                }
-            });
         });
+    }
+});
 
-        function showTutorial() {
-            alert('Tutorial interativo será implementado em breve! 🎓');
-        }
+function showTutorial() {
+    alert('Tutorial interativo será implementado em breve! 🎓');
+}
+
+// Log de inicialização
+console.log('✅ Script de popups carregado com sucesso!');
+console.log('🔍 CSRF Token:', csrfToken ? 'Encontrado' : 'NÃO ENCONTRADO');
+
+// Debug: testar se os popups existem
+setTimeout(() => {
+    ['notes-criados', 'curtidas-recebidas', 'downloads', 'recomendacoes'].forEach(tipo => {
+        const overlay = document.getElementById(`popup-${tipo}`);
+        const content = document.getElementById(`popup-${tipo}-content`);
+        console.log(`Popup ${tipo}:`, {
+            overlay: overlay ? '✅' : '❌',
+            content: content ? '✅' : '❌'
+        });
+    });
+}, 500);
     </script>
 </body>
 </html>

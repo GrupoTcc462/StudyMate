@@ -2,9 +2,10 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST, require_http_methods
-from django.db.models import Sum, Count
+from django.db.models import Sum, Count, Q
 from django.utils import timezone
 from django.contrib.auth import authenticate
+from django.urls import reverse
 import json
 from perfil.models import PerfilUsuario
 from notes.models import Note, NoteLike, NoteRecommendation
@@ -30,8 +31,8 @@ def perfil_view(request):
     # Notes criados pelo usuário
     notes_count = Note.objects.filter(author=user).count()
     
-    # Curtidas dadas pelo usuário
-    likes_count = NoteLike.objects.filter(user=user).count()
+    # Curtidas RECEBIDAS nos notes do usuário
+    likes_count = NoteLike.objects.filter(note__author=user).count()
     
     # Downloads totais recebidos nos notes do usuário
     downloads_count = Note.objects.filter(author=user).aggregate(
@@ -69,74 +70,171 @@ def perfil_view(request):
 @require_http_methods(["GET"])
 def popup_data(request, tipo):
     """
-    Retorna dados atualizados para os popups em tempo real
+    Retorna dados atualizados para os popups em tempo real.
+    CADA POPUP FUNCIONA DE FORMA INDEPENDENTE!
     """
     user = request.user
     items = []
     
     try:
+        # ========================================
+        # POPUP 1: NOTES CRIADOS
+        # Mostra TODOS os notes criados pelo usuário
+        # ========================================
         if tipo == 'notes-criados':
-            notes = Note.objects.filter(author=user).select_related('subject_new').order_by('-created_at')
+            notes = Note.objects.filter(
+                author=user
+            ).select_related('subject_new').order_by('-created_at')
             
             for note in notes:
-                items.append({
-                    'id': note.pk,
-                    'title': note.title,
-                    'subject': note.subject_new.nome if note.subject_new else 'Sem matéria',
-                    'file_type': note.get_file_type_display(),
-                    'created_at': note.created_at.strftime('%d/%m/%Y'),
-                    'url': f'/notes/{note.pk}/'
-                })
+                try:
+                    items.append({
+                        'id': note.pk,
+                        'title': note.title,
+                        'subject': note.subject_new.nome if note.subject_new else 'Sem matéria',
+                        'file_type': note.get_file_type_display(),
+                        'created_at': note.created_at.strftime('%d/%m/%Y'),
+                        'url': reverse('notes:detail', args=[note.pk])
+                    })
+                except Exception as e:
+                    print(f"Erro ao processar note {note.pk}: {e}")
+                    continue
         
+        # ========================================
+        # POPUP 2: CURTIDAS RECEBIDAS
+        # Mostra TODOS os notes que RECEBERAM curtidas
+        # (INDEPENDENTE de terem sido recomendados ou não)
+        # ========================================
         elif tipo == 'curtidas-recebidas':
-            notes = Note.objects.filter(author=user).order_by('-likes', '-views', '-downloads')
+            # Buscar notes do usuário que têm PELO MENOS 1 curtida
+            notes = Note.objects.filter(
+                author=user,
+                likes__gt=0
+            ).annotate(
+                comments_count=Count('comments')
+            ).order_by('-likes', '-views', '-downloads')
             
             for note in notes:
-                items.append({
-                    'id': note.pk,
-                    'title': note.title,
-                    'created_at': note.created_at.strftime('%d/%m/%Y'),
-                    'likes': note.likes,
-                    'views': note.views,
-                    'downloads': note.downloads,
-                    'comments_count': note.comments.count(),
-                    'url': f'/notes/{note.pk}/'
-                })
+                try:
+                    items.append({
+                        'id': note.pk,
+                        'title': note.title,
+                        'created_at': note.created_at.strftime('%d/%m/%Y'),
+                        'likes': note.likes,
+                        'views': note.views,
+                        'downloads': note.downloads,
+                        'comments_count': note.comments_count,
+                        'url': reverse('notes:detail', args=[note.pk])
+                    })
+                except Exception as e:
+                    print(f"Erro ao processar note {note.pk}: {e}")
+                    continue
         
+        # ========================================
+        # POPUP 3: DOWNLOADS
+        # Mostra notes que FORAM BAIXADOS (downloads > 0)
+        # (INDEPENDENTE de terem curtidas ou recomendações)
+        # ========================================
         elif tipo == 'downloads':
-            # Sistema de rastreamento ainda não implementado
-            pass
+            # Buscar notes do usuário que foram baixados
+            notes_downloaded = Note.objects.filter(
+                author=user,
+                downloads__gt=0
+            ).select_related('subject_new').order_by('-downloads', '-created_at')
+            
+            for note in notes_downloaded:
+                try:
+                    items.append({
+                        'id': note.pk,
+                        'title': note.title,
+                        'tipo': 'Note',
+                        'subject': note.subject_new.nome if note.subject_new else 'Sem matéria',
+                        'downloads': note.downloads,
+                        'likes': note.likes,
+                        'views': note.views,
+                        'created_at': note.created_at.strftime('%d/%m/%Y'),
+                        'url': reverse('notes:detail', args=[note.pk])
+                    })
+                except Exception as e:
+                    print(f"Erro ao processar note {note.pk}: {e}")
+                    continue
+            
+            # TODO: Adicionar atividades e horários quando implementado
+            # atividades = Atividade.objects.filter(downloads__gt=0)
+            # horarios = Horario.objects.filter(downloads__gt=0)
         
+        # ========================================
+        # POPUP 4: RECOMENDAÇÕES (APENAS PROFESSORES)
+        # Mostra notes que FORAM RECOMENDADOS pelo professor
+        # (INDEPENDENTE de terem curtidas ou downloads)
+        # ========================================
         elif tipo == 'recomendacoes':
-            if user.user_type == 'professor' or user.is_staff:
-                recomendacoes = NoteRecommendation.objects.filter(
-                    teacher=user
-                ).select_related('note', 'note__subject_new').order_by('-recommended_at')
-                
-                for rec in recomendacoes:
-                    try:
+            if user.user_type != 'professor' and not user.is_staff:
+                return JsonResponse({
+                    'success': False,
+                    'error': 'Apenas professores podem ver recomendações.'
+                }, status=403)
+            
+            # Buscar todas as recomendações feitas pelo professor
+            recomendacoes = NoteRecommendation.objects.filter(
+                teacher=user
+            ).select_related('note', 'note__subject_new').order_by('-recommended_at')
+            
+            for rec in recomendacoes:
+                try:
+                    # Verificar se o note ainda existe
+                    if rec.note:
                         items.append({
                             'id': rec.note.pk,
                             'title': rec.note.title,
+                            'subject': rec.note.subject_new.nome if rec.note.subject_new else 'Sem matéria',
                             'views': rec.note.views,
                             'likes': rec.note.likes,
                             'downloads': rec.note.downloads,
                             'recommended_at': rec.recommended_at.strftime('%d/%m/%Y às %H:%M'),
-                            'url': f'/notes/{rec.note.pk}/'
+                            'url': reverse('notes:detail', args=[rec.note.pk]),
+                            'deleted': False
                         })
-                    except:
+                    else:
                         # Note foi deletado
-                        pass
+                        items.append({
+                            'id': None,
+                            'title': '❌ Note removido',
+                            'subject': 'N/A',
+                            'views': 0,
+                            'likes': 0,
+                            'downloads': 0,
+                            'recommended_at': rec.recommended_at.strftime('%d/%m/%Y às %H:%M'),
+                            'url': '#',
+                            'deleted': True
+                        })
+                except Exception as e:
+                    print(f"Erro ao processar recomendação {rec.pk}: {e}")
+                    continue
+        
+        else:
+            return JsonResponse({
+                'success': False,
+                'error': f'Tipo de popup inválido: {tipo}'
+            }, status=400)
+        
+        # Log de debug
+        print(f"[POPUP {tipo}] Retornando {len(items)} itens para usuário {user.username}")
         
         return JsonResponse({
             'success': True,
-            'items': items
+            'items': items,
+            'total': len(items)
         })
         
     except Exception as e:
+        print(f"[ERRO CRÍTICO] popup_data ({tipo}): {e}")
+        import traceback
+        traceback.print_exc()
+        
         return JsonResponse({
             'success': False,
-            'error': str(e)
+            'error': f'Erro ao carregar dados: {str(e)}'
         }, status=500)
 
 
@@ -257,3 +355,59 @@ def editar_perfil(request):
             'success': False,
             'error': f'Erro ao atualizar perfil: {str(e)}'
         }, status=500)
+    # ========================================
+# ADICIONAR ESTAS VIEWS NO ARQUIVO perfil/views.py
+# ========================================
+
+@login_required
+@require_http_methods(["POST"])
+def check_username(request):
+    """
+    Verifica se um nome de usuário está disponível
+    """
+    try:
+        data = json.loads(request.body)
+        username = data.get('username', '').strip()
+        current_username = data.get('current_username', '')
+        
+        # Se for o mesmo usuário atual, está disponível
+        if username.lower() == current_username.lower():
+            return JsonResponse({'available': True})
+        
+        # Verificar se existe outro usuário com esse nome
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        
+        exists = User.objects.filter(username__iexact=username).exists()
+        
+        return JsonResponse({'available': not exists})
+        
+    except Exception as e:
+        return JsonResponse({'available': False, 'error': str(e)})
+
+
+@login_required
+@require_http_methods(["POST"])
+def check_email(request):
+    """
+    Verifica se um e-mail está disponível
+    """
+    try:
+        data = json.loads(request.body)
+        email = data.get('email', '').strip().lower()
+        current_email = data.get('current_email', '').lower()
+        
+        # Se for o mesmo e-mail atual, está disponível
+        if email == current_email:
+            return JsonResponse({'available': True})
+        
+        # Verificar se existe outro usuário com esse e-mail
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        
+        exists = User.objects.filter(email__iexact=email).exists()
+        
+        return JsonResponse({'available': not exists})
+        
+    except Exception as e:
+        return JsonResponse({'available': False, 'error': str(e)})
