@@ -27,110 +27,127 @@ def is_aluno(user):
 @login_required
 def lista_atividades(request):
     """
-    Lista de atividades - FILTRO CORRIGIDO
+    Lista de atividades - SISTEMA DE FILTROS TOTALMENTE RECONSTRUÍDO
+    Funciona para: ALUNO, PROFESSOR e ADMINISTRADOR
     """
-    if is_professor(request.user):
+    user = request.user
+    
+    # ========================================
+    # PROFESSORES: SUAS PRÓPRIAS ATIVIDADES
+    # ========================================
+    if is_professor(user):
         if request.method == 'POST':
             return processar_criacao_atividade(request)
         
-        atividades = Atividade.objects.filter(professor=request.user).order_by('-criado_em')
-        
-        atividades_anotadas = []
-        for atividade in atividades:
-            atividades_anotadas.append({
-                'atividade': atividade,
-                'visualizou': False,
-                'envio': None,
-                'salvou': False,
-            })
-        
-        context = {
-            'atividades_anotadas': atividades_anotadas,
-            'filtro_tipo': '',
-            'filtro_status': '',
-        }
-        
-        return render(request, 'atividades/lista_aluno.html', context)
+        atividades = Atividade.objects.filter(professor=user)
     
-    if not is_aluno(request.user):
-        messages.error(request, 'Acesso restrito.')
-        return redirect('study:home')
+    # ========================================
+    # ALUNOS: ATIVIDADES DISPONÍVEIS
+    # ========================================
+    elif is_aluno(user):
+        atividades = Atividade.objects.all()
     
-    # BUSCAR ATIVIDADES
-    atividades = Atividade.objects.all().order_by('-criado_em')
+    # ========================================
+    # ADMINISTRADORES: TODAS AS ATIVIDADES
+    # ========================================
+    else:
+        atividades = Atividade.objects.all()
     
-    # FILTROS CORRIGIDOS
+    # ========================================
+    # SISTEMA DE FILTROS (IGUAL AO NOTES)
+    # ========================================
     filtro_tipo = request.GET.get('tipo', '')
     filtro_status = request.GET.get('status', '')
     filtro_order = request.GET.get('order', 'recent')
     
-    # Aplicar filtro de tipo
+    # FILTRO 1: TIPO
     if filtro_tipo:
         atividades = atividades.filter(tipo=filtro_tipo)
     
-    # Aplicar filtro de status
-    if filtro_status == 'abertas':
-        atividades = atividades.exclude(
-            envios__aluno=request.user
-        ).filter(
-            Q(prazo_entrega__gte=timezone.now()) | Q(prazo_entrega__isnull=True)
-        )
-    elif filtro_status == 'enviadas':
-        atividades = atividades.filter(envios__aluno=request.user)
-    elif filtro_status == 'pendentes':
-        atividades = atividades.exclude(
-            envios__aluno=request.user
-        ).filter(
-            prazo_entrega__isnull=False
-        )
+    # FILTRO 2: STATUS (apenas para alunos)
+    if is_aluno(user):
+        if filtro_status == 'pendentes':
+            # Atividades não enviadas e dentro do prazo
+            atividades = atividades.exclude(
+                envios__aluno=user
+            ).filter(
+                Q(prazo_entrega__gte=timezone.now()) | Q(prazo_entrega__isnull=True)
+            )
+        
+        elif filtro_status == 'enviadas':
+            # Atividades já enviadas pelo aluno
+            atividades = atividades.filter(envios__aluno=user)
+        
+        elif filtro_status == 'abertas':
+            # Atividades em aberto (não enviadas)
+            atividades = atividades.exclude(envios__aluno=user)
     
-    # Aplicar ordenação
+    # FILTRO 3: ORDENAÇÃO
     order_map = {
         'recent': '-criado_em',
         'views': '-visualizacoes',
         'deadline': 'prazo_entrega',
+        'saved': None  # Tratado separadamente
     }
     
-    if filtro_order in order_map:
-        if filtro_order == 'saved':
-            # Ordenar por atividades salvas
-            atividades_salvas_ids = AtividadeSalva.objects.filter(
-                aluno=request.user
-            ).values_list('atividade_id', flat=True)
-            
-            atividades = atividades.filter(id__in=atividades_salvas_ids)
-        else:
-            atividades = atividades.order_by(order_map[filtro_order])
+    if filtro_order == 'saved' and is_aluno(user):
+        # Apenas atividades salvas pelo aluno
+        atividades_salvas_ids = AtividadeSalva.objects.filter(
+            aluno=user
+        ).values_list('atividade_id', flat=True)
+        
+        atividades = atividades.filter(id__in=atividades_salvas_ids).order_by('-criado_em')
     
-    # Anotar status de cada atividade
+    elif filtro_order in order_map and order_map[filtro_order]:
+        atividades = atividades.order_by(order_map[filtro_order])
+    
+    else:
+        atividades = atividades.order_by('-criado_em')
+    
+    # ========================================
+    # ANOTAR INFORMAÇÕES ADICIONAIS
+    # ========================================
     atividades_anotadas = []
+    
     for atividade in atividades:
-        visualizou = AtividadeVisualizacao.objects.filter(
-            atividade=atividade, 
-            aluno=request.user
-        ).exists()
-        
-        envio = AtividadeEnvio.objects.filter(
-            atividade=atividade, 
-            aluno=request.user
-        ).first()
-        
-        salvou = AtividadeSalva.objects.filter(
-            atividade=atividade,
-            aluno=request.user
-        ).exists()
-        
-        atividades_anotadas.append({
+        item = {
             'atividade': atividade,
-            'visualizou': visualizou,
-            'envio': envio,
-            'salvou': salvou,
-        })
+            'visualizou': False,
+            'envio': None,
+            'salvou': False,
+        }
+        
+        # Informações específicas para alunos
+        if is_aluno(user):
+            item['visualizou'] = AtividadeVisualizacao.objects.filter(
+                atividade=atividade, 
+                aluno=user
+            ).exists()
+            
+            item['envio'] = AtividadeEnvio.objects.filter(
+                atividade=atividade, 
+                aluno=user
+            ).first()
+            
+            item['salvou'] = AtividadeSalva.objects.filter(
+                atividade=atividade,
+                aluno=user
+            ).exists()
+        
+        atividades_anotadas.append(item)
+    
+    # ========================================
+    # VERIFICAR SE HÁ RESULTADOS
+    # ========================================
+    tem_filtros_ativos = any([filtro_tipo, filtro_status, filtro_order != 'recent'])
     
     context = {
         'atividades_anotadas': atividades_anotadas,
         'filtro_tipo': filtro_tipo,
         'filtro_status': filtro_status,
+        'filtro_order': filtro_order,
+        'tem_filtros_ativos': tem_filtros_ativos,
+        'total_atividades': len(atividades_anotadas),
     }
     
     return render(request, 'atividades/lista_aluno.html', context)
@@ -138,7 +155,7 @@ def lista_atividades(request):
 
 def processar_criacao_atividade(request):
     """
-    Processa criação de atividade via modal - CORRIGIDO
+    Processa criação de atividade via modal
     """
     try:
         titulo = request.POST.get('titulo', '').strip()
@@ -229,7 +246,7 @@ def processar_criacao_atividade(request):
 @login_required
 def detalhe_atividade(request, pk):
     """
-    Detalhe de atividade - CORRIGIDO: TRATA ERRO ModeloNãoExiste
+    Detalhe de atividade
     """
     try:
         atividade = get_object_or_404(Atividade, pk=pk)
@@ -336,7 +353,7 @@ def enviar_atividade(request, pk):
 @require_POST
 def salvar_atividade(request, pk):
     """
-    Salvar atividade - CORRIGIDO
+    Salvar/remover atividade dos salvos
     """
     if not is_aluno(request.user):
         return JsonResponse({'success': False, 'error': 'Acesso negado'}, status=403)

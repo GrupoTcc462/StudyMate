@@ -188,6 +188,8 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
         }
 
         .btn-download {
@@ -198,6 +200,7 @@
         .btn-download:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+            color: white;
         }
 
         .btn-agendar {
@@ -208,6 +211,7 @@
         .btn-agendar:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 15px rgba(23, 162, 184, 0.3);
+            color: white;
         }
 
         .btn-enviar {
@@ -315,7 +319,6 @@
         <a href="{% url 'atividades:lista' %}" class="btn-back">← Voltar</a>
 
         <div class="atividade-detail-card">
-            <!-- HEADER -->
             <div class="atividade-header">
                 <h1 class="atividade-title">{{ atividade.titulo }}</h1>
                 
@@ -337,14 +340,13 @@
                 </div>
             </div>
 
-            <!-- DESCRIÇÃO -->
             {% if atividade.descricao %}
                 <div class="atividade-description">
                     {{ atividade.descricao }}
                 </div>
             {% endif %}
 
-            <!-- INFORMAÇÕES -->
+            <!-- INFORMAÇÕES COM DATAS CORRIGIDAS -->
             <div class="info-section">
                 <div class="info-item">
                     <span class="info-label">📚 Destinado para:</span>
@@ -354,13 +356,13 @@
                 {% if atividade.prazo_entrega %}
                     <div class="info-item">
                         <span class="info-label">📅 Prazo de Entrega:</span>
-                        <span class="info-value">{{ atividade.prazo_entrega|date:"d/m/Y 'às' H:i" }}</span>
+                        <span class="info-value">{{ atividade.prazo_entrega|date:"d/m/Y" }} até {{ atividade.prazo_entrega|date:"H:i" }}</span>
                     </div>
                 {% endif %}
                 
                 <div class="info-item">
                     <span class="info-label">📆 Criado em:</span>
-                    <span class="info-value">{{ atividade.criado_em|date:"d/m/Y 'às' H:i" }}</span>
+                    <span class="info-value">{{ atividade.criado_em|date:"d/m/Y" }} às {{ atividade.criado_em|date:"H:i" }}</span>
                 </div>
                 
                 <div class="info-item">
@@ -369,14 +371,12 @@
                 </div>
             </div>
 
-            <!-- PRAZO ENCERRADO -->
             {% if atividade.esta_encerrada %}
                 <div class="prazo-encerrado">
                     ⏰ O prazo de entrega desta atividade expirou
                 </div>
             {% endif %}
 
-            <!-- BOTÕES DE AÇÃO -->
             <div class="action-buttons">
                 {% if atividade.anexo %}
                     <a href="{% url 'atividades:baixar_anexo' atividade.pk %}" class="btn-action btn-download">
@@ -402,13 +402,12 @@
                 </button>
             </div>
 
-            <!-- SE JÁ ENVIOU -->
             {% if envio %}
                 <div class="envio-section">
                     <h3>✅ Atividade Enviada</h3>
                     <div class="envio-info">
                         <div><strong>Arquivo:</strong> {{ envio.arquivo.name }}</div>
-                        <div><strong>Data de Envio:</strong> {{ envio.enviado_em|date:"d/m/Y 'às' H:i" }}</div>
+                        <div><strong>Data de Envio:</strong> {{ envio.enviado_em|date:"d/m/Y" }} às {{ envio.enviado_em|date:"H:i" }}</div>
                         <div><strong>Status:</strong> {{ envio.get_status_display }}</div>
                         
                         {% if envio.nota %}
@@ -424,7 +423,6 @@
         </div>
     </div>
 
-    <!-- MODAL DE ENVIO -->
     <div class="modal fade" id="enviarModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -464,7 +462,6 @@
         const csrfToken = '{{ csrf_token }}';
         const atividadeId = {{ atividade.pk }};
 
-        // SALVAR ATIVIDADE
         async function toggleSalvar() {
             try {
                 const response = await fetch(`/atividades/${atividadeId}/salvar/`, {
@@ -496,7 +493,6 @@
             }
         }
 
-        // ENVIAR ATIVIDADE
         async function enviarAtividade() {
             const form = document.getElementById('enviarForm');
             const formData = new FormData(form);
@@ -524,7 +520,6 @@
             }
         }
 
-        // TOAST
         function showToast(message, type = 'success') {
             const toast = document.createElement('div');
             toast.style.cssText = `

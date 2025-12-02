@@ -30,7 +30,6 @@
             text-align: center;
         }
 
-        /* NAVBAR CORRIGIDA - MESMA COR PARA TODOS OS BOTÕES */
         .nav {
             display: flex;
             justify-content: center;
@@ -74,7 +73,6 @@
             padding: 20px;
         }
 
-        /* BOTÃO NAVEGAÇÃO CHAT <-> ATIVIDADES */
         .section-nav {
             background: white;
             border-radius: 15px;
@@ -104,40 +102,7 @@
             color: white;
         }
 
-        .create-first-activity {
-            text-align: center;
-            padding: 60px 20px;
-            background: white;
-            border-radius: 15px;
-            margin-bottom: 25px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-        }
-
-        .create-first-activity h3 {
-            color: #6c757d;
-            margin-bottom: 20px;
-            font-size: 1.5rem;
-        }
-
-        .btn-create-first {
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-            color: white;
-            padding: 15px 35px;
-            border-radius: 50px;
-            border: none;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            box-shadow: 0 5px 20px rgba(40, 167, 69, 0.4);
-            transition: all 0.3s ease;
-        }
-
-        .btn-create-first:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 7px 25px rgba(40, 167, 69, 0.5);
-        }
-
-        /* FILTROS */
+        /* FILTROS RECONSTRUÍDOS */
         .filters-section {
             background: white;
             border-radius: 15px;
@@ -226,6 +191,31 @@
             color: white;
         }
 
+        /* MENSAGEM "NENHUMA ATIVIDADE ENCONTRADA" */
+        .empty-state {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 15px;
+            padding: 60px 20px;
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+
+        .empty-state h3 {
+            color: #6c757d;
+            margin-bottom: 10px;
+        }
+
+        .empty-state p {
+            color: #adb5bd;
+            font-size: 1rem;
+        }
+
         .atividade-card {
             background: white;
             border-radius: 15px;
@@ -310,6 +300,8 @@
             cursor: pointer;
             transition: all 0.3s ease;
             margin: 5px;
+            text-decoration: none;
+            display: inline-block;
         }
 
         .btn-ver {
@@ -320,6 +312,7 @@
         .btn-ver:hover {
             background: var(--primary-dark);
             transform: translateY(-2px);
+            color: white;
         }
 
         .btn-salvar {
@@ -331,95 +324,37 @@
             background: #6c757d;
         }
 
-        /* MODAL */
-        .modal-content {
+        .create-first-activity {
+            text-align: center;
+            padding: 60px 20px;
+            background: white;
             border-radius: 15px;
-            border: none;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
         }
 
-        .modal-header {
-            background: var(--primary);
+        .create-first-activity h3 {
+            color: #6c757d;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .btn-create-first {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
             color: white;
-            border-radius: 15px 15px 0 0;
-        }
-
-        .form-label {
+            padding: 15px 35px;
+            border-radius: 50px;
+            border: none;
+            font-size: 1.1rem;
             font-weight: 600;
-            color: #2c2c2c;
-            margin-bottom: 8px;
-        }
-
-        .form-control,
-        .form-select {
-            border: 2px solid #e9ecef;
-            border-radius: 10px;
-            padding: 12px;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(40, 167, 69, 0.4);
             transition: all 0.3s ease;
         }
 
-        .form-control:focus,
-        .form-select:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 0.2rem rgba(178, 34, 34, 0.1);
-        }
-
-        .char-counter {
-            text-align: right;
-            font-size: 0.875rem;
-            color: #6c757d;
-            margin-top: 5px;
-        }
-
-        .required-field::after {
-            content: " *";
-            color: #dc3545;
-        }
-
-        .checkbox-group {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 15px;
-            margin-top: 10px;
-        }
-
-        .checkbox-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .checkbox-item input[type="checkbox"] {
-            width: 20px;
-            height: 20px;
-            cursor: pointer;
-        }
-
-        /* WRAPPER CLICÁVEL PARA O INPUT DE PRAZO */
-        .input-wrapper {
-            position: relative;
-            cursor: pointer;
-        }
-
-        .input-wrapper input {
-            cursor: pointer;
-        }
-
-        @media (max-width: 768px) {
-            .nav {
-                gap: 8px;
-            }
-
-            .nav a,
-            .nav button {
-                padding: 12px 18px;
-                font-size: 0.9rem;
-            }
-        }
-
-        .container1 {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
+        .btn-create-first:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 25px rgba(40, 167, 69, 0.5);
         }
 
         footer {
@@ -434,16 +369,14 @@
         footer p {
             margin-bottom: 10px;
         }
-
     </style>
 </head>
 <body>
-    <div class="container1">
+    <div class="container1" style="max-width: 1200px; margin: 0 auto; padding: 20px;">
         <div class="header">
             <img src="{% static 'study/img/logoStudyMate.png' %}" height="144px" width="293">
             <h4>Atividades Acadêmicas</h4>
             
-            <!-- NAVBAR CORRIGIDA - TODAS AS CORES VERMELHAS -->
             <div class="nav">
                 <a href="{% url 'study:home' %}">🏠 Home</a>
                 <a href="{% url 'materias:home' %}" class="nav-btn">📚 Matérias</a>
@@ -485,102 +418,113 @@
                 {% endif %}
             {% endif %}
 
-            <!-- FILTROS COM LEGENDAS -->
+            <!-- FILTROS RECONSTRUÍDOS (IGUAL AO NOTES) -->
             <div class="filters-section">
                 <h4>🔍 Filtros</h4>
-                <form method="get">
+                <form method="get" id="filterForm">
                     <div class="filter-row">
                         <div class="filter-group">
                             <label>Tipo da atividade</label>
                             <select name="tipo" class="form-select">
-                                <option value="">Todos</option>
+                                <option value="">Todos os tipos</option>
                                 <option value="ATIVIDADE" {% if filtro_tipo == 'ATIVIDADE' %}selected{% endif %}>Atividade/Tarefa</option>
                                 <option value="AVISO_PROVA" {% if filtro_tipo == 'AVISO_PROVA' %}selected{% endif %}>Aviso de Prova</option>
                                 <option value="AVISO_SIMPLES" {% if filtro_tipo == 'AVISO_SIMPLES' %}selected{% endif %}>Aviso Simples</option>
                             </select>
                         </div>
 
+                        {% if user.user_type == 'aluno' %}
                         <div class="filter-group">
                             <label>Status</label>
                             <select name="status" class="form-select">
                                 <option value="">Todos</option>
                                 <option value="pendentes" {% if filtro_status == 'pendentes' %}selected{% endif %}>Pendentes</option>
-                                <option value="enviadas" {% if filtro_status == 'enviadas' %}selected{% endif %}>Enviados</option>
-                                <option value="abertas" {% if filtro_status == 'abertas' %}selected{% endif %}>Abertos</option>
+                                <option value="enviadas" {% if filtro_status == 'enviadas' %}selected{% endif %}>Enviadas</option>
+                                <option value="abertas" {% if filtro_status == 'abertas' %}selected{% endif %}>Em aberto</option>
                             </select>
                         </div>
+                        {% endif %}
 
                         <div class="filter-group">
                             <label>Ordenação</label>
                             <select name="order" class="form-select">
-                                <option value="recent">Mais recentes</option>
-                                <option value="views">Mais visualizados</option>
-                                <option value="deadline">Em prazo curto</option>
-                                <option value="saved">Salvos</option>
+                                <option value="recent" {% if filtro_order == 'recent' %}selected{% endif %}>Mais recentes</option>
+                                <option value="views" {% if filtro_order == 'views' %}selected{% endif %}>Mais visualizados</option>
+                                <option value="deadline" {% if filtro_order == 'deadline' %}selected{% endif %}>Prazo mais curto</option>
+                                {% if user.user_type == 'aluno' %}
+                                <option value="saved" {% if filtro_order == 'saved' %}selected{% endif %}>Atividades Salvas</option>
+                                {% endif %}
                             </select>
                         </div>
                     </div>
 
                     <div class="filter-actions">
                         <button type="submit" class="btn-filter">🔍 Filtrar</button>
-                        <a href="{% url 'atividades:lista' %}" class="btn-clear">❌ Limpar filtros</a>
+                        <a href="{% url 'atividades:lista' %}" class="btn-clear">❌ Limpar Filtros</a>
                     </div>
                 </form>
             </div>
 
             <!-- LISTA DE ATIVIDADES -->
-            {% for item in atividades_anotadas %}
-                <div class="atividade-card">
-                    <div class="atividade-header">
-                        <div>
-                            <h3 class="atividade-titulo">
+            {% if atividades_anotadas %}
+                {% for item in atividades_anotadas %}
+                    <div class="atividade-card">
+                        <div class="atividade-header">
+                            <div>
+                                <h3 class="atividade-titulo">
+                                    {% if not item.visualizou %}
+                                        🔴
+                                    {% elif item.envio %}
+                                        🟢
+                                    {% else %}
+                                        🟠
+                                    {% endif %}
+                                    {{ item.atividade.titulo }}
+                                </h3>
+                                <span class="badge {% if item.atividade.tipo == 'ATIVIDADE' %}badge-atividade{% elif item.atividade.tipo == 'AVISO_PROVA' %}badge-prova{% else %}badge-aviso{% endif %}">
+                                    {{ item.atividade.get_tipo_display }}
+                                </span>
+                            </div>
+                            <div>
                                 {% if not item.visualizou %}
-                                    🔴
+                                    <span class="status-badge status-nao-vista">Não Vista</span>
                                 {% elif item.envio %}
-                                    🟢
+                                    <span class="status-badge status-enviada">Enviada</span>
                                 {% else %}
-                                    🟠
+                                    <span class="status-badge status-vista">Vista</span>
                                 {% endif %}
-                                {{ item.atividade.titulo }}
-                            </h3>
-                            <span class="badge {% if item.atividade.tipo == 'ATIVIDADE' %}badge-atividade{% elif item.atividade.tipo == 'AVISO_PROVA' %}badge-prova{% else %}badge-aviso{% endif %}">
-                                {{ item.atividade.get_tipo_display }}
-                            </span>
+                            </div>
                         </div>
+
+                        <div class="atividade-info">
+                            <p><strong>Professor(a):</strong> {{ item.atividade.professor.username }}</p>
+                            <p><strong>Destinado:</strong> {{ item.atividade.get_anos_destino_display }}</p>
+                            {% if item.atividade.prazo_entrega %}
+                                <p><strong>📅 Prazo:</strong> {{ item.atividade.prazo_entrega|date:"d/m/Y até H:i" }}</p>
+                            {% endif %}
+                            <p><strong>📆 Criado:</strong> {{ item.atividade.criado_em|date:"d/m/Y às H:i" }}</p>
+                        </div>
+
                         <div>
-                            {% if not item.visualizou %}
-                                <span class="status-badge status-nao-vista">Não Vista</span>
-                            {% elif item.envio %}
-                                <span class="status-badge status-enviada">Enviada</span>
-                            {% else %}
-                                <span class="status-badge status-vista">Vista</span>
+                            <a href="{% url 'atividades:detalhe' item.atividade.pk %}" class="btn-acao btn-ver">Ver Atividade</a>
+                            
+                            {% if user.user_type == 'aluno' %}
+                            <button class="btn-acao btn-salvar {% if item.salvou %}salva{% endif %}" 
+                                    onclick="salvarAtividade({{ item.atividade.pk }}, this)">
+                                {% if item.salvou %}★ Salva{% else %}☆ Salvar{% endif %}
+                            </button>
                             {% endif %}
                         </div>
                     </div>
-
-                    <div class="atividade-info">
-                        <p><strong>Professor(a):</strong> {{ item.atividade.professor.username }}</p>
-                        <p><strong>Destinado:</strong> {{ item.atividade.get_anos_destino_display }}</p>
-                        {% if item.atividade.prazo_entrega %}
-                            <p><strong>📅 Prazo:</strong> {{ item.atividade.prazo_entrega|date:"d/m/Y 'às' H:i" }}</p>
-                        {% endif %}
-                    </div>
-
-                    <div>
-                        <a href="{% url 'atividades:detalhe' item.atividade.pk %}" class="btn-acao btn-ver">Ver Atividade</a>
-                        
-                        <button class="btn-acao btn-salvar {% if item.salvou %}salva{% endif %}" 
-                                onclick="salvarAtividade({{ item.atividade.pk }}, this)">
-                            {% if item.salvou %}★ Salva{% else %}☆ Salvar{% endif %}
-                        </button>
-                    </div>
+                {% endfor %}
+            {% else %}
+                <!-- MENSAGEM "NENHUMA ATIVIDADE ENCONTRADA" -->
+                <div class="empty-state">
+                    <div class="empty-state-icon">📚</div>
+                    <h3>Nenhuma atividade encontrada</h3>
+                    <p>Tente ajustar os filtros ou limpar a busca.</p>
                 </div>
-            {% empty %}
-                <div style="text-align: center; padding: 60px; background: white; border-radius: 15px;">
-                    <h3 style="color: #6c757d;">Nenhuma atividade encontrada</h3>
-                    <p>Não há atividades disponíveis no momento.</p>
-                </div>
-            {% endfor %}
+            {% endif %}
         </div>
 
         <footer>
@@ -591,11 +535,12 @@
         </footer>
     </div>
 
-    <!-- MODAL DE CRIAÇÃO -->
+    <!-- MODAL CRIAR ATIVIDADE -->
+    {% if user.user_type == 'professor' or user.is_staff %}
     <div class="modal fade" id="criarAtividadeModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
-                <div class="modal-header">
+                <div class="modal-header" style="background: var(--primary); color: white;">
                     <h5 class="modal-title">📝 Criar Nova Atividade</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
@@ -603,17 +548,15 @@
                     <form method="POST" enctype="multipart/form-data" id="criarAtividadeForm">
                         {% csrf_token %}
 
-                        <!-- TÍTULO (50 CARACTERES, APENAS LETRAS E ESPAÇOS) -->
                         <div class="mb-3">
-                            <label for="titulo" class="form-label required-field">Título da atividade</label>
+                            <label for="titulo" class="form-label" style="font-weight: 600;">Título da atividade *</label>
                             <input type="text" id="titulo" name="titulo" class="form-control" 
                                    maxlength="50" placeholder="Ex: Trabalho de História" required>
-                            <div class="char-counter" id="tituloCount">0/50</div>
+                            <div class="char-counter" id="tituloCount" style="text-align: right; font-size: 0.875rem; color: #6c757d;">0/50</div>
                         </div>
 
-                        <!-- TIPO -->
                         <div class="mb-3">
-                            <label class="form-label required-field">Tipo da atividade</label>
+                            <label class="form-label" style="font-weight: 600;">Tipo da atividade *</label>
                             <div style="display: flex; flex-direction: column; gap: 10px;">
                                 <div class="form-check">
                                     <input class="form-check-input" type="radio" name="tipo" value="ATIVIDADE" 
@@ -633,48 +576,42 @@
                             </div>
                         </div>
 
-                        <!-- PRAZO (MÍNIMO 30 MINUTOS) - CORRIGIDO -->
                         <div class="mb-3" id="prazoContainer" style="display: none;">
-                            <label for="prazo" class="form-label">⏳ Prazo de Entrega</label>
-                            <div class="input-wrapper" id="prazoWrapper">
-                                <input type="datetime-local" id="prazo" name="prazo_entrega" class="form-control">
-                            </div>
+                            <label for="prazo" class="form-label" style="font-weight: 600;">⏳ Prazo de Entrega</label>
+                            <input type="datetime-local" id="prazo" name="prazo_entrega" class="form-control">
                             <small class="text-muted">Mínimo 30 minutos após agora</small>
                         </div>
 
-                        <!-- DESCRIÇÃO (SEM LIMITE) -->
                         <div class="mb-3">
-                            <label for="descricao" class="form-label required-field">Descrição / Orientações</label>
+                            <label for="descricao" class="form-label" style="font-weight: 600;">Descrição / Orientações *</label>
                             <textarea id="descricao" name="descricao" class="form-control" rows="4" 
                                       placeholder="Descreva a atividade..." required></textarea>
                         </div>
 
-                        <!-- DESTINADO PARA -->
                         <div class="mb-3">
-                            <label class="form-label required-field">Destinado para</label>
-                            <div class="checkbox-group">
-                                <div class="checkbox-item">
-                                    <input type="checkbox" name="ano_1" id="ano1" value="true">
-                                    <label for="ano1">1º Ano</label>
+                            <label class="form-label" style="font-weight: 600;">Destinado para *</label>
+                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
+                                <div class="form-check">
+                                    <input type="checkbox" name="ano_1" id="ano1" class="form-check-input">
+                                    <label for="ano1" class="form-check-label">1º Ano</label>
                                 </div>
-                                <div class="checkbox-item">
-                                    <input type="checkbox" name="ano_2" id="ano2" value="true">
-                                    <label for="ano2">2º Ano</label>
+                                <div class="form-check">
+                                    <input type="checkbox" name="ano_2" id="ano2" class="form-check-input">
+                                    <label for="ano2" class="form-check-label">2º Ano</label>
                                 </div>
-                                <div class="checkbox-item">
-                                    <input type="checkbox" name="ano_3" id="ano3" value="true">
-                                    <label for="ano3">3º Ano</label>
+                                <div class="form-check">
+                                    <input type="checkbox" name="ano_3" id="ano3" class="form-check-input">
+                                    <label for="ano3" class="form-check-label">3º Ano</label>
                                 </div>
-                                <div class="checkbox-item">
-                                    <input type="checkbox" name="todos" id="todos" value="true">
-                                    <label for="todos">Todos</label>
+                                <div class="form-check">
+                                    <input type="checkbox" name="todos" id="todos" class="form-check-input">
+                                    <label for="todos" class="form-check-label">Todos</label>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- ANEXO -->
                         <div class="mb-3">
-                            <label for="anexo" class="form-label">📂 Anexo (opcional)</label>
+                            <label for="anexo" class="form-label" style="font-weight: 600;">📂 Anexo (opcional)</label>
                             <input type="file" id="anexo" name="anexo" class="form-control" 
                                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.zip">
                             <small class="text-muted">Máximo 10MB</small>
@@ -692,229 +629,96 @@
             </div>
         </div>
     </div>
+    {% endif %}
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-    const csrfToken = '{{ csrf_token }}';
+        const csrfToken = '{{ csrf_token }}';
 
-    // ========================================
-    // CONTADORES DE CARACTERES
-    // ========================================
-    const titulo = document.getElementById('titulo');
-    const tituloCount = document.getElementById('tituloCount');
+        // CONTADOR DE CARACTERES
+        const titulo = document.getElementById('titulo');
+        const tituloCount = document.getElementById('tituloCount');
 
-    if (titulo && tituloCount) {
-        titulo.addEventListener('input', function() {
-            tituloCount.textContent = `${this.value.length}/50`;
-            
-            // Validar apenas letras e espaços
-            const regex = /^[A-Za-zÀ-ÿÇç\s]*$/;
-            if (!regex.test(this.value)) {
-                this.value = this.value.replace(/[^A-Za-zÀ-ÿÇç\s]/g, '');
-            }
-        });
-    }
-
-    // ========================================
-    // MOSTRAR CAMPO DE PRAZO CONFORME TIPO
-    // ========================================
-    const tipoRadios = document.querySelectorAll('input[name="tipo"]');
-    const prazoContainer = document.getElementById('prazoContainer');
-
-    if (tipoRadios && prazoContainer) {
-        tipoRadios.forEach(radio => {
-            radio.addEventListener('change', function() {
-                if (this.value === 'ATIVIDADE' || this.value === 'AVISO_PROVA') {
-                    prazoContainer.style.display = 'block';
-                } else {
-                    prazoContainer.style.display = 'none';
-                    const prazoInput = document.getElementById('prazo');
-                    if (prazoInput) prazoInput.value = '';
+        if (titulo && tituloCount) {
+            titulo.addEventListener('input', function() {
+                tituloCount.textContent = `${this.value.length}/50`;
+                
+                const regex = /^[A-Za-zÀ-ÿÇç\s]*$/;
+                if (!regex.test(this.value)) {
+                    this.value = this.value.replace(/[^A-Za-zÀ-ÿÇç\s]/g, '');
                 }
             });
-        });
-    }
-
-    // ========================================
-    // ABRIR CALENDÁRIO AO CLICAR NO WRAPPER
-    // ========================================
-    const prazoWrapper = document.getElementById('prazoWrapper');
-    const prazoInput = document.getElementById('prazo');
-
-    if (prazoWrapper && prazoInput) {
-        prazoWrapper.addEventListener('click', function(e) {
-            // Só executar se não clicou diretamente no input
-            if (e.target !== prazoInput) {
-                // Tentar método nativo primeiro (Chrome 99+, Firefox 101+, Safari 16+)
-                if (typeof prazoInput.showPicker === 'function') {
-                    try {
-                        prazoInput.showPicker();
-                    } catch (err) {
-                        // Fallback para navegadores antigos
-                        prazoInput.focus();
-                        prazoInput.click();
-                    }
-                } else {
-                    // Fallback para navegadores antigos
-                    prazoInput.focus();
-                    prazoInput.click();
-                }
-            }
-        });
-    }
-
-    // ========================================
-    // VALIDAÇÃO DO PRAZO (MÍNIMO 30 MINUTOS)
-    // ========================================
-    if (prazoInput) {
-        prazoInput.addEventListener('change', function() {
-            const prazoDigitado = new Date(this.value);
-            const agora = new Date();
-            const limite = new Date(agora.getTime() + 30 * 60000);
-            
-            if (prazoDigitado < limite) {
-                alert('⚠️ O prazo deve ser no mínimo 30 minutos após agora.');
-                this.value = '';
-            }
-        });
-    }
-
-    // ========================================
-    // VALIDAÇÃO CHECKBOX "TODOS"
-    // ========================================
-    const todosCheck = document.getElementById('todos');
-    const anosChecks = [
-        document.getElementById('ano1'),
-        document.getElementById('ano2'),
-        document.getElementById('ano3')
-    ];
-
-    if (todosCheck && anosChecks.every(c => c)) {
-        todosCheck.addEventListener('change', function() {
-            if (this.checked) {
-                anosChecks.forEach(check => check.checked = false);
-            }
-        });
-
-        anosChecks.forEach(check => {
-            check.addEventListener('change', function() {
-                if (this.checked) {
-                    todosCheck.checked = false;
-                }
-            });
-        });
-    }
-
-    // ========================================
-    // SUBMIT DO FORMULÁRIO - CORRIGIDO
-    // ========================================
-    const form = document.getElementById('criarAtividadeForm');
-
-    if (form) {
-        form.addEventListener('submit', function(e) {
-            // Validar se pelo menos um ano foi selecionado
-            const anosSelecionados = anosChecks.some(c => c.checked) || todosCheck.checked;
-            
-            if (!anosSelecionados) {
-                e.preventDefault();
-                alert('❌ Selecione pelo menos um ano ou "Todos".');
-                return false;
-            }
-
-            // Validar título
-            const tituloVal = titulo.value.trim();
-            if (!tituloVal) {
-                e.preventDefault();
-                alert('❌ O título é obrigatório.');
-                titulo.focus();
-                return false;
-            }
-
-            // Validar descrição
-            const descricao = document.getElementById('descricao');
-            const descVal = descricao.value.trim();
-            if (!descVal) {
-                e.preventDefault();
-                alert('❌ A descrição é obrigatória.');
-                descricao.focus();
-                return false;
-            }
-
-            // Validar tipo selecionado
-            const tipoSelecionado = document.querySelector('input[name="tipo"]:checked');
-            if (!tipoSelecionado) {
-                e.preventDefault();
-                alert('❌ Selecione o tipo de atividade.');
-                return false;
-            }
-
-            // Desabilitar botão para evitar duplo envio
-            const btnCriar = document.getElementById('btnCriar');
-            if (btnCriar) {
-                btnCriar.disabled = true;
-                btnCriar.textContent = 'Criando...';
-            }
-
-            // Permitir envio normal do formulário
-            return true;
-        });
-    }
-
-    // ========================================
-    // SALVAR ATIVIDADE (BOTÃO ESTRELA)
-    // ========================================
-    async function salvarAtividade(atividadeId, button) {
-        try {
-            const response = await fetch(`/atividades/${atividadeId}/salvar/`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': csrfToken,
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-                if (data.action === 'saved') {
-                    button.classList.add('salva');
-                    button.textContent = '★ Salva';
-                } else {
-                    button.classList.remove('salva');
-                    button.textContent = '☆ Salvar';
-                }
-            }
-        } catch (error) {
-            console.error('Erro:', error);
-            alert('Erro ao salvar atividade.');
         }
-    }
 
-    // ========================================
-    // LIMPAR FORMULÁRIO AO FECHAR MODAL
-    // ========================================
-    const criarAtividadeModal = document.getElementById('criarAtividadeModal');
-    if (criarAtividadeModal) {
-        criarAtividadeModal.addEventListener('hidden.bs.modal', function() {
-            const form = document.getElementById('criarAtividadeForm');
-            if (form) {
-                form.reset();
-                
-                // Resetar contadores
-                if (tituloCount) tituloCount.textContent = '0/50';
-                
-                // Esconder campo de prazo
-                if (prazoContainer) prazoContainer.style.display = 'none';
-                
-                // Reabilitar botão
-                const btnCriar = document.getElementById('btnCriar');
-                if (btnCriar) {
-                    btnCriar.disabled = false;
-                    btnCriar.textContent = 'Salvar atividade';
+        // MOSTRAR CAMPO DE PRAZO CONFORME TIPO
+        const tipoRadios = document.querySelectorAll('input[name="tipo"]');
+        const prazoContainer = document.getElementById('prazoContainer');
+
+        if (tipoRadios && prazoContainer) {
+            tipoRadios.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    if (this.value === 'ATIVIDADE' || this.value === 'AVISO_PROVA') {
+                        prazoContainer.style.display = 'block';
+                    } else {
+                        prazoContainer.style.display = 'none';
+                        const prazoInput = document.getElementById('prazo');
+                        if (prazoInput) prazoInput.value = '';
+                    }
+                });
+            });
+        }
+
+        // VALIDAÇÃO CHECKBOX "TODOS"
+        const todosCheck = document.getElementById('todos');
+        const anosChecks = [
+            document.getElementById('ano1'),
+            document.getElementById('ano2'),
+            document.getElementById('ano3')
+        ];
+
+        if (todosCheck && anosChecks.every(c => c)) {
+            todosCheck.addEventListener('change', function() {
+                if (this.checked) {
+                    anosChecks.forEach(check => check.checked = false);
                 }
+            });
+
+            anosChecks.forEach(check => {
+                check.addEventListener('change', function() {
+                    if (this.checked) {
+                        todosCheck.checked = false;
+                    }
+                });
+            });
+        }
+
+        // SALVAR ATIVIDADE
+        async function salvarAtividade(atividadeId, button) {
+            try {
+                const response = await fetch(`/atividades/${atividadeId}/salvar/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrfToken,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    if (data.action === 'saved') {
+                        button.classList.add('salva');
+                        button.textContent = '★ Salva';
+                    } else {
+                        button.classList.remove('salva');
+                        button.textContent = '☆ Salvar';
+                    }
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+                alert('Erro ao salvar atividade.');
             }
-        });
-    }
+        }
     </script>
 </body>
 </html>
-    
