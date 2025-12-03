@@ -114,9 +114,9 @@ class Mensagem(models.Model):
     def clean_message(self):
         """Remove palavras ofensivas da mensagem"""
         palavras_proibidas = [
-            'faca', 'facada', 'matar', 'morrer', 'droga', 'cocaina',
-            'maconha', 'crack', 'merda', 'porra', 'caralho', 'puta',
-            'viado', 'bicha', 'otario', 'idiota', 'burro', 'imbecil', 'burro', 'Burro',
+            'faca','Faca' 'facada', 'matar', 'morrer', 'droga', 'cocaina',
+            'maconha', 'crack', 'merda', 'porra', 'caralho', 'puta', 'Ponto', 'fdp', 'FDP',
+            'viado', 'bicha', 'otario', 'idiota', 'burro', 'imbecil', 'burro', 'Burro', 'pipi', 'Pipi', 'Penis', 'Buceta', 'Bucetuda','Nigga', 'Você é negro', 'Você é preto',
         ]
         
         mensagem_limpa = self.mensagem
