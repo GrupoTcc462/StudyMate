@@ -79,7 +79,7 @@
             width: 90%;
             max-height: 80vh;
             overflow-y: auto;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            
             animation: slideUp 0.3s ease;
             position: relative;
         }
@@ -444,11 +444,65 @@
             </div>
         </div>
 
-        <footer>
-            <p><strong>Endereço:</strong> Av. Paulo Lacerda Quartim Barbosa, 630 - Santa Bárbara, Itapira - SP, 13977-175</p>
-            <p><strong>Telefone:</strong> (19) 3843-1171</p>
+        <footer style="
+            background: rgb(178, 34, 34);
+            color: white;
+            border-radius: 20px;
+            padding: 40px;
+            margin-top: 30px;
+            text-align: center;
+        ">
+            <!-- ENDEREÇO: Clique para abrir no Google Maps -->
+            <p style="margin-bottom: 10px;">
+                <strong>Endereço:</strong> 
+                <a href="https://maps.app.goo.gl/dj6vG36bioJgcc2x8" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                style="
+                    color: white; 
+                    text-decoration: none; 
+                    cursor: pointer;
+                    transition: opacity 0.3s ease;
+                "
+                onmouseover="this.style.opacity='0.8'"
+                onmouseout="this.style.opacity='1'">
+                    Av. Paulo Lacerda Quartim Barbosa, 630 - Santa Bárbara, Itapira - SP, 13977-175
+                </a>
+            </p>
+
+            <!-- TELEFONE: Clique para copiar -->
+            <p style="margin-bottom: 10px;">
+                <strong>Telefone:</strong> 
+                <span onclick="copiarTelefone()" 
+                    style="
+                        color: white; 
+                        cursor: pointer;
+                        transition: opacity 0.3s ease;
+                    "
+                    onmouseover="this.style.opacity='0.8'"
+                    onmouseout="this.style.opacity='1'">
+                    (19) 3843-1171
+                </span>
+            </p>
+
             <br>
-            <p>&copy; 2025 ETEC João Maria Stevanatto. Todos os direitos reservados.</p>
+
+            <!-- COPYRIGHT: Clique para ir ao site da ETEC -->
+            <p style="margin: 0;">
+                <a href="https://www.etecitapira.com.br/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                style="
+                    color: white; 
+                    text-decoration: none; 
+                    cursor: pointer;
+                    transition: opacity 0.3s ease;
+                "
+                onmouseover="this.style.opacity='0.8'"
+                onmouseout="this.style.opacity='1'">
+                    &copy; 2025 ETEC João Maria Stevanatto. Todos os direitos reservados.
+                </a>
+            </p>
         </footer>
     </div>
 
@@ -510,7 +564,96 @@
     </div>
 
     <script>
-        // ========================================
+         function copiarTelefone() {
+            const telefone = '(19) 3843-1171';
+            
+            // Criar elemento temporário
+            const tempInput = document.createElement('input');
+            tempInput.value = telefone;
+            document.body.appendChild(tempInput);
+            
+            // Selecionar e copiar
+            tempInput.select();
+            tempInput.setSelectionRange(0, 99999); // Para mobile
+            
+            try {
+                document.execCommand('copy');
+                
+                // Mostrar notificação de sucesso
+                mostrarNotificacao('📋 Telefone copiado: ' + telefone);
+            } catch (err) {
+                console.error('Erro ao copiar:', err);
+                mostrarNotificacao('❌ Erro ao copiar telefone', 'error');
+            }
+            
+            // Remover elemento temporário
+            document.body.removeChild(tempInput);
+        }
+        
+        function mostrarNotificacao(mensagem, tipo = 'success') {
+            // Verificar se já existe uma notificação
+            const existente = document.getElementById('footer-notification');
+            if (existente) {
+                existente.remove();
+            }
+            
+            const notificacao = document.createElement('div');
+            notificacao.id = 'footer-notification';
+            notificacao.textContent = mensagem;
+            notificacao.style.cssText = `
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                background: white;
+                color: #2c2c2c;
+                border-left: 4px solid #28a745;
+                padding: 12px 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+                z-index: 9999;
+                font-size: 0.95rem;
+                animation: slideInUp 0.3s ease;
+            `;
+            
+            document.body.appendChild(notificacao);
+            
+            // Remover após 2 segundos
+            setTimeout(() => {
+                notificacao.style.animation = 'slideOutDown 0.3s ease';
+                setTimeout(() => notificacao.remove(), 300);
+            }, 2000);
+        }
+        
+        // Adicionar animações CSS
+        if (!document.getElementById('footer-animations')) {
+            const style = document.createElement('style');
+            style.id = 'footer-animations';
+            style.textContent = `
+                @keyframes slideInUp {
+                    from {
+                        transform: translateY(100px);
+                        opacity: 0;
+                    }
+                    to {
+                        transform: translateY(0);
+                        opacity: 1;
+                    }
+                }
+                
+                @keyframes slideOutDown {
+                    from {
+                        transform: translateY(0);
+                        opacity: 1;
+                    }
+                    to {
+                        transform: translateY(100px);
+                        opacity: 0;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+            // ========================================
         // CSRF TOKEN
         // ========================================
         const csrfToken = '{{ csrf_token }}';
@@ -674,7 +817,7 @@
                     html += `
                         <div class="aluno-item">
                             <div class="aluno-nome">${aluno.username}</div>
-                            <div class="aluno-status">🟢 Online - ${tempoTexto}</div>
+                            <div class="aluno-status"> Online - ${tempoTexto}</div>
                         </div>
                     `;
                 });
