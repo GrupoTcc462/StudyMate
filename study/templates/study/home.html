@@ -391,19 +391,19 @@
                 
                 <!-- CARDS COM VALIDAÇÃO EM TEMPO REAL -->
                 <div class="stats-grid">
-                    <div class="stat-card" onclick="abrirLinksDisponiveis()" id="card-links">
-                        <div class="stat-number" id="links-count">0</div>
-                        <div>Links Disponíveis</div>
+                    <div class="stat-card" onclick="abrirMaterias()" id="card-materias">
+                        <div class="stat-number" id="materias-count">0</div>
+                        <div id="materias-label">Matérias disponíveis</div>
                     </div>
                     
                     <div class="stat-card" onclick="abrirAlunosOnline()" id="card-alunos">
                         <div class="stat-number" id="alunos-count">0</div>
-                        <div>Estudantes Online</div>
+                        <div id="alunos-label">Estudantes online</div>
                     </div>
                     
-                    <div class="stat-card" onclick="abrirNotesCompartilhados()" id="card-notes">
+                    <div class="stat-card" onclick="abrirNotes()" id="card-notes">
                         <div class="stat-number" id="notes-count">0</div>
-                        <div>Notes Compartilhados</div>
+                        <div id="notes-label">Notes compartilhados</div>
                     </div>
                     
                     <div class="stat-card" onclick="abrirSuporte()" id="card-suporte">
@@ -511,16 +511,96 @@
 
     <script>
         // ========================================
+        // CSRF TOKEN
+        // ========================================
+        const csrfToken = '{{ csrf_token }}';
+
+        // ========================================
         // VARIÁVEIS GLOBAIS
         // ========================================
         let statsData = {
-            links: 0,
-            alunos: { count: 0, list: [] },
-            notes: 0
+            materias_count: 0,
+            notes_count: 0,
+            alunos_online_count: 0,
+            alunos_online: []
         };
 
         // ========================================
-        // ALERTA CUSTOMIZADO BONITO
+        // FUNÇÃO: PLURALIZAR TEXTOS
+        // ========================================
+        function pluralize(count, singular, plural) {
+            return count === 1 ? singular : plural;
+        }
+
+        // ========================================
+        // FUNÇÃO: BUSCAR ESTATÍSTICAS DO SERVIDOR
+        // ========================================
+        async function fetchStats() {
+            try {
+                const response = await fetch('/study/api/stats/', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                if (data.success) {
+                    updateCards(data);
+                } else {
+                    console.error('❌ Erro na resposta:', data.error);
+                }
+            } catch (error) {
+                console.error('❌ Erro ao buscar estatísticas:', error);
+            }
+        }
+
+        // ========================================
+        // FUNÇÃO: ATUALIZAR CARDS COM DADOS
+        // ========================================
+        function updateCards(data) {
+            // Salvar dados globalmente
+            statsData = data;
+
+            // CARD: MATÉRIAS
+            const materiasCount = data.materias_count || 0;
+            document.getElementById('materias-count').textContent = materiasCount;
+            document.getElementById('materias-label').textContent = 
+                materiasCount === 0 
+                    ? 'Nenhuma matéria cadastrada' 
+                    : pluralize(materiasCount, 'Matéria disponível', 'Matérias disponíveis');
+
+            // CARD: ALUNOS ONLINE
+            const alunosCount = data.alunos_online_count || 0;
+            document.getElementById('alunos-count').textContent = alunosCount;
+            document.getElementById('alunos-label').textContent = 
+                alunosCount === 0 
+                    ? 'Nenhum aluno online' 
+                    : pluralize(alunosCount, 'Estudante online', 'Estudantes online');
+
+            // CARD: NOTES
+            const notesCount = data.notes_count || 0;
+            document.getElementById('notes-count').textContent = notesCount;
+            document.getElementById('notes-label').textContent = 
+                notesCount === 0 
+                    ? 'Nenhum note criado' 
+                    : pluralize(notesCount, 'Note compartilhado', 'Notes compartilhados');
+
+            console.log('✅ Cards atualizados:', {
+                materias: materiasCount,
+                alunos: alunosCount,
+                notes: notesCount
+            });
+        }
+
+        // ========================================
+        // FUNÇÃO: ALERTA CUSTOMIZADO
         // ========================================
         function mostrarAlerta(icone, titulo, mensagem) {
             const overlay = document.getElementById('alert-overlay');
@@ -537,7 +617,6 @@
             overlay.classList.add('show');
             document.body.appendChild(alertDiv);
             
-            // Fechar ao clicar no overlay
             overlay.onclick = fecharAlerta;
         }
 
@@ -555,39 +634,14 @@
         }
 
         // ========================================
-        // BUSCAR ESTATÍSTICAS DO SERVIDOR
+        // FUNÇÃO: ABRIR MATÉRIAS
         // ========================================
-        async function atualizarEstatisticas(mostrarIndicador = false) {
-            try {
-                const response = await fetch('/study/api/stats/');
-                const data = await response.json();
-
-                if (data.success) {
-                    statsData.links = data.links_cadastrados;
-                    statsData.alunos = data.estudantes_online;
-                    statsData.notes = data.notes_compartilhados;
-
-                    // Atualizar UI
-                    document.getElementById('links-count').textContent = statsData.links;
-                    document.getElementById('alunos-count').textContent = statsData.alunos.count;
-                    document.getElementById('notes-count').textContent = statsData.notes;
-
-                    console.log('✅ Estatísticas atualizadas:', statsData);
-                }
-            } catch (error) {
-                console.error('❌ Erro ao buscar estatísticas:', error);
-            }
-        }
-
-        // ========================================
-        // ABRIR LINKS DISPONÍVEIS
-        // ========================================
-        function abrirLinksDisponiveis() {
-            if (statsData.links === 0) {
+        function abrirMaterias() {
+            if (statsData.materias_count === 0) {
                 mostrarAlerta(
                     '📚',
-                    'Nenhum link cadastrado ainda',
-                    'Em breve novos materiais de estudo serão adicionados pela equipe!'
+                    'Nenhuma matéria cadastrada ainda',
+                    'Em breve novas matérias serão adicionadas pela equipe!'
                 );
             } else {
                 window.location.href = '/materias/';
@@ -595,12 +649,12 @@
         }
 
         // ========================================
-        // ABRIR ALUNOS ONLINE
+        // FUNÇÃO: ABRIR ALUNOS ONLINE
         // ========================================
         function abrirAlunosOnline() {
             const content = document.getElementById('alunos-online-content');
 
-            if (statsData.alunos.count === 0) {
+            if (statsData.alunos_online_count === 0) {
                 content.innerHTML = `
                     <div class="empty-message">
                         <span class="emoji">😴</span>
@@ -610,7 +664,7 @@
                 `;
             } else {
                 let html = '';
-                statsData.alunos.alunos.forEach(aluno => {
+                statsData.alunos_online.forEach(aluno => {
                     const lastLogin = new Date(aluno.last_login);
                     const agora = new Date();
                     const minutosAtras = Math.floor((agora - lastLogin) / 60000);
@@ -631,10 +685,10 @@
         }
 
         // ========================================
-        // ABRIR NOTES COMPARTILHADOS
+        // FUNÇÃO: ABRIR NOTES
         // ========================================
-        function abrirNotesCompartilhados() {
-            if (statsData.notes === 0) {
+        function abrirNotes() {
+            if (statsData.notes_count === 0) {
                 mostrarAlerta(
                     '📝',
                     'Nenhum note compartilhado ainda',
@@ -646,14 +700,14 @@
         }
 
         // ========================================
-        // ABRIR SUPORTE
+        // FUNÇÃO: ABRIR SUPORTE
         // ========================================
         function abrirSuporte() {
             document.getElementById('popup-suporte').classList.add('active');
         }
 
         // ========================================
-        // FECHAR POPUP
+        // FUNÇÃO: FECHAR POPUP
         // ========================================
         function fecharPopup(tipo) {
             document.getElementById(`popup-${tipo}`).classList.remove('active');
@@ -688,29 +742,55 @@
             navBtns.forEach(btn => btn.classList.remove('active'));
             
             document.getElementById(sectionId).classList.add('active');
-            event.target.classList.add('active');
+            if (event && event.target) {
+                event.target.classList.add('active');
+            }
         }
 
         // ========================================
-        // INICIALIZAÇÃO E AUTO-ATUALIZAÇÃO
+        // INICIALIZAÇÃO E AUTO-ATUALIZAÇÃO (POLLING)
         // ========================================
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('🚀 Inicializando sistema de estatísticas em tempo real...');
+            console.log('🚀 Inicializando sistema de validação em tempo real...');
 
             // Buscar dados inicial
-            atualizarEstatisticas();
+            fetchStats();
 
-            // Atualizar a cada 30 segundos (silenciosamente)
+            // Atualizar automaticamente a cada 10 segundos (POLLING)
             setInterval(() => {
-                atualizarEstatisticas(false);
-            }, 30000);
+                fetchStats();
+            }, 10000);
 
             // Animação de entrada dos cards
             const cards = document.querySelectorAll('.card');
             cards.forEach((card, index) => {
                 card.style.animationDelay = `${index * 0.1}s`;
             });
+
+            console.log('✅ Sistema de atualização automática ativado (10s)');
         });
+
+        // ========================================
+        // OPCIONAL: PING PARA ATUALIZAR LAST_ACTIVITY
+        // (Descomentar se quiser usar)
+        // ========================================
+        {% if user.is_authenticated %}
+        /*
+        setInterval(async () => {
+            try {
+                await fetch('/study/api/ping/', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrfToken,
+                        'Content-Type': 'application/json'
+                    }
+                });
+            } catch (error) {
+                console.error('Erro no ping:', error);
+            }
+        }, 60000); // A cada 1 minuto
+        */
+        {% endif %}
     </script>
 
     <script src="{% static 'study/js/script.js' %}"></script>
