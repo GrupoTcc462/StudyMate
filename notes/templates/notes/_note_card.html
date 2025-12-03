@@ -7,7 +7,7 @@
                     <strong class="text-primary">{{ note.author.username }}</strong>
                     
                     {% if note.author.user_type == 'professor' or note.author.is_staff %}
-                        <span class="badge badge-professor ms-1">Professor ✔️</span>
+                        <span class="badge badge-professor ms-1">Professor </span>
                     {% endif %}
                     
                     {% if note.is_recommended %}

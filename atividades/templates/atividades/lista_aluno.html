@@ -459,8 +459,8 @@
                     </div>
 
                     <div class="filter-actions">
-                        <button type="submit" class="btn-filter">🔍 Filtrar</button>
-                        <a href="{% url 'atividades:lista' %}" class="btn-clear">❌ Limpar Filtros</a>
+                        <button type="submit" class="btn-filter"> Filtrar</button>
+                        <a href="{% url 'atividades:lista' %}" class="btn-clear"> Limpar Filtros</a>
                     </div>
                 </form>
             </div>
@@ -549,14 +549,14 @@
                         {% csrf_token %}
 
                         <div class="mb-3">
-                            <label for="titulo" class="form-label" style="font-weight: 600;">Título da atividade *</label>
+                            <label for="titulo" class="form-label" style="font-weight: 600;">Título da atividade </label>
                             <input type="text" id="titulo" name="titulo" class="form-control" 
                                    maxlength="50" placeholder="Ex: Trabalho de História" required>
                             <div class="char-counter" id="tituloCount" style="text-align: right; font-size: 0.875rem; color: #6c757d;">0/50</div>
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label" style="font-weight: 600;">Tipo da atividade *</label>
+                            <label class="form-label" style="font-weight: 600;">Tipo da atividade </label>
                             <div style="display: flex; flex-direction: column; gap: 10px;">
                                 <div class="form-check">
                                     <input class="form-check-input" type="radio" name="tipo" value="ATIVIDADE" 
@@ -583,13 +583,13 @@
                         </div>
 
                         <div class="mb-3">
-                            <label for="descricao" class="form-label" style="font-weight: 600;">Descrição / Orientações *</label>
+                            <label for="descricao" class="form-label" style="font-weight: 600;">Descrição / Orientações </label>
                             <textarea id="descricao" name="descricao" class="form-control" rows="4" 
                                       placeholder="Descreva a atividade..." required></textarea>
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label" style="font-weight: 600;">Destinado para *</label>
+                            <label class="form-label" style="font-weight: 600;">Destinado para </label>
                             <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
                                 <div class="form-check">
                                     <input type="checkbox" name="ano_1" id="ano1" class="form-check-input">

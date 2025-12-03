@@ -88,7 +88,6 @@
             color: white;
             font-size: 4rem;
             font-weight: 700;
-            box-shadow: 0 8px 25px rgba(178, 34, 34, 0.4);
             margin-bottom: 20px;
             transition: all 0.3s ease;
             position: relative;
@@ -1480,7 +1479,7 @@ async function abrirPopup(tipo) {
                                     <strong>${note.title}</strong><br>
                                     <small>
                                         Criado em ${note.created_at}<br>
-                                        ❤️ ${note.likes} curtidas | 👁️ ${note.views} views | ⬇️ ${note.downloads} downloads | 💬 ${note.comments_count} comentários
+                                        ❤️ ${note.likes} curtidas | <i class="bi bi-eye"></i> ${note.views} views | ⬇️ ${note.downloads} downloads | 💬 ${note.comments_count} comentários
                                     </small>
                                 </a>
                             </div>
@@ -1509,7 +1508,8 @@ async function abrirPopup(tipo) {
                                     <strong>${item.title}</strong><br>
                                     <small>
                                         📁 ${item.tipo} — ${item.subject}<br>
-                                        ⬇️ ${item.downloads} downloads | ❤️ ${item.likes} curtidas | 👁️ ${item.views} views<br>
+                                        ⬇️ ${item.downloads} downloads | ❤️ ${item.likes} curtidas | <i class="bi bi-eye"></i> ${item.views} views<br>
+
                                         Criado em ${item.created_at}
                                     </small>
                                 </a>
@@ -1550,7 +1550,7 @@ async function abrirPopup(tipo) {
                                         <strong>${rec.title}</strong><br>
                                         <small>
                                             ${rec.subject}<br>
-                                            👁️ ${rec.views} views | ❤️ ${rec.likes} likes | ⬇️ ${rec.downloads} downloads<br>
+                                            <i class="bi bi-eye"></i> ${rec.views} views | ❤️ ${rec.likes} likes | ⬇️ ${rec.downloads} downloads<br>
                                             Recomendado em ${rec.recommended_at}
                                         </small>
                                     </a>

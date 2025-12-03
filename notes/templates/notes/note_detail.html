@@ -212,12 +212,15 @@
         .btn-download {
             background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
             color: white;
+            text-decoration: none;
         }
 
         .btn-download:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+            text-decoration: none;
         }
+        
 
         .btn-recommend {
             background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
@@ -393,7 +396,7 @@
                     <div class="recommendation-banner">
                         <div>
                             <div class="recommendation-text">
-                                ⭐ Recomendado por {{ primary_recommendation.teacher.username }}
+                                 Recomendado por {{ primary_recommendation.teacher.username }}
                             </div>
                             {% if other_recommendations_count > 0 %}
                                 <div class="recommendation-details">
@@ -411,7 +414,7 @@
                     <div class="recommendation-banner auto">
                         <div>
                             <div class="recommendation-text">
-                                ✅ Recomendado automaticamente
+                                 Recomendado automaticamente
                             </div>
                             <div class="recommendation-details">
                                 {% if auto_recommend_reason == 'downloads' %}
@@ -439,7 +442,7 @@
                         {% endif %}
                     </div>
                     <div style="color: #6c757d;">
-                        📅 {{ note.created_at|date:"d/m/Y às H:i" }}
+                         {{ note.created_at|date:"d/m/Y às H:i" }}
                     </div>
                 </div>
             </div>
@@ -454,7 +457,7 @@
             <!-- BADGES -->
             <div class="note-badges">
                 {% if note.subject %}
-                    <span class="badge-subject">📚 {{ note.subject }}</span>
+                    <span class="badge-subject"> {{ note.subject }}</span>
                 {% endif %}
                 <span class="badge-type">{{ note.get_file_type_display }}</span>
             </div>
@@ -463,15 +466,15 @@
             <div class="metrics">
                 <div class="metric-item">
                     <div class="metric-number">{{ note.views }}</div>
-                    <div class="metric-label">👁️ Visualizações</div>
+                    <div class="metric-label"> Visualizações</div>
                 </div>
                 <div class="metric-item">
                     <div class="metric-number" id="likesCount">{{ note.likes }}</div>
-                    <div class="metric-label">❤️ Curtidas</div>
+                    <div class="metric-label"> Curtidas</div>
                 </div>
                 <div class="metric-item">
                     <div class="metric-number">{{ note.downloads }}</div>
-                    <div class="metric-label">⬇️ Downloads</div>
+                    <div class="metric-label"> Downloads</div>
                 </div>
             </div>
 
@@ -479,33 +482,33 @@
             <div class="action-buttons">
                 {% if user.is_authenticated %}
                     <button class="btn-action btn-like {% if user_liked %}liked{% endif %}" id="likeBtn" onclick="toggleLike()">
-                        <span id="likeIcon">{% if user_liked %}❤️{% else %}🤍{% endif %}</span>
+                        <span id="likeIcon">{% if user_liked %}{% else %}{% endif %}</span>
                         <span id="likeText">{% if user_liked %}Descurtir{% else %}Curtir{% endif %}</span>
                     </button>
 
                     {% if note.file %}
                         <a href="{% url 'notes:download' note.pk %}" class="btn-action btn-download">
-                            ⬇️ Baixar Arquivo
+                             Baixar Arquivo
                         </a>
                     {% elif note.link %}
                         <a href="{{ note.link }}" target="_blank" class="btn-action btn-download">
-                            🔗 Acessar Link
+                             Acessar Link
                         </a>
                     {% endif %}
 
                     {% if can_recommend %}
                         <button class="btn-action btn-recommend {% if user_has_recommended %}active{% endif %}" 
                                 id="recommendBtn" onclick="toggleRecommend()">
-                            <span id="recommendIcon">{% if user_has_recommended %}✅{% else %}⭐{% endif %}</span>
+                            <span id="recommendIcon">{% if user_has_recommended %}✅{% else %}{% endif %}</span>
                             <span id="recommendText">{% if user_has_recommended %}Remover Recomendação{% else %}Recomendar{% endif %}</span>
                         </button>
                     {% endif %}
                 {% else %}
                     <button class="btn-action btn-like" data-bs-toggle="modal" data-bs-target="#loginRequiredModal">
-                        🤍 Curtir
+                         Curtir
                     </button>
                     <button class="btn-action btn-download" data-bs-toggle="modal" data-bs-target="#loginRequiredModal">
-                        ⬇️ Baixar
+                        ⬇ Baixar
                     </button>
                 {% endif %}
             </div>
@@ -584,7 +587,7 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header" style="background: #17a2b8 !important;">
-                    <h5 class="modal-title">⭐ Professores que Recomendaram</h5>
+                    <h5 class="modal-title"> Professores que Recomendaram</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
@@ -657,11 +660,11 @@
 
                     if (data.liked) {
                         likeBtn.classList.add('liked');
-                        likeIcon.textContent = '❤️';
+                        likeIcon.textContent = '';
                         likeText.textContent = 'Descurtir';
                     } else {
                         likeBtn.classList.remove('liked');
-                        likeIcon.textContent = '🤍';
+                        likeIcon.textContent = '';
                         likeText.textContent = 'Curtir';
                     }
                 }
@@ -694,7 +697,7 @@
                         recommendText.textContent = 'Remover Recomendação';
                     } else {
                         recommendBtn.classList.remove('active');
-                        recommendIcon.textContent = '⭐';
+                        recommendIcon.textContent = '';
                         recommendText.textContent = 'Recomendar';
                     }
 

@@ -348,24 +348,24 @@
 
             <div class="info-section">
                 <div class="info-item">
-                    <span class="info-label">📚 Destinado para:</span>
+                    <span class="info-label"> Destinado para:</span>
                     <span class="info-value">{{ atividade.get_anos_destino_display }}</span>
                 </div>
                 
                 {% if atividade.prazo_entrega %}
                     <div class="info-item">
-                        <span class="info-label">📅 Prazo de Entrega:</span>
+                        <span class="info-label"> Prazo de Entrega:</span>
                         <span class="info-value">{{ atividade.prazo_entrega|date:"d/m/Y" }} até {{ atividade.prazo_entrega|date:"H:i" }}</span>
                     </div>
                 {% endif %}
                 
                 <div class="info-item">
-                    <span class="info-label">📆 Criado em:</span>
+                    <span class="info-label"> Criado em:</span>
                     <span class="info-value">{{ atividade.criado_em|date:"d/m/Y" }} às {{ atividade.criado_em|date:"H:i" }}</span>
                 </div>
                 
                 <div class="info-item">
-                    <span class="info-label">👁️ Visualizações:</span>
+                    <span class="info-label"> Visualizações:</span>
                     <span class="info-value">{{ atividade.visualizacoes }}</span>
                 </div>
             </div>
@@ -379,7 +379,7 @@
             <div class="action-buttons">
                 {% if atividade.anexo %}
                     <a href="{% url 'atividades:baixar_anexo' atividade.pk %}" class="btn-action btn-download">
-                        ⬇️ Baixar Anexo
+                         Baixar Anexo
                     </a>
                 {% endif %}
                 
@@ -387,19 +387,19 @@
                     <a target="_blank"
                        href="https://calendar.google.com/calendar/render?action=TEMPLATE&text={{ atividade.titulo|urlencode }}&details={{ atividade.descricao|default:'Atividade acadêmica'|urlencode }}&dates={{ atividade.prazo_entrega|date:'Ymd' }}T{{ atividade.prazo_entrega|date:'His' }}Z/{{ atividade.prazo_entrega|date:'Ymd' }}T{{ atividade.prazo_entrega|date:'His' }}Z&location=ETEC João Maria Stevanatto"
                        class="btn-action btn-agendar">
-                        📅 Agendar no Google Calendar
+                         Agendar no Google Calendar
                     </a>
                 {% endif %}
                 
                 {% if atividade.permite_envio and not atividade.esta_encerrada and not envio %}
                     <button type="button" class="btn-action btn-enviar" data-bs-toggle="modal" data-bs-target="#enviarModal">
-                        📤 Enviar Atividade
+                         Enviar Atividade
                     </button>
                 {% endif %}
                 
                 <button class="btn-action btn-salvar {% if salvou %}salva{% endif %}" 
                         id="btnSalvar" onclick="toggleSalvar()">
-                    {% if salvou %}★ Salva{% else %}☆ Salvar{% endif %}
+                    {% if salvou %}★ Salva{% else %} Salvar{% endif %}
                 </button>
             </div>
 
@@ -443,7 +443,7 @@
                         </div>
 
                         <div class="alert alert-info mt-3">
-                            ℹ️ Após enviar, você não poderá alterar o arquivo.
+                             Após enviar, você não poderá alterar o arquivo.
                         </div>
                     </form>
                 </div>
@@ -480,11 +480,11 @@
                     
                     if (data.action === 'saved') {
                         btn.classList.add('salva');
-                        btn.textContent = '★ Salva';
+                        btn.textContent = ' Salva';
                         showToast('Atividade salva!');
                     } else {
                         btn.classList.remove('salva');
-                        btn.textContent = '☆ Salvar';
+                        btn.textContent = ' Salvar';
                         showToast('Removida dos salvos');
                     }
                 }

@@ -6,6 +6,7 @@
     <title>Notes - StudyMate</title>
     {% load static %}
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <style>
         :root {
             --primary: rgb(178, 34, 34);
@@ -457,7 +458,7 @@
                     <div class="filter-row">
                         <!-- 🔥 FILTRO DE MATÉRIA CORRIGIDO: ENVIA ID -->
                         <div class="filter-box">
-                            <label>📚 Matéria</label>
+                            <label> Matéria</label>
                             <select name="subject" id="subjectFilter" class="filter-field">
                                 <option value="">Todas as matérias</option>
                                 {% for m in materias %}
@@ -469,7 +470,7 @@
                         </div>
 
                         <div class="filter-box">
-                            <label>📄 Tipo de Conteúdo</label>
+                            <label> Tipo de Conteúdo</label>
                             <select name="file_type" id="typeFilter" class="filter-field">
                                 <option value="">Todos os tipos</option>
                                 {% for code, name in file_types %}
@@ -481,7 +482,7 @@
                         </div>
 
                         <div class="filter-box">
-                            <label>🔀 Ordenar por</label>
+                            <label> Ordenar por</label>
                             <select name="order" id="orderFilter" class="filter-field">
                                 <option value="recent" {% if current_order == 'recent' %}selected{% endif %}>Mais Recentes</option>
                                 <option value="likes" {% if current_order == 'likes' %}selected{% endif %}>Mais Curtidos</option>
@@ -491,7 +492,7 @@
                         </div>
 
                         <div class="filter-box">
-                            <label>⭐ Recomendados</label>
+                            <label> Recomendados</label>
                             <select name="recommended" id="recommendedFilter" class="filter-field">
                                 <option value="">Todos</option>
                                 <option value="true" {% if request.GET.recommended == 'true' %}selected{% endif %}>Apenas Recomendados</option>
@@ -562,7 +563,7 @@
                         {% endif %}
 
                         <div class="note-metrics">
-                            <span title="Visualizações">👁️ {{ note.views }}</span>
+                            <small title="Visualizações"><i class="bi bi-eye"></i> {{ note.views }}</small>
                             <span title="Curtidas">❤️ {{ note.likes }}</span>
                             <span title="Downloads">⬇️ {{ note.downloads }}</span>
                         </div>

@@ -6,6 +6,7 @@
     <title>Horários - StudyMate</title>
     {% load static %}
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <style>
         :root {
             --primary: rgb(178, 34, 34);
@@ -255,17 +256,22 @@
     </div>
 
     <div class="container">
-        <!-- MENSAGENS -->
+        <!-- MENSAGENS - FILTRADAS APENAS PARA HORÁRIOS -->
         {% if messages %}
             {% for message in messages %}
-                <div class="alert-custom {% if message.tags == 'success' %}alert-success{% else %}alert-error{% endif %}">
-                    {{ message }}
-                </div>
+                {% if 'Horário' in message.message or 'horário' in message.message or 'arquivo' in message.message %}
+                    <div class="alert-custom {% if message.tags == 'success' %}alert-success{% else %}alert-error{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endif %}
             {% endfor %}
         {% endif %}
 
         <div class="content-card">
-            <h1 class="page-title">📅 Horários</h1>
+            <!-- TÍTULO CONDICIONAL: Apenas "Horário Atual" para alunos -->
+            {% if is_professor_or_admin %}
+                <h1 class="page-title">📅 Horários</h1>
+            {% endif %}
 
             <!-- SEÇÃO DE IMPORTAÇÃO (APENAS PROFESSOR/ADMIN) -->
             {% if is_professor_or_admin %}
@@ -296,7 +302,12 @@
             <!-- EXIBIÇÃO DO HORÁRIO ATIVO -->
             {% if horario_ativo %}
                 <div class="horario-display">
-                    <h3 style="margin-bottom: 20px;">📋 Horário Atual</h3>
+                    <!-- Título apenas para alunos -->
+                    {% if not is_professor_or_admin %}
+                        <h1 class="page-title" style="margin-bottom: 30px;">📋 Horário Atual</h1>
+                    {% else %}
+                        <h3 style="margin-bottom: 20px;">📋 Horário Atual</h3>
+                    {% endif %}
 
                     {% if horario_ativo.tipo == 'IMAGEM' %}
                         <img src="{{ horario_ativo.arquivo.url }}" alt="Horário">

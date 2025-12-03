@@ -69,7 +69,6 @@ def login_view(request):
 # ========================================
 def logout_view(request):
     logout(request)
-    messages.info(request, 'Você saiu da sua conta.')
     return redirect('accounts:login')
 
 
