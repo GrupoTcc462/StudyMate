@@ -5,12 +5,323 @@
     {% load static %}
     <link rel="stylesheet" href="{% static 'study/style.css' %}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.4.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* ESTILOS DOS CARDS CLICÁVEIS */
+        .stat-card {
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .stat-card:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .stat-card:active {
+            transform: scale(0.95);
+        }
+
+        /* LOADING STATE */
+        .stat-card.loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .stat-card.loading .stat-number::after {
+            content: '...';
+            animation: dots 1.5s infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+
+        /* POPUP OVERLAY */
+        .popup-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 9999;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .popup-overlay.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .popup-content {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.3s ease;
+            position: relative;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .popup-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .popup-header h3 {
+            color: var(--primary);
+            margin: 0;
+            font-size: 1.8rem;
+        }
+
+        .popup-close {
+            background: #f8f9fa;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .popup-close:hover {
+            background: #dc3545;
+            color: white;
+            transform: rotate(90deg);
+        }
+
+        /* LISTA DE ALUNOS ONLINE */
+        .aluno-item {
+            background: #f8f9fa;
+            border-left: 4px solid var(--primary);
+            padding: 15px 20px;
+            margin-bottom: 12px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .aluno-item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+
+        .aluno-nome {
+            font-weight: 600;
+            color: #2c2c2c;
+            font-size: 1.1rem;
+        }
+
+        .aluno-status {
+            background: #28a745;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .aluno-status::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: white;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* MENSAGEM VAZIA */
+        .empty-message {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .empty-message .emoji {
+            font-size: 5rem;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .empty-message h4 {
+            color: #6c757d;
+            margin-bottom: 10px;
+        }
+
+        .empty-message p {
+            color: #adb5bd;
+            font-size: 1rem;
+        }
+
+        /* CONTATO SUPORTE */
+        .contato-item {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .contato-item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+
+        .contato-icon {
+            width: 50px;
+            height: 50px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .contato-info {
+            flex: 1;
+        }
+
+        .contato-label {
+            font-weight: 600;
+            color: #2c2c2c;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+
+        .contato-value {
+            color: #6c757d;
+            font-size: 1rem;
+        }
+
+        .contato-value a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .contato-value a:hover {
+            text-decoration: underline;
+        }
+
+        /* ALERTAS PERSONALIZADOS */
+        .custom-alert {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border-radius: 20px;
+            padding: 40px 50px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            z-index: 10000;
+            text-align: center;
+            max-width: 500px;
+            animation: alertPop 0.3s ease;
+        }
+
+        @keyframes alertPop {
+            0% { transform: translate(-50%, -50%) scale(0.7); opacity: 0; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+
+        .custom-alert .alert-icon {
+            font-size: 5rem;
+            margin-bottom: 20px;
+        }
+
+        .custom-alert h4 {
+            color: #2c2c2c;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+
+        .custom-alert p {
+            color: #6c757d;
+            margin-bottom: 25px;
+            font-size: 1.1rem;
+        }
+
+        .custom-alert button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .custom-alert button:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .alert-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 9999;
+            display: none;
+        }
+
+        .alert-overlay.show {
+            display: block;
+        }
+    </style>
 </head>
 <body>
-   
-     <!-- ========================================
-         MENSAGENS DE TOAST (BOAS-VINDAS)
-    ======================================== -->
+    <!-- MENSAGENS DE TOAST (BOAS-VINDAS) -->
     {% if messages %}
         <div id="toast-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>
         <script>
@@ -58,13 +369,9 @@
             <img src="{% static 'study/img/logoStudyMate.png' %}" height="144px" width="293">
             <p>Portal do Estudante - Sua plataforma de estudos</p>
             
-            <!-- SUBSTITUIR A NAVBAR COMPLETA NO home.html POR ESTA: -->
-
             <div class="nav">
                 <button class="nav-btn active" onclick="showSection('home')">🏠 Home</button>
                 <a href="{% url 'materias:home' %}" class="nav-btn">📚 Matérias</a>
-                
-                <!-- CHAT CORRIGIDO - AGORA VAI PARA LISTA DE ATIVIDADES -->
                 <a href="{% url 'chat:lista' %}" class="nav-btn">💬 Chat</a>
                 <a href="{% url 'notes:list' %}" class="nav-btn">📝 Notes</a>
                 <a href="{% url 'horarios:home' %}" class="nav-btn">🕐 Horários</a>
@@ -74,7 +381,6 @@
                 {% else %}
                     <a href="{% url 'accounts:login' %}" class="nav-btn">🔐 Login</a>
                 {% endif %}
-                
             </div>
         </div>
 
@@ -83,20 +389,24 @@
             <div id="home" class="section active">
                 <h2>Bem-vindo ao Portal do Estudante! 🎓</h2>
                 
+                <!-- CARDS COM VALIDAÇÃO EM TEMPO REAL -->
                 <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-number">15</div>
-                        <div>Matérias Disponíveis</div>
+                    <div class="stat-card" onclick="abrirLinksDisponiveis()" id="card-links">
+                        <div class="stat-number" id="links-count">0</div>
+                        <div>Links Disponíveis</div>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-number">247</div>
+                    
+                    <div class="stat-card" onclick="abrirAlunosOnline()" id="card-alunos">
+                        <div class="stat-number" id="alunos-count">0</div>
                         <div>Estudantes Online</div>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-number">89</div>
-                        <div>Notes Compartilhadas</div>
+                    
+                    <div class="stat-card" onclick="abrirNotesCompartilhados()" id="card-notes">
+                        <div class="stat-number" id="notes-count">0</div>
+                        <div>Notes Compartilhados</div>
                     </div>
-                    <div class="stat-card">
+                    
+                    <div class="stat-card" onclick="abrirSuporte()" id="card-suporte">
                         <div class="stat-number">24/7</div>
                         <div>Suporte Disponível</div>
                     </div>
@@ -132,79 +442,6 @@
                     </div>
                 </div>
             </div>
-
-
-            <!-- HORÁRIOS SECTION -->
-            <div id="horarios" class="section">
-                <h2>🕐 Horários das Aulas</h2>
-                
-                <div class="class-selector">
-                    <label for="scheduleClass">Selecione a turma:</label>
-                    <select id="scheduleClass" onchange="changeSchedule()">
-                        <option value="1info">1º C - Integral</option>
-                        <option value="2info">2º C - Integral</option>
-                        <option value="3info">3º C - Integral</option>
-                        <option value="1adm">1º A - Manhã</option>
-                        <option value="2adm">2º A - Manhã</option>
-                        <option value="3adm">3º A - Manhã</option>
-                    </select>
-                </div>
-
-                <table class="schedule-table">
-                    <thead>
-                        <tr>
-                            <th>Horário</th>
-                            <th>Segunda</th>
-                            <th>Terça</th>
-                            <th>Quarta</th>
-                            <th>Quinta</th>
-                            <th>Sexta</th>
-                        </tr>
-                    </thead>
-                    <tbody id="scheduleBody">
-                        <tr>
-                            <td>07:30 - 08:20</td>
-                            <td>Matemática</td>
-                            <td>Português</td>
-                            <td>Programação</td>
-                            <td>Física</td>
-                            <td>BD</td>
-                        </tr>
-                        <tr>
-                            <td>08:20 - 09:10</td>
-                            <td>Matemática</td>
-                            <td>Português</td>
-                            <td>Programação</td>
-                            <td>Física</td>
-                            <td>BD</td>
-                        </tr>
-                        <tr>
-                            <td>09:30 - 10:20</td>
-                            <td>História</td>
-                            <td>Inglês</td>
-                            <td>Redes</td>
-                            <td>Química</td>
-                            <td>Programação</td>
-                        </tr>
-                        <tr>
-                            <td>10:20 - 11:10</td>
-                            <td>História</td>
-                            <td>Inglês</td>
-                            <td>Redes</td>
-                            <td>Química</td>
-                            <td>Programação</td>
-                        </tr>
-                        <tr>
-                            <td>11:10 - 12:00</td>
-                            <td>Geografia</td>
-                            <td>Ed. Física</td>
-                            <td>Sistemas Op.</td>
-                            <td>Biologia</td>
-                            <td>TCC</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
         </div>
 
         <footer>
@@ -215,8 +452,234 @@
         </footer>
     </div>
 
+    <!-- OVERLAY PARA ALERTAS CUSTOMIZADOS -->
+    <div class="alert-overlay" id="alert-overlay"></div>
+
+    <!-- POPUP: ALUNOS ONLINE -->
+    <div class="popup-overlay" id="popup-alunos-online">
+        <div class="popup-content">
+            <div class="popup-header">
+                <h3>👥 Estudantes Online</h3>
+                <button class="popup-close" onclick="fecharPopup('alunos-online')">✕</button>
+            </div>
+            <div id="alunos-online-content"></div>
+        </div>
+    </div>
+
+    <!-- POPUP: SUPORTE -->
+    <div class="popup-overlay" id="popup-suporte">
+        <div class="popup-content">
+            <div class="popup-header">
+                <h3>💬 Fale Conosco</h3>
+                <button class="popup-close" onclick="fecharPopup('suporte')">✕</button>
+            </div>
+            <div>
+                <div class="contato-item">
+                    <div class="contato-icon">📧</div>
+                    <div class="contato-info">
+                        <div class="contato-label">E-mail Institucional</div>
+                        <div class="contato-value">
+                            <a href="mailto:e218.sec@etec.sp.gov.br">e218.sec@etec.sp.gov.br</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="contato-item">
+                    <div class="contato-icon">📞</div>
+                    <div class="contato-info">
+                        <div class="contato-label">Telefone</div>
+                        <div class="contato-value">
+                            <a href="tel:+551938431171">(19) 3843-1171</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="contato-item">
+                    <div class="contato-icon">🌐</div>
+                    <div class="contato-info">
+                        <div class="contato-label">Portal Fale Conosco</div>
+                        <div class="contato-value">
+                            <a href="https://www.etecitapira.com.br/institucional/fale-conosco/" target="_blank">
+                                Acessar Portal
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // Navegação entre seções
+        // ========================================
+        // VARIÁVEIS GLOBAIS
+        // ========================================
+        let statsData = {
+            links: 0,
+            alunos: { count: 0, list: [] },
+            notes: 0
+        };
+
+        // ========================================
+        // ALERTA CUSTOMIZADO BONITO
+        // ========================================
+        function mostrarAlerta(icone, titulo, mensagem) {
+            const overlay = document.getElementById('alert-overlay');
+            
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'custom-alert';
+            alertDiv.innerHTML = `
+                <div class="alert-icon">${icone}</div>
+                <h4>${titulo}</h4>
+                <p>${mensagem}</p>
+                <button onclick="fecharAlerta()">Entendi</button>
+            `;
+            
+            overlay.classList.add('show');
+            document.body.appendChild(alertDiv);
+            
+            // Fechar ao clicar no overlay
+            overlay.onclick = fecharAlerta;
+        }
+
+        function fecharAlerta() {
+            const overlay = document.getElementById('alert-overlay');
+            const alert = document.querySelector('.custom-alert');
+            
+            if (alert) {
+                alert.style.animation = 'alertPop 0.3s ease reverse';
+                setTimeout(() => {
+                    alert.remove();
+                    overlay.classList.remove('show');
+                }, 300);
+            }
+        }
+
+        // ========================================
+        // BUSCAR ESTATÍSTICAS DO SERVIDOR
+        // ========================================
+        async function atualizarEstatisticas(mostrarIndicador = false) {
+            try {
+                const response = await fetch('/study/api/stats/');
+                const data = await response.json();
+
+                if (data.success) {
+                    statsData.links = data.links_cadastrados;
+                    statsData.alunos = data.estudantes_online;
+                    statsData.notes = data.notes_compartilhados;
+
+                    // Atualizar UI
+                    document.getElementById('links-count').textContent = statsData.links;
+                    document.getElementById('alunos-count').textContent = statsData.alunos.count;
+                    document.getElementById('notes-count').textContent = statsData.notes;
+
+                    console.log('✅ Estatísticas atualizadas:', statsData);
+                }
+            } catch (error) {
+                console.error('❌ Erro ao buscar estatísticas:', error);
+            }
+        }
+
+        // ========================================
+        // ABRIR LINKS DISPONÍVEIS
+        // ========================================
+        function abrirLinksDisponiveis() {
+            if (statsData.links === 0) {
+                mostrarAlerta(
+                    '📚',
+                    'Nenhum link cadastrado ainda',
+                    'Em breve novos materiais de estudo serão adicionados pela equipe!'
+                );
+            } else {
+                window.location.href = '/materias/';
+            }
+        }
+
+        // ========================================
+        // ABRIR ALUNOS ONLINE
+        // ========================================
+        function abrirAlunosOnline() {
+            const content = document.getElementById('alunos-online-content');
+
+            if (statsData.alunos.count === 0) {
+                content.innerHTML = `
+                    <div class="empty-message">
+                        <span class="emoji">😴</span>
+                        <h4>Nenhum aluno online no momento</h4>
+                        <p>Parece que todos estão descansando ou estudando offline!</p>
+                    </div>
+                `;
+            } else {
+                let html = '';
+                statsData.alunos.alunos.forEach(aluno => {
+                    const lastLogin = new Date(aluno.last_login);
+                    const agora = new Date();
+                    const minutosAtras = Math.floor((agora - lastLogin) / 60000);
+
+                    let tempoTexto = minutosAtras === 0 ? 'Agora' : `${minutosAtras} min atrás`;
+
+                    html += `
+                        <div class="aluno-item">
+                            <div class="aluno-nome">${aluno.username}</div>
+                            <div class="aluno-status">🟢 Online - ${tempoTexto}</div>
+                        </div>
+                    `;
+                });
+                content.innerHTML = html;
+            }
+
+            document.getElementById('popup-alunos-online').classList.add('active');
+        }
+
+        // ========================================
+        // ABRIR NOTES COMPARTILHADOS
+        // ========================================
+        function abrirNotesCompartilhados() {
+            if (statsData.notes === 0) {
+                mostrarAlerta(
+                    '📝',
+                    'Nenhum note compartilhado ainda',
+                    'Seja o primeiro a criar e compartilhar um note com a comunidade!'
+                );
+            } else {
+                window.location.href = '/notes/';
+            }
+        }
+
+        // ========================================
+        // ABRIR SUPORTE
+        // ========================================
+        function abrirSuporte() {
+            document.getElementById('popup-suporte').classList.add('active');
+        }
+
+        // ========================================
+        // FECHAR POPUP
+        // ========================================
+        function fecharPopup(tipo) {
+            document.getElementById(`popup-${tipo}`).classList.remove('active');
+        }
+
+        // Fechar ao clicar fora
+        document.querySelectorAll('.popup-overlay').forEach(overlay => {
+            overlay.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.classList.remove('active');
+                }
+            });
+        });
+
+        // Fechar com ESC
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.popup-overlay.active').forEach(overlay => {
+                    overlay.classList.remove('active');
+                });
+            }
+        });
+
+        // ========================================
+        // NAVEGAÇÃO ENTRE SEÇÕES
+        // ========================================
         function showSection(sectionId) {
             const sections = document.querySelectorAll('.section');
             sections.forEach(section => section.classList.remove('active'));
@@ -228,74 +691,21 @@
             event.target.classList.add('active');
         }
 
-        function openSubject(subject) {
-            alert(`Abrindo conteúdo de ${subject}. Em breve, materiais completos estarão disponíveis!`);
-        }
-
-        function changeSchedule() {
-            const selectedClass = document.getElementById('scheduleClass').value;
-            const scheduleBody = document.getElementById('scheduleBody');
-            
-            const schedules = {
-                '1info': [
-                    ['07:30 - 08:20', 'Matemática', 'Português', 'Algoritmos', 'Física', 'Inglês'],
-                    ['08:20 - 09:10', 'Matemática', 'Português', 'Algoritmos', 'Física', 'Inglês'],
-                    ['09:30 - 10:20', 'História', 'Química', 'Hardware', 'Geografia', 'Ed. Física'],
-                    ['10:20 - 11:10', 'História', 'Química', 'Hardware', 'Geografia', 'Ed. Física'],
-                    ['11:10 - 12:00', 'Biologia', 'Sociologia', 'Informática', 'Filosofia', 'Arte']
-                ],
-                '2info': [
-                    ['07:30 - 08:20', 'Programação', 'Matemática', 'BD', 'Redes', 'Português'],
-                    ['08:20 - 09:10', 'Programação', 'Matemática', 'BD', 'Redes', 'Português'],
-                    ['09:30 - 10:20', 'Sistemas Op.', 'Física', 'Web Design', 'História', 'Inglês'],
-                    ['10:20 - 11:10', 'Sistemas Op.', 'Física', 'Web Design', 'História', 'Inglês'],
-                    ['11:10 - 12:00', 'Geografia', 'Química', 'Projeto', 'Ed. Física', 'Filosofia']
-                ],
-                '3info': [
-                    ['07:30 - 08:20', 'TCC', 'Programação', 'BD Avançado', 'Gestão', 'Português'],
-                    ['08:20 - 09:10', 'TCC', 'Programação', 'BD Avançado', 'Gestão', 'Português'],
-                    ['09:30 - 10:20', 'Redes Av.', 'Matemática', 'Seg. Info', 'Empreend.', 'Inglês'],
-                    ['10:20 - 11:10', 'Redes Av.', 'Matemática', 'Seg. Info', 'Empreend.', 'Inglês'],
-                    ['11:10 - 12:00', 'Estágio', 'Física', 'Projeto', 'Ética', 'Ed. Física']
-                ],
-                '1adm': [
-                    ['07:30 - 08:20', 'Administração', 'Português', 'Matemática', 'História', 'Inglês'],
-                    ['08:20 - 09:10', 'Administração', 'Português', 'Matemática', 'História', 'Inglês'],
-                    ['09:30 - 10:20', 'Economia', 'Geografia', 'Física', 'Química', 'Ed. Física'],
-                    ['10:20 - 11:10', 'Economia', 'Geografia', 'Física', 'Química', 'Ed. Física'],
-                    ['11:10 - 12:00', 'Sociologia', 'Filosofia', 'Biologia', 'Arte', 'Informática']
-                ],
-                '2adm': [
-                    ['07:30 - 08:20', 'Marketing', 'Matemática', 'RH', 'Contabilidade', 'Português'],
-                    ['08:20 - 09:10', 'Marketing', 'Matemática', 'RH', 'Contabilidade', 'Português'],
-                    ['09:30 - 10:20', 'Direito', 'História', 'Geografia', 'Física', 'Inglês'],
-                    ['10:20 - 11:10', 'Direito', 'História', 'Geografia', 'Física', 'Inglês'],
-                    ['11:10 - 12:00', 'Projeto', 'Química', 'Filosofia', 'Ed. Física', 'Informática']
-                ],
-                '3adm': [
-                    ['07:30 - 08:20', 'TCC', 'Empreend.', 'Gestão', 'Estatística', 'Português'],
-                    ['08:20 - 09:10', 'TCC', 'Empreend.', 'Gestão', 'Estatística', 'Português'],
-                    ['09:30 - 10:20', 'Estágio', 'Finanças', 'Direito Emp.', 'Economia', 'Inglês'],
-                    ['10:20 - 11:10', 'Estágio', 'Finanças', 'Direito Emp.', 'Economia', 'Inglês'],
-                    ['11:10 - 12:00', 'Ética', 'Liderança', 'Projeto', 'Ed. Física', 'Filosofia']
-                ]
-            };
-            
-            const currentSchedule = schedules[selectedClass] || schedules['1info'];
-            
-            scheduleBody.innerHTML = '';
-            currentSchedule.forEach(row => {
-                const tr = document.createElement('tr');
-                row.forEach(cell => {
-                    const td = document.createElement('td');
-                    td.textContent = cell;
-                    tr.appendChild(td);
-                });
-                scheduleBody.appendChild(tr);
-            });
-        }
-
+        // ========================================
+        // INICIALIZAÇÃO E AUTO-ATUALIZAÇÃO
+        // ========================================
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Inicializando sistema de estatísticas em tempo real...');
+
+            // Buscar dados inicial
+            atualizarEstatisticas();
+
+            // Atualizar a cada 30 segundos (silenciosamente)
+            setInterval(() => {
+                atualizarEstatisticas(false);
+            }, 30000);
+
+            // Animação de entrada dos cards
             const cards = document.querySelectorAll('.card');
             cards.forEach((card, index) => {
                 card.style.animationDelay = `${index * 0.1}s`;
