@@ -216,34 +216,54 @@
             justify-content: space-between;
             align-items: flex-start;
             margin-bottom: 12px;
+            gap: 10px;
+        }
+
+        .note-author-badges {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            flex: 1;
+            min-width: 0;
         }
 
         .note-author {
             font-weight: 600;
             color: var(--primary);
+            word-break: break-word;
+        }
+
+        .badges-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .badge-professor,
+        .badge-recommended {
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            white-space: nowrap;
+            display: inline-block;
         }
 
         .badge-professor {
             background: var(--primary);
             color: white;
-            padding: 3px 10px;
-            border-radius: 12px;
-            font-size: 0.75rem;
-            font-weight: 600;
         }
 
         .badge-recommended {
             background: #17a2b8;
             color: white;
-            padding: 3px 10px;
-            border-radius: 12px;
-            font-size: 0.75rem;
-            font-weight: 600;
         }
 
         .note-date {
             font-size: 0.85rem;
             color: #6c757d;
+            white-space: nowrap;
+            flex-shrink: 0;
         }
 
         .note-title {
@@ -256,6 +276,7 @@
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
+            word-break: break-word;
         }
 
         .note-description {
@@ -325,7 +346,7 @@
             color: white;
         }
 
-        /* 🔥 ESTILOS DO MODAL */
+        /* ESTILOS DO MODAL */
         .modal-content {
             border-radius: 15px;
             border: none;
@@ -357,22 +378,42 @@
             box-shadow: 0 0 0 0.2rem rgba(178, 34, 34, 0.1);
         }
 
-        /* 🔥 VALIDAÇÃO VISUAL */
+        /* VALIDAÇÃO VISUAL APRIMORADA */
         .form-control.is-invalid,
         .form-select.is-invalid {
             border-color: #dc3545;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right calc(0.375em + 0.1875rem) center;
+            background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+            padding-right: calc(1.5em + 0.75rem);
         }
 
         .form-control.is-valid,
         .form-select.is-valid {
             border-color: #28a745;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%2328a745' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right calc(0.375em + 0.1875rem) center;
+            background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+            padding-right: calc(1.5em + 0.75rem);
         }
 
         .invalid-feedback,
         .valid-feedback {
-            display: block;
-            font-size: 0.875rem;
+            display: none;
             margin-top: 5px;
+            font-size: 0.875rem;
+        }
+
+        .form-control.is-invalid ~ .invalid-feedback,
+        .form-select.is-invalid ~ .invalid-feedback {
+            display: block;
+        }
+
+        .form-control.is-valid ~ .valid-feedback,
+        .form-select.is-valid ~ .valid-feedback {
+            display: block;
         }
 
         .char-counter {
@@ -387,44 +428,42 @@
             font-weight: 600;
         }
 
-        /* 🔥 ALERTA DE LINK NÃO SEGURO */
-        .link-warning {
-            background: #fff3cd;
-            border-left: 4px solid #ffc107;
+        /* ALERTAS DE LINK */
+        .link-warning,
+        .link-error,
+        .link-success {
             padding: 12px;
             border-radius: 8px;
             margin-top: 10px;
             display: none;
         }
 
-        .link-warning.show {
-            display: block;
+        .link-warning {
+            background: #ffe6e6;  /* Vermelho bem claro */
+            border-left: 4px solid #ff6b6b;  /* Vermelho suave */
+            color: #c92a2a;  /* Texto vermelho escuro para contraste */
+        }
+
+        .link-warning strong {
+            color: #c92a2a;  /* Título em vermelho escuro */
         }
 
         .link-error {
             background: #f8d7da;
             border-left: 4px solid #dc3545;
-            padding: 12px;
-            border-radius: 8px;
-            margin-top: 10px;
-            display: none;
-        }
-
-        .link-error.show {
-            display: block;
         }
 
         .link-success {
             background: #d4edda;
             border-left: 4px solid #28a745;
-            padding: 12px;
-            border-radius: 8px;
-            margin-top: 10px;
-            display: none;
         }
 
+        .link-warning.show,
+        .link-error.show,
         .link-success.show {
             display: block;
+            color: #ff6b6b;  /* Texto vermelho escuro para contraste */
+
         }
 
         @media (max-width: 768px) {
@@ -451,6 +490,14 @@
 
             .btn-filter, .btn-clear {
                 width: 100%;
+            }
+
+            .note-header {
+                flex-direction: column;
+            }
+
+            .note-date {
+                align-self: flex-start;
             }
         }
 
@@ -561,14 +608,16 @@
                 {% for note in page_obj %}
                     <div class="note-card">
                         <div class="note-header">
-                            <div>
+                            <div class="note-author-badges">
                                 <span class="note-author">{{ note.author.username }}</span>
-                                {% if note.author.user_type == 'professor' or note.author.is_staff %}
-                                    <span class="badge-professor">👨‍🏫 Professor</span>
-                                {% endif %}
-                                {% if note.is_recommended %}
-                                    <span class="badge-recommended">⭐ Recomendado</span>
-                                {% endif %}
+                                <div class="badges-row">
+                                    {% if note.author.user_type == 'professor' or note.author.is_staff %}
+                                        <span class="badge-professor">👨‍🏫 Professor</span>
+                                    {% endif %}
+                                    {% if note.is_recommended %}
+                                        <span class="badge-recommended">⭐ Recomendado</span>
+                                    {% endif %}
+                                </div>
                             </div>
                             <span class="note-date">{{ note.created_at|date:"d/m/Y" }}</span>
                         </div>
@@ -677,7 +726,7 @@
         </footer>
     </div>
 
-    <!-- 🔥 MODAL CRIAR NOTE COM VALIDAÇÕES -->
+    <!-- MODAL CRIAR NOTE COM VALIDAÇÕES EM TEMPO REAL -->
     {% if user.is_authenticated %}
     <div class="modal fade" id="createNoteModal" tabindex="-1">
         <div class="modal-dialog modal-lg">
@@ -690,17 +739,17 @@
                     <form id="createNoteForm" method="POST" action="{% url 'notes:create' %}" enctype="multipart/form-data">
                         {% csrf_token %}
                         
-                        <!-- 🔥 TÍTULO -->
+                        <!-- TÍTULO -->
                         <div class="mb-3">
                             <label class="form-label">Título <span style="color: red;">*</span></label>
                             <input type="text" name="title" class="form-control" required maxlength="50" 
                                    placeholder="Ex: Resumo de Revolução Francesa" id="titleInput">
                             <div class="char-counter" id="titleCount">0/50</div>
-                            <div class="invalid-feedback" id="titleError"></div>
+                            <div class="invalid-feedback" id="titleError">❌ Apenas letras e espaços são permitidos</div>
                             <div class="valid-feedback" id="titleSuccess">✓ Título válido</div>
                         </div>
 
-                        <!-- 🔥 DESCRIÇÃO -->
+                        <!-- DESCRIÇÃO -->
                         <div class="mb-3">
                             <label class="form-label">Descrição (opcional)</label>
                             <textarea name="description" class="form-control" rows="4" maxlength="400" 
@@ -708,7 +757,7 @@
                             <div class="char-counter" id="descCount">0/400</div>
                         </div>
 
-                        <!-- 🔥 MATÉRIA (OBRIGATÓRIO) -->
+                        <!-- MATÉRIA -->
                         <div class="mb-3">
                             <label class="form-label">Matéria <span style="color: red;">*</span></label>
                             <select name="subject" class="form-select" id="subjectSelect" required>
@@ -718,9 +767,10 @@
                                 {% endfor %}
                             </select>
                             <div class="invalid-feedback" id="subjectError">❌ Matéria é obrigatória</div>
+                            <div class="valid-feedback" id="subjectSuccess">✓ Matéria selecionada</div>
                         </div>
 
-                        <!-- 🔥 TIPO DE CONTEÚDO (OBRIGATÓRIO) -->
+                        <!-- TIPO DE CONTEÚDO -->
                         <div class="mb-3">
                             <label class="form-label">Tipo de Conteúdo <span style="color: red;">*</span></label>
                             <select name="file_type" id="fileTypeSelect" class="form-select" required>
@@ -731,36 +781,39 @@
                                 <option value="LINK">🔗 Link Externo</option>
                             </select>
                             <div class="invalid-feedback" id="typeError">❌ Tipo de conteúdo é obrigatório</div>
+                            <div class="valid-feedback" id="typeSuccess">✓ Tipo selecionado</div>
                         </div>
 
-                        <!-- 🔥 CAMPO DE ARQUIVO (APARECE CONFORME TIPO) -->
+                        <!-- CAMPO DE ARQUIVO -->
                         <div class="mb-3" id="fileInput" style="display: none;">
                             <label class="form-label">Arquivo <span style="color: red;">*</span></label>
                             <input type="file" name="file" class="form-control" id="fileUpload">
                             <small class="text-muted" id="fileHint">Máximo 50MB</small>
                             <div class="invalid-feedback" id="fileError"></div>
+                            <div class="valid-feedback" id="fileSuccess">✓ Arquivo válido</div>
                         </div>
 
-                        <!-- 🔥 CAMPO DE LINK (APARECE PARA TIPO LINK) -->
+                        <!-- CAMPO DE LINK -->
                         <div class="mb-3" id="linkInput" style="display: none;">
-                            <label class="form-label">Link <span style="color: red;">*</span></label>
+                            <label class="form-label">Link </label>
                             <input type="url" name="link" class="form-control" placeholder="https://exemplo.com" id="linkField">
                             <small class="text-muted">O link deve começar com http:// ou https://</small>
                             
-                            <!-- 🔥 ALERTAS DE VALIDAÇÃO DO LINK -->
                             <div class="link-error" id="linkError"></div>
                             <div class="link-warning" id="linkWarning">
-                                ⚠️ <strong>Atenção!</strong> Este link usa HTTP (não seguro). Recomendamos usar HTTPS quando possível.
+                                 <strong>Atenção!</strong> <span style="color: red;"></span> Este link usa HTTP (não seguro). Recomendamos usar HTTPS quando possível.</span>
                             </div>
                             <div class="link-success" id="linkSuccess">
                                 ✓ Link válido e acessível
                             </div>
+                            <div class="invalid-feedback" id="linkErrorFeedback"></div>
+                            <div class="valid-feedback" id="linkSuccessFeedback">✓ Link válido</div>
                         </div>
 
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                             <button type="submit" class="btn btn-primary" id="submitBtn" style="background: var(--primary); border: none;" disabled>
-                                ✨ Criar Note
+                                 Criar Note
                             </button>
                         </div>
                     </form>
@@ -772,9 +825,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // ========================================
-        // 🔥 VALIDAÇÕES JAVASCRIPT - TODAS AS REGRAS
-        // ========================================
+        // ===== VALIDAÇÕES JAVASCRIPT EM TEMPO REAL =====
 
         const titleInput = document.getElementById('titleInput');
         const titleCount = document.getElementById('titleCount');
@@ -786,27 +837,30 @@
 
         const subjectSelect = document.getElementById('subjectSelect');
         const subjectError = document.getElementById('subjectError');
+        const subjectSuccess = document.getElementById('subjectSuccess');
 
         const fileTypeSelect = document.getElementById('fileTypeSelect');
         const typeError = document.getElementById('typeError');
+        const typeSuccess = document.getElementById('typeSuccess');
 
         const fileInputDiv = document.getElementById('fileInput');
         const fileUpload = document.getElementById('fileUpload');
         const fileHint = document.getElementById('fileHint');
         const fileError = document.getElementById('fileError');
+        const fileSuccess = document.getElementById('fileSuccess');
 
         const linkInputDiv = document.getElementById('linkInput');
         const linkField = document.getElementById('linkField');
         const linkError = document.getElementById('linkError');
         const linkWarning = document.getElementById('linkWarning');
         const linkSuccess = document.getElementById('linkSuccess');
+        const linkErrorFeedback = document.getElementById('linkErrorFeedback');
+        const linkSuccessFeedback = document.getElementById('linkSuccessFeedback');
 
         const submitBtn = document.getElementById('submitBtn');
         const createNoteForm = document.getElementById('createNoteForm');
 
-        // ========================================
-        // 🔥 VALIDAÇÃO 1: TÍTULO (APENAS LETRAS E ESPAÇOS)
-        // ========================================
+        // ===== VALIDAÇÃO TÍTULO (APENAS LETRAS E ESPAÇOS) =====
         titleInput.addEventListener('input', function() {
             const len = this.value.length;
             titleCount.textContent = `${len}/50`;
@@ -817,35 +871,23 @@
                 titleCount.classList.remove('warning');
             }
 
-            // Validar apenas letras e espaços
             const regex = /^[A-Za-zÀ-ÿÇç\s]*$/;
             
             if (!regex.test(this.value)) {
                 this.classList.add('is-invalid');
                 this.classList.remove('is-valid');
-                titleError.textContent = '❌ Apenas letras e espaços são permitidos';
-                titleError.style.display = 'block';
-                titleSuccess.style.display = 'none';
-                
-                // Remover caracteres inválidos automaticamente
                 this.value = this.value.replace(/[^A-Za-zÀ-ÿÇç\s]/g, '');
             } else if (len > 0 && len <= 50) {
                 this.classList.remove('is-invalid');
                 this.classList.add('is-valid');
-                titleError.style.display = 'none';
-                titleSuccess.style.display = 'block';
             } else if (len === 0) {
                 this.classList.remove('is-valid', 'is-invalid');
-                titleError.style.display = 'none';
-                titleSuccess.style.display = 'none';
             }
 
             validarFormulario();
         });
 
-        // ========================================
-        // 🔥 VALIDAÇÃO 2: DESCRIÇÃO (CONTADOR)
-        // ========================================
+        // ===== VALIDAÇÃO DESCRIÇÃO (CONTADOR) =====
         descInput.addEventListener('input', function() {
             const len = this.value.length;
             descCount.textContent = `${len}/400`;
@@ -857,9 +899,7 @@
             }
         });
 
-        // ========================================
-        // 🔥 VALIDAÇÃO 3: MATÉRIA (OBRIGATÓRIO)
-        // ========================================
+        // ===== VALIDAÇÃO MATÉRIA =====
         subjectSelect.addEventListener('change', function() {
             if (this.value) {
                 this.classList.remove('is-invalid');
@@ -871,9 +911,7 @@
             validarFormulario();
         });
 
-        // ========================================
-        // 🔥 VALIDAÇÃO 4: TIPO DE CONTEÚDO (OBRIGATÓRIO)
-        // ========================================
+        // ===== VALIDAÇÃO TIPO DE CONTEÚDO =====
         fileTypeSelect.addEventListener('change', function() {
             const tipo = this.value;
             
@@ -889,9 +927,12 @@
             this.classList.remove('is-invalid');
             this.classList.add('is-valid');
             
-            // Esconder ambos
             fileInputDiv.style.display = 'none';
             linkInputDiv.style.display = 'none';
+            
+            // Limpar validações anteriores
+            fileUpload.classList.remove('is-valid', 'is-invalid');
+            linkField.classList.remove('is-valid', 'is-invalid');
             
             if (tipo === 'LINK') {
                 linkInputDiv.style.display = 'block';
@@ -920,15 +961,12 @@
             validarFormulario();
         });
 
-        // ========================================
-        // 🔥 VALIDAÇÃO 5: ARQUIVO (TAMANHO E EXTENSÃO)
-        // ========================================
+        // ===== VALIDAÇÃO ARQUIVO =====
         fileUpload.addEventListener('change', function() {
             const file = this.files[0];
             
             if (!file) {
                 this.classList.remove('is-valid', 'is-invalid');
-                fileError.style.display = 'none';
                 validarFormulario();
                 return;
             }
@@ -936,15 +974,13 @@
             const fileSize = file.size;
             const fileName = file.name;
             const fileExt = fileName.substring(fileName.lastIndexOf('.')).toLowerCase();
-            
             const tipo = fileTypeSelect.value;
             
-            // Validar tamanho (50MB)
+            // Validar tamanho
             if (fileSize > 50 * 1024 * 1024) {
                 this.classList.add('is-invalid');
                 this.classList.remove('is-valid');
                 fileError.textContent = '❌ O arquivo excede o limite de 50MB';
-                fileError.style.display = 'block';
                 this.value = '';
                 validarFormulario();
                 return;
@@ -962,23 +998,18 @@
                     this.classList.add('is-invalid');
                     this.classList.remove('is-valid');
                     fileError.textContent = `❌ Extensão inválida. Use: ${extensoesPermitidas[tipo].join(', ')}`;
-                    fileError.style.display = 'block';
                     this.value = '';
                     validarFormulario();
                     return;
                 }
             }
             
-            // Arquivo válido
             this.classList.remove('is-invalid');
             this.classList.add('is-valid');
-            fileError.style.display = 'none';
             validarFormulario();
         });
 
-        // ========================================
-        // 🔥 VALIDAÇÃO 6: LINK (HTTP/HTTPS E ACESSIBILIDADE)
-        // ========================================
+        // ===== VALIDAÇÃO LINK EM TEMPO REAL =====
         let linkCheckTimeout;
         linkField.addEventListener('input', function() {
             clearTimeout(linkCheckTimeout);
@@ -996,7 +1027,7 @@
                 return;
             }
             
-            // Validação 1: Deve começar com http:// ou https://
+            // Deve começar com http:// ou https://
             if (!url.startsWith('http://') && !url.startsWith('https://')) {
                 this.classList.add('is-invalid');
                 this.classList.remove('is-valid');
@@ -1006,7 +1037,7 @@
                 return;
             }
             
-            // Validação 2: Formato básico de URL
+            // Formato básico de URL
             const urlPattern = /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$/;
             
             if (!urlPattern.test(url)) {
@@ -1018,7 +1049,7 @@
                 return;
             }
             
-            // Validação 3: Verificar se é HTTP (não seguro)
+            // HTTP não seguro
             if (url.startsWith('http://')) {
                 this.classList.remove('is-invalid');
                 this.classList.add('is-valid');
@@ -1030,29 +1061,15 @@
             }
             
             validarFormulario();
-            
-            // Validação 4: Verificar acessibilidade (debounce 1s)
-            linkCheckTimeout = setTimeout(() => {
-                verificarLinkAcessivel(url);
-            }, 1000);
         });
 
-        function verificarLinkAcessivel(url) {
-            // Nota: Por questões de CORS, não é possível verificar acessibilidade
-            // diretamente no frontend. Esta validação será feita no backend.
-            console.log('🔍 Link será verificado no backend:', url);
-        }
-
-        // ========================================
-        // 🔥 FUNÇÃO: VALIDAR FORMULÁRIO COMPLETO
-        // ========================================
+        // ===== VALIDAR FORMULÁRIO COMPLETO =====
         function validarFormulario() {
             const tituloValido = titleInput.value.trim().length > 0 && 
                                  titleInput.value.trim().length <= 50 &&
                                  /^[A-Za-zÀ-ÿÇç\s]+$/.test(titleInput.value);
             
             const materiaValida = subjectSelect.value !== '';
-            
             const tipoValido = fileTypeSelect.value !== '';
             
             let arquivoOuLinkValido = false;
@@ -1067,23 +1084,11 @@
             }
             
             const formularioValido = tituloValido && materiaValida && tipoValido && arquivoOuLinkValido;
-            
             submitBtn.disabled = !formularioValido;
-            
-            console.log('🔍 Validação:', {
-                titulo: tituloValido,
-                materia: materiaValida,
-                tipo: tipoValido,
-                arquivoOuLink: arquivoOuLinkValido,
-                formulario: formularioValido
-            });
         }
 
-        // ========================================
-        // 🔥 VALIDAÇÃO FINAL NO SUBMIT
-        // ========================================
+        // ===== VALIDAÇÃO FINAL NO SUBMIT =====
         createNoteForm.addEventListener('submit', function(e) {
-            // Validar todos os campos obrigatórios
             if (!titleInput.value.trim()) {
                 e.preventDefault();
                 alert('❌ Título é obrigatório');
@@ -1119,15 +1124,11 @@
                 return false;
             }
             
-            // Desabilitar botão para evitar duplo envio
             submitBtn.disabled = true;
             submitBtn.innerHTML = '⏳ Criando...';
         });
 
-        // ========================================
-        // OUTRAS FUNÇÕES
-        // ========================================
-        
+        // ===== FUNÇÕES AUXILIARES =====
         function copiarTelefone() {
             const telefone = '(19) 3843-1171';
             const tempInput = document.createElement('input');
@@ -1179,7 +1180,6 @@
             }, 2000);
         }
         
-        // Animações CSS
         if (!document.getElementById('footer-animations')) {
             const style = document.createElement('style');
             style.id = 'footer-animations';
@@ -1197,7 +1197,7 @@
             document.head.appendChild(style);
         }
 
-        // MOSTRAR AÇÕES DE FILTRO
+        // ===== FILTROS =====
         const filters = document.querySelectorAll('.filter-field');
         const filterActions = document.getElementById('filterActions');
 
