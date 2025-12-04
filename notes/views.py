@@ -10,12 +10,12 @@ import mimetypes
 import os
 import re
 import json
+import urllib.request
+import urllib.error
 
 
 def notes_list(request):
     """Lista de notes com filtros e paginação"""
-
-    # Carrega notas com prefetch e select corretos
     qs = Note.objects.select_related('author', 'subject_new').prefetch_related('comments')
 
     # Filtros
@@ -24,19 +24,15 @@ def notes_list(request):
     order = request.GET.get('order', 'recent')
     recommended = request.GET.get('recommended', '')
 
-    # FILTRO POR MATÉRIA (usando subject_new_id)
     if subject:
         qs = qs.filter(subject_new_id=subject)
 
-    # FILTRO POR TIPO DE ARQUIVO
     if file_type:
         qs = qs.filter(file_type=file_type)
 
-    # FILTRO POR RECOMENDADOS
     if recommended == 'true':
         qs = qs.filter(is_recommended=True)
 
-    # ORDENAÇÃO
     ordering_map = {
         'recent': '-created_at',
         'likes': '-likes',
@@ -45,12 +41,10 @@ def notes_list(request):
     }
     qs = qs.order_by(ordering_map.get(order, '-created_at'))
 
-    # PAGINAÇÃO
     paginator = Paginator(qs, 12)
     page_number = request.GET.get('page', 1)
     page_obj = paginator.get_page(page_number)
 
-    # LISTA DE MATÉRIAS (a nova tabela)
     materias = Materia.objects.all().order_by('nome')
 
     context = {
@@ -64,15 +58,11 @@ def notes_list(request):
 
     return render(request, 'notes/notes_list.html', context)
 
-        
- 
-
 
 def note_detail(request, pk):
     """Detalhe de um note com incremento ÚNICO de views por usuário logado"""
     note = get_object_or_404(Note.objects.select_related('author', 'subject_new'), pk=pk)
     
-    # Controle de visualizações
     if request.user.is_authenticated:
         view_created = NoteView.objects.get_or_create(note=note, user=request.user)
         
@@ -84,7 +74,6 @@ def note_detail(request, pk):
     if request.user.is_authenticated:
         user_liked = NoteLike.objects.filter(note=note, user=request.user).exists()
     
-    # Processar comentário
     if request.method == 'POST' and request.user.is_authenticated:
         text = request.POST.get('text', '').strip()
         
@@ -95,7 +84,6 @@ def note_detail(request, pk):
         else:
             messages.error(request, 'Comentário inválido.')
     
-    # Sistema de recomendações
     recommendations = NoteRecommendation.objects.filter(note=note).select_related('teacher')
     
     primary_recommendation = None
@@ -145,169 +133,182 @@ def validate_text_content(text):
     return bool(re.match(pattern, text))
 
 
+def validate_safe_url(url):
+    """
+    🔥 NOVA VALIDAÇÃO: Verifica se URL é segura (HTTPS)
+    """
+    if not url:
+        return False, "URL vazia"
+    
+    # Verificar se começa com http:// ou https://
+    if not (url.startswith('http://') or url.startswith('https://')):
+        return False, "URL deve começar com http:// ou https://"
+    
+    # Verificar se é HTTPS (recomendado)
+    is_https = url.startswith('https://')
+    
+    # Tentar acessar URL para verificar se existe
+    try:
+        req = urllib.request.Request(url, method='HEAD')
+        with urllib.request.urlopen(req, timeout=5) as response:
+            if response.status == 200:
+                if is_https:
+                    return True, "URL válida e segura (HTTPS)"
+                else:
+                    return True, "⚠️ URL válida mas não segura (HTTP). Recomendamos usar HTTPS."
+    except urllib.error.HTTPError as e:
+        return False, f"Erro HTTP {e.code}: {e.reason}"
+    except urllib.error.URLError as e:
+        return False, f"URL inacessível: {e.reason}"
+    except Exception as e:
+        return False, f"Erro ao verificar URL: {str(e)}"
+    
+    return False, "URL inválida"
+
+
 @login_required
 def note_create(request):
-    """Criação de note - CORRIGIDO COM DEBUG"""
+    """
+    🔥 CRIAÇÃO DE NOTE COM TODAS AS VALIDAÇÕES
+    """
     if request.method != 'POST':
         return redirect('notes:list')
     
     try:
         # ========================================
-        # LOG DE DEBUG
+        # CAPTURA DE DADOS
         # ========================================
-        print("=" * 50)
-        print("DEBUG NOTE CREATE")
-        print(f"POST data: {request.POST}")
-        print(f"FILES: {request.FILES}")
-        print("=" * 50)
-        
         title = request.POST.get('title', '').strip()
         description = request.POST.get('description', '').strip()
         file_type = request.POST.get('file_type', '')
-        subject_id = request.POST.get('subject', '').strip()  # ✅ Agora recebe ID
+        subject_id = request.POST.get('subject', '').strip()
         file = request.FILES.get('file')
         link = request.POST.get('link', '').strip()
         
-        # Validação do título
+        # ========================================
+        # 🔥 VALIDAÇÃO 1: TÍTULO OBRIGATÓRIO
+        # ========================================
         if not title:
-            messages.error(request, 'Título é obrigatório.')
+            messages.error(request, '❌ Título é obrigatório.')
             return redirect('notes:list')
         
         if len(title) > 50:
-            messages.error(request, 'Título muito longo (máximo 50 caracteres).')
+            messages.error(request, '❌ Título muito longo (máximo 50 caracteres).')
             return redirect('notes:list')
         
         title_regex = r'^[A-Za-zÀ-ÿÇç\s]+$'
         if not re.match(title_regex, title):
-            messages.error(request, 'Título contém caracteres não permitidos. Use apenas letras e espaços.')
+            messages.error(request, '❌ Título contém caracteres não permitidos. Use apenas letras e espaços.')
             return redirect('notes:list')
         
-        # Validação da descrição
+        # ========================================
+        # 🔥 VALIDAÇÃO 2: DESCRIÇÃO
+        # ========================================
         if description and len(description) > 400:
-            messages.error(request, 'Descrição muito longa (máximo 400 caracteres).')
+            messages.error(request, '❌ Descrição muito longa (máximo 400 caracteres).')
             return redirect('notes:list')
         
         if description and not validate_text_content(description):
-            messages.error(request, 'Descrição contém caracteres não permitidos.')
-            return redirect('notes:list')
-        
-        # Validação do tipo de conteúdo
-        valid_types = [code for code, _ in Note.FILE_TYPES]
-        if file_type not in valid_types:
-            messages.error(request, 'Tipo de conteúdo inválido.')
+            messages.error(request, '❌ Descrição contém caracteres não permitidos.')
             return redirect('notes:list')
         
         # ========================================
-        # 🔥 CORREÇÃO CRÍTICA: BUSCAR MATÉRIA POR ID
+        # 🔥 VALIDAÇÃO 3: TIPO DE CONTEÚDO OBRIGATÓRIO
+        # ========================================
+        valid_types = [code for code, _ in Note.FILE_TYPES]
+        if not file_type or file_type not in valid_types:
+            messages.error(request, '❌ Tipo de conteúdo é obrigatório.')
+            return redirect('notes:list')
+        
+        # ========================================
+        # 🔥 VALIDAÇÃO 4: MATÉRIA OBRIGATÓRIA
         # ========================================
         materia = None
-        if subject_id:
-            try:
-                subject_id = int(subject_id)  # ✅ Converter para inteiro
-                materia = Materia.objects.get(id=subject_id)
-                print(f"[DEBUG] ✅ Matéria encontrada: {materia.nome} (ID: {materia.id})")
-            except (Materia.DoesNotExist, ValueError) as e:
-                print(f"[DEBUG] ❌ Erro ao buscar matéria: {e}")
-                messages.error(request, 'Matéria inválida.')
-                return redirect('notes:list')
-        else:
-            print("[DEBUG] ⚠️ Nenhuma matéria fornecida")
+        if not subject_id:
+            messages.error(request, '❌ Matéria é obrigatória.')
+            return redirect('notes:list')
         
-        # Criar objeto Note
+        try:
+            subject_id = int(subject_id)
+            materia = Materia.objects.get(id=subject_id)
+        except (Materia.DoesNotExist, ValueError):
+            messages.error(request, '❌ Matéria inválida.')
+            return redirect('notes:list')
+        
+        # ========================================
+        # 🔥 VALIDAÇÃO 5: ARQUIVO OU LINK OBRIGATÓRIO
+        # ========================================
         note = Note(
             author=request.user,
             title=title,
             description=description,
             file_type=file_type,
-            subject_new=materia  # ✅ Atribuir a matéria corretamente
+            subject_new=materia
         )
         
-        
-        # Validação por tipo de conteúdo
+        # TIPO: LINK
         if file_type == 'LINK':
             if not link:
-                messages.error(request, 'Link é obrigatório para tipo Link Externo.')
+                messages.error(request, '❌ Link é obrigatório para tipo Link Externo.')
                 return redirect('notes:list')
             
-            url_pattern = r'^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$'
-            if not re.match(url_pattern, link):
-                messages.error(request, 'Link inválido. Use um URL completo (ex: https://exemplo.com).')
+            # 🔥 VALIDAÇÃO EXTRA: LINK SEGURO
+            is_valid, message = validate_safe_url(link)
+            
+            if not is_valid:
+                messages.error(request, f'❌ {message}')
                 return redirect('notes:list')
+            
+            # Se for HTTP (não HTTPS), mostrar aviso mas permitir
+            if link.startswith('http://'):
+                messages.warning(request, '⚠️ Este link usa HTTP (não seguro). Recomendamos usar HTTPS quando possível.')
             
             note.link = link
         
-        elif file_type == 'DOC':
+        # TIPO: ARQUIVO (DOC, PDF, PPT)
+        else:
             if not file:
-                messages.error(request, 'Arquivo é obrigatório para tipo Word.')
+                messages.error(request, '❌ Arquivo é obrigatório para este tipo de conteúdo.')
                 return redirect('notes:list')
             
+            # 🔥 VALIDAÇÃO 6: TAMANHO DO ARQUIVO (50MB)
+            if file.size > 50 * 1024 * 1024:
+                messages.error(request, '❌ O arquivo excede o limite de 50MB.')
+                return redirect('notes:list')
+            
+            # 🔥 VALIDAÇÃO 7: EXTENSÃO DO ARQUIVO
             file_ext = os.path.splitext(file.name)[1].lower()
-            if file_ext not in ['.doc', '.docx']:
-                messages.error(request, 'Formato inválido. Use .doc ou .docx.')
-                return redirect('notes:list')
             
-            if file.size > 10 * 1024 * 1024:
-                messages.error(request, 'Arquivo muito grande (máximo 10MB).')
-                return redirect('notes:list')
+            allowed_extensions = {
+                'DOC': ['.doc', '.docx'],
+                'PDF': ['.pdf'],
+                'PPT': ['.ppt', '.pptx']
+            }
             
-            note.file = file
-        
-        elif file_type == 'PDF':
-            if not file:
-                messages.error(request, 'Arquivo é obrigatório para tipo PDF.')
-                return redirect('notes:list')
-            
-            file_ext = os.path.splitext(file.name)[1].lower()
-            if file_ext != '.pdf':
-                messages.error(request, 'Formato inválido. Use .pdf.')
-                return redirect('notes:list')
-            
-            if file.size > 10 * 1024 * 1024:
-                messages.error(request, 'Arquivo muito grande (máximo 10MB).')
-                return redirect('notes:list')
-            
-            note.file = file
-        
-        elif file_type == 'PPT':
-            if not file:
-                messages.error(request, 'Arquivo é obrigatório para tipo Apresentação.')
-                return redirect('notes:list')
-            
-            file_ext = os.path.splitext(file.name)[1].lower()
-            if file_ext not in ['.ppt', '.pptx']:
-                messages.error(request, 'Formato inválido. Use .ppt ou .pptx.')
-                return redirect('notes:list')
-            
-            if file.size > 10 * 1024 * 1024:
-                messages.error(request, 'Arquivo muito grande (máximo 10MB).')
-                return redirect('notes:list')
+            if file_type in allowed_extensions:
+                if file_ext not in allowed_extensions[file_type]:
+                    messages.error(
+                        request, 
+                        f'❌ Formato inválido. Use: {", ".join(allowed_extensions[file_type])}'
+                    )
+                    return redirect('notes:list')
             
             note.file = file
         
         # ========================================
         # SALVAR NOTE
         # ========================================
-        note.full_clean()
+        note.full_clean()  # Chama validações do model
         note.save()
         
-        print(f"[DEBUG] ✅ Note criado com sucesso!")
-        print(f"[DEBUG] ID: {note.pk}")
-        print(f"[DEBUG] Título: {note.title}")
-        print(f"[DEBUG] Matéria: {note.subject_new.nome if note.subject_new else 'Nenhuma'}")
-        print(f"[DEBUG] subject_new ID: {note.subject_new.id if note.subject_new else 'None'}")
-        
-        messages.success(request, f'Note "{title}" criado com sucesso!')
-        
-        # ========================================
-        # REDIRECIONAR PARA A LISTA
-        # ========================================
+        messages.success(request, f'✅ Note "{title}" criado com sucesso!')
         return redirect('notes:list')
         
     except Exception as e:
         print(f"[ERRO] ❌ Ao criar note: {str(e)}")
         import traceback
         traceback.print_exc()
-        messages.error(request, f'Erro ao criar note: {str(e)}')
+        messages.error(request, f'❌ Erro ao criar note: {str(e)}')
         return redirect('notes:list')
 
 

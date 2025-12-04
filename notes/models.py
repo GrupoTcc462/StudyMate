@@ -7,28 +7,28 @@ import os
 User = get_user_model()
 
 def validate_file_size(file):
-    """Valida o tamanho do arquivo (máx 10MB)"""
+    """
+    🔥 VALIDAÇÃO ATUALIZADA: Máximo 50MB
+    """
     from django.conf import settings
-    max_size = getattr(settings, 'NOTE_MAX_UPLOAD_SIZE', 10 * 1024 * 1024)
+    max_size = getattr(settings, 'NOTE_MAX_UPLOAD_SIZE', 50 * 1024 * 1024)
     if file.size > max_size:
-        raise ValidationError(f'O arquivo não pode ser maior que {max_size/(1024*1024):.0f}MB')
+        raise ValidationError(f'⚠️ O arquivo excede o limite de {max_size/(1024*1024):.0f}MB.')
 
 def validate_file_extension(file):
-    """Valida a extensão do arquivo"""
+    """
+    Valida a extensão do arquivo
+    """
     from django.conf import settings
     allowed = getattr(settings, 'ALLOWED_FILE_TYPES', ['.pdf', '.doc', '.docx', '.ppt', '.pptx'])
     ext = os.path.splitext(file.name)[1].lower()
     if ext not in allowed:
-        raise ValidationError(f'Extensão {ext} não permitida. Use: {", ".join(allowed)}')
+        raise ValidationError(f'❌ Extensão {ext} não permitida. Use: {", ".join(allowed)}')
 
 
-# ========================================
-# NOVO MODEL: MATÉRIA (EXCLUSIVO PARA NOTES)
-# ========================================
 class Materia(models.Model):
     """
     Model de matérias EXCLUSIVO para o sistema de Notes.
-    NÃO compartilha dados com o app 'materias/'.
     """
     nome = models.CharField(max_length=100, unique=True, verbose_name='Nome da Matéria')
     
@@ -64,9 +64,6 @@ class Note(models.Model):
     )
     link = models.URLField(null=True, blank=True, verbose_name='Link')
     
-    # ========================================
-    # CAMPO ALTERADO: Agora usa ForeignKey para Materia
-    # ========================================
     subject_new = models.ForeignKey(
         Materia, 
         on_delete=models.SET_NULL, 
@@ -98,18 +95,20 @@ class Note(models.Model):
         return f"{self.title} — {self.author.username}"
     
     def clean(self):
-        """Validação customizada"""
+        """
+        🔥 VALIDAÇÃO CUSTOMIZADA APRIMORADA
+        """
+        # Validação: Link obrigatório para tipo LINK
         if self.file_type == 'LINK' and not self.link:
-            raise ValidationError('Link é obrigatório para tipo LINK')
+            raise ValidationError('❌ Link é obrigatório quando o tipo é "Link Externo".')
+        
+        # Validação: Arquivo obrigatório para outros tipos
         if self.file_type != 'LINK' and not self.file:
-            raise ValidationError('Arquivo é obrigatório para este tipo')
+            raise ValidationError('❌ Arquivo é obrigatório para este tipo de conteúdo.')
     
     def check_auto_recommend(self):
         """
-        Verifica se o note atingiu os critérios para recomendação automática:
-        - 20+ downloads
-        - 40+ likes
-        - 50+ visualizações
+        Verifica se o note atingiu os critérios para recomendação automática
         """
         if not self.is_recommended:
             if self.downloads >= 20 or self.likes >= 40 or self.views >= 50:
