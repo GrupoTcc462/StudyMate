@@ -439,13 +439,17 @@
         }
 
         .link-warning {
-            background: #ffe6e6;  /* Vermelho bem claro */
-            border-left: 4px solid #ff6b6b;  /* Vermelho suave */
-            color: #c92a2a;  /* Texto vermelho escuro para contraste */
+            background: #ffe6e6 !important;
+            border-left: 4px solid #dc3545 !important;
+            color: #dc3545 !important;
         }
 
         .link-warning strong {
-            color: #c92a2a;  /* Título em vermelho escuro */
+            color: #dc3545 !important;
+        }
+
+        .link-warning span {
+            color: #dc3545 !important;
         }
 
         .link-error {
@@ -461,9 +465,7 @@
         .link-warning.show,
         .link-error.show,
         .link-success.show {
-            display: block;
-            color: #ff6b6b;  /* Texto vermelho escuro para contraste */
-
+            display: block !important;
         }
 
         @media (max-width: 768px) {
@@ -546,7 +548,7 @@
             {% if user.is_authenticated %}
             <div class="create-note-section">
                 <button class="btn-create-note" data-bs-toggle="modal" data-bs-target="#createNoteModal">
-                    ✨ Criar Novo Note
+                     Criar Novo Note
                 </button>
             </div>
             {% endif %}
@@ -555,7 +557,7 @@
                 <form method="get" id="filterForm">
                     <div class="filter-row">
                         <div class="filter-box">
-                            <label>📚 Matéria</label>
+                            <label> Matéria</label>
                             <select name="subject" id="subjectFilter" class="filter-field">
                                 <option value="">Todas as matérias</option>
                                 {% for m in materias %}
@@ -567,7 +569,7 @@
                         </div>
 
                         <div class="filter-box">
-                            <label>📄 Tipo de Conteúdo</label>
+                            <label> Tipo de Conteúdo</label>
                             <select name="file_type" id="typeFilter" class="filter-field">
                                 <option value="">Todos os tipos</option>
                                 {% for code, name in file_types %}
@@ -579,7 +581,7 @@
                         </div>
 
                         <div class="filter-box">
-                            <label>🔄 Ordenar por</label>
+                            <label> Ordenar por</label>
                             <select name="order" id="orderFilter" class="filter-field">
                                 <option value="recent" {% if current_order == 'recent' %}selected{% endif %}>Mais Recentes</option>
                                 <option value="likes" {% if current_order == 'likes' %}selected{% endif %}>Mais Curtidos</option>
@@ -589,7 +591,7 @@
                         </div>
 
                         <div class="filter-box">
-                            <label>⭐ Recomendados</label>
+                            <label> Recomendados</label>
                             <select name="recommended" id="recommendedFilter" class="filter-field">
                                 <option value="">Todos</option>
                                 <option value="true" {% if request.GET.recommended == 'true' %}selected{% endif %}>Apenas Recomendados</option>
@@ -612,10 +614,10 @@
                                 <span class="note-author">{{ note.author.username }}</span>
                                 <div class="badges-row">
                                     {% if note.author.user_type == 'professor' or note.author.is_staff %}
-                                        <span class="badge-professor">👨‍🏫 Professor</span>
+                                        <span class="badge-professor"> Professor</span>
                                     {% endif %}
                                     {% if note.is_recommended %}
-                                        <span class="badge-recommended">⭐ Recomendado</span>
+                                        <span class="badge-recommended"> Recomendado</span>
                                     {% endif %}
                                 </div>
                             </div>
@@ -646,7 +648,7 @@
                         </div>
 
                         <a href="{% url 'notes:detail' note.pk %}" class="btn-open-note">
-                            📖 Abrir Note
+                             Abrir Note
                         </a>
                     </div>
                 {% empty %}
@@ -732,7 +734,7 @@
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">✨ Criar Novo Note</h5>
+                    <h5 class="modal-title"> Criar Novo Note</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
@@ -741,7 +743,7 @@
                         
                         <!-- TÍTULO -->
                         <div class="mb-3">
-                            <label class="form-label">Título <span style="color: red;">*</span></label>
+                            <label class="form-label">Título </label>
                             <input type="text" name="title" class="form-control" required maxlength="50" 
                                    placeholder="Ex: Resumo de Revolução Francesa" id="titleInput">
                             <div class="char-counter" id="titleCount">0/50</div>
@@ -759,7 +761,7 @@
 
                         <!-- MATÉRIA -->
                         <div class="mb-3">
-                            <label class="form-label">Matéria <span style="color: red;">*</span></label>
+                            <label class="form-label">Matéria </label>
                             <select name="subject" class="form-select" id="subjectSelect" required>
                                 <option value="">Selecione uma matéria</option>
                                 {% for m in materias %}
@@ -772,7 +774,7 @@
 
                         <!-- TIPO DE CONTEÚDO -->
                         <div class="mb-3">
-                            <label class="form-label">Tipo de Conteúdo <span style="color: red;">*</span></label>
+                            <label class="form-label">Tipo de Conteúdo </label>
                             <select name="file_type" id="fileTypeSelect" class="form-select" required>
                                 <option value="">Selecione...</option>
                                 <option value="PDF">📄 PDF</option>
@@ -786,7 +788,7 @@
 
                         <!-- CAMPO DE ARQUIVO -->
                         <div class="mb-3" id="fileInput" style="display: none;">
-                            <label class="form-label">Arquivo <span style="color: red;">*</span></label>
+                            <label class="form-label">Arquivo </label>
                             <input type="file" name="file" class="form-control" id="fileUpload">
                             <small class="text-muted" id="fileHint">Máximo 50MB</small>
                             <div class="invalid-feedback" id="fileError"></div>
@@ -800,8 +802,9 @@
                             <small class="text-muted">O link deve começar com http:// ou https://</small>
                             
                             <div class="link-error" id="linkError"></div>
-                            <div class="link-warning" id="linkWarning">
-                                 <strong>Atenção!</strong> <span style="color: red;"></span> Este link usa HTTP (não seguro). Recomendamos usar HTTPS quando possível.</span>
+                            <div class="link-warning" id="linkWarning" style="color: #dc3545 !important;">
+                                <strong style="color: #dc3545 !important;"> Atenção!</strong> 
+                                <span style="color: #dc3545 !important;">Este link usa HTTP (não seguro). Recomendamos usar HTTPS quando possível.</span>
                             </div>
                             <div class="link-success" id="linkSuccess">
                                 ✓ Link válido e acessível

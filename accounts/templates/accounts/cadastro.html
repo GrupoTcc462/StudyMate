@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cadastro - StudyMate</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     {% load static %}
     <style>
         * {
@@ -250,16 +251,24 @@
             position: relative;
         }
 
-        .password-toggle {
+        .password-toggle-btn {
             position: absolute;
             right: 15px;
             top: 50%;
             transform: translateY(-50%);
-            background: none;
             border: none;
+            background: none;
             cursor: pointer;
-            font-size: 1.3rem;
+            font-size: 1.2rem;
+            color: #6c757d;
+            transition: color 0.3s ease;
+            padding: 5px;
         }
+
+        .password-toggle-btn:hover {
+            color: #003366;
+        }
+        
 
         /* FORÇA DA SENHA */
         .password-strength {
@@ -492,14 +501,16 @@
             </div>
 
             <!-- ========================================
-                 ETAPA 3: CRIAÇÃO DE SENHA
+                ETAPA 3: CRIAÇÃO DE SENHA
             ======================================== -->
             <div class="step" id="step-password">
                 <div class="form-group">
                     <label for="password">Senha *</label>
                     <div class="password-wrapper">
                         <input type="password" id="password" name="password" placeholder="Crie uma senha forte">
-                        <button type="button" class="password-toggle" onclick="togglePassword('password', this)">👁️</button>
+                        <button type="button" class="password-toggle-btn" onclick="togglePassword('password', this)">
+                            <i class="bi bi-eye-fill"></i>
+                        </button>
                     </div>
                     <div class="password-strength">
                         <div class="password-strength-bar" id="strength-bar"></div>
@@ -527,7 +538,9 @@
                     <label for="password_confirm">Confirmar Senha *</label>
                     <div class="password-wrapper">
                         <input type="password" id="password_confirm" name="password_confirm" placeholder="Digite a senha novamente">
-                        <button type="button" class="password-toggle" onclick="togglePassword('password_confirm', this)">👁️</button>
+                        <button type="button" class="password-toggle-btn" onclick="togglePassword('password_confirm', this)">
+                            <i class="bi bi-eye-fill"></i>
+                        </button>
                     </div>
                     <div class="error-message" id="confirm-error"></div>
                     <div class="success-message" id="confirm-success"></div>
@@ -771,12 +784,7 @@
         // ========================================
         // ETAPA 3: VALIDAÇÃO DE SENHA
         // ========================================
-        function togglePassword(inputId, button) {
-            const input = document.getElementById(inputId);
-            const type = input.type === 'password' ? 'text' : 'password';
-            input.type = type;
-            button.textContent = type === 'password' ? '👁️' : '🙈';
-        }
+       
 
         const passwordInput = document.getElementById('password');
         const confirmInput = document.getElementById('password_confirm');
@@ -983,6 +991,21 @@
         document.getElementById('password_confirm').addEventListener('keypress', (e) => {
             if (e.key === 'Enter' && !btnCreate.disabled) createAccount();
         });
+
+        function togglePassword(inputId, button) {
+    const input = document.getElementById(inputId);
+    const icon = button.querySelector('i');
+    
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('bi-eye-fill');
+        icon.classList.add('bi-eye-slash-fill');
+    } else {
+        input.type = 'password';
+        icon.classList.remove('bi-eye-slash-fill');
+        icon.classList.add('bi-eye-fill');
+    }
+}
     </script>
 
 </body>
